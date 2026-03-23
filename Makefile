@@ -1,7 +1,4 @@
-SHELL = /bin/bash -O globstar
-
-export CFLAGS = $(shell echo "$$CFLAGS")
-export CXXFLAGS = -Wpedantic -Wall -W $(shell echo "$$CXXFLAGS")
+SHELL := /bin/bash -O globstar
 
 .PHONY: all
 all:
@@ -22,5 +19,5 @@ FORCE:
 git-push: FORCE
 	git pull
 	git add .
-	GIT_EDITOR=`[ -f /snap/bin/emacs ] && echo /snap/bin/emacs || which emacs &>/dev/null && echo emacs` git commit -v
+	GIT_EDITOR=emacs git commit -v
 	git push

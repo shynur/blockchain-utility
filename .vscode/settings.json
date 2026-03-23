@@ -16,30 +16,12 @@
 
 	"editor.formatOnSave": false,
 
-	"[C_Cpp]": {
-		"autoAddFileAssociations": false,
-        "caseSensitiveFileSupport": "enabled",
-		"files.exclude": {
-			"/usr/include/c++/10": true,
-        	"/usr/include/c++/11": true,
-			"/usr/include/c++/12": true,
-			"/usr/include/c++/13": true,
-			"/usr/include/c++/14": true,
-        	"/usr/local/include/c++/10": true,
-			"/usr/local/include/c++/11": true,
-			"/usr/local/include/c++/12": true,
-			"/usr/local/include/c++/13": true,
-			"/usr/local/include/c++/14": true
-    	}
-	},
-
 	"[go]": {
 		"editor.formatOnSave": true,
 		"editor.formatOnSaveMode": "file",
 
 		"editor.tabSize": 8,
-		"editor.insertSpaces": false,
-        "testFlags": ["-test.v"]
+		"editor.insertSpaces": false
 	},
 
     "[javascript]": {
@@ -56,18 +38,5 @@
 	"[json]": {
 		"editor.insertSpaces": false,
 		"editor.tabSize": 4
-	},
-
-	"prettier.semi": false,
-	"prettier.arrowParens": "avoid",
-
-	"files.associations": {
-		".clang-format": "yaml",
-		"_clang-format": "yaml"
-	},
-
-	"[html]": {
-		"editor.tabSize": 4,
-		"editor.insertSpaces": false
 	}
 }
