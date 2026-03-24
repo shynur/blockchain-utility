@@ -45,7 +45,7 @@
     <fieldset>
         <legend>Mnemonic Sentence → Seed</legend>
         <label>Mnemonic sentence (<span id="seed-mnemonic-count">0</span>):<br>
-            <textarea id="seed-mnemonic" rows="3" style="width:100%;box-sizing:border-box;resize:none"></textarea>
+            <textarea id="seed-mnemonic" rows="1" style="width:100%;box-sizing:border-box;resize:none;overflow:hidden"></textarea>
         </label>
         <br>
         <label>Passphrase (<span id="seed-passphrase-len">0</span>): <input id="seed-passphrase" type="text"></label>
@@ -95,8 +95,15 @@
             }
         }
 
+        const seedMnemonic = document.getElementById('seed-mnemonic')
+        function autoResize() {
+            seedMnemonic.style.height = 'auto'
+            seedMnemonic.style.height = seedMnemonic.scrollHeight + 'px'
+        }
+
         for (const id of ['seed-mnemonic', 'seed-passphrase', 'lang'])
             document.getElementById(id).addEventListener('input', generateSeed)
+        seedMnemonic.addEventListener('input', autoResize)
 
         document.getElementById('gen-passphrase').addEventListener('input', e => {
             document.getElementById('gen-passphrase-len').textContent = e.target.value.length
