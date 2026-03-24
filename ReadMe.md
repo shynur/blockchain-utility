@@ -2,7 +2,7 @@
 
 ## BIP39
 
-[在线测试工具 (可离线使用)](https://shynur.github.io/blockchain-utility/utilities/bip39)
+[在线测试工具 (可离线使用)](utilities/bip39)
 
 ____
 
