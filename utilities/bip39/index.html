@@ -30,7 +30,7 @@
             </select>
         </label>
         <br>
-        <label>Passphrase: <input id="gen-passphrase" type="text"></label>
+        <label>Passphrase: <input id="gen-passphrase" type="text"> <span id="gen-passphrase-len">0</span></label>
         <br>
         <button id="gen-btn">生成</button>
         <pre id="gen-output"></pre>
@@ -44,7 +44,7 @@
             <textarea id="seed-mnemonic" rows="3" cols="60"></textarea>
         </label>
         <br>
-        <label>Passphrase: <input id="seed-passphrase" type="text"></label>
+        <label>Passphrase: <input id="seed-passphrase" type="text"> <span id="seed-passphrase-len">0</span></label>
         <pre id="seed-output"></pre>
     </fieldset>
 
@@ -92,6 +92,13 @@
 
         for (const id of ['seed-mnemonic', 'seed-passphrase', 'lang'])
             document.getElementById(id).addEventListener('input', generateSeed)
+
+        document.getElementById('gen-passphrase').addEventListener('input', e => {
+            document.getElementById('gen-passphrase-len').textContent = e.target.value.length
+        })
+        document.getElementById('seed-passphrase').addEventListener('input', e => {
+            document.getElementById('seed-passphrase-len').textContent = e.target.value.length
+        })
     </script>
 </body>
 </html>
