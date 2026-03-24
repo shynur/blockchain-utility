@@ -1,5 +1,3 @@
-# Blockchain 工具集
-
 ## BIP39
 
 [在线测试工具 (可离线使用)](utilities/bip39)
