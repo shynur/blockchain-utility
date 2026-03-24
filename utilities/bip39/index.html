@@ -45,8 +45,6 @@
         </label>
         <br>
         <label>Passphrase: <input id="seed-passphrase" type="text"></label>
-        <br>
-        <button id="seed-btn">生成 Seed</button>
         <pre id="seed-output"></pre>
     </fieldset>
 
@@ -70,13 +68,13 @@
             }
         })
 
-        document.getElementById('seed-btn').addEventListener('click', async () => {
+        async function generateSeed() {
             const output = document.getElementById('seed-output')
             const mnemonic = document.getElementById('seed-mnemonic').value.trim()
             const passphrase = document.getElementById('seed-passphrase').value
             const lang = document.getElementById('lang').value
             if (!mnemonic) {
-                output.textContent = '错误: Mnemonic sentence 不能为空.'
+                output.textContent = ''
                 return
             }
             output.textContent = '校验中...'
@@ -90,7 +88,10 @@
             } catch (e) {
                 output.textContent = '错误: ' + e.message
             }
-        })
+        }
+
+        for (const id of ['seed-mnemonic', 'seed-passphrase', 'lang'])
+            document.getElementById(id).addEventListener('input', generateSeed)
     </script>
 </body>
 </html>
