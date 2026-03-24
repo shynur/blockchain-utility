@@ -40,7 +40,7 @@
 
     <fieldset>
         <legend>Mnemonic Sentence → Seed</legend>
-        <label>Mnemonic sentence:<br>
+        <label>Mnemonic sentence: <span id="seed-mnemonic-count">0</span><br>
             <textarea id="seed-mnemonic" rows="3" cols="60"></textarea>
         </label>
         <br>
@@ -73,6 +73,7 @@
             const mnemonic = document.getElementById('seed-mnemonic').value.trim()
             const passphrase = document.getElementById('seed-passphrase').value
             const lang = document.getElementById('lang').value
+            document.getElementById('seed-mnemonic-count').textContent = mnemonic ? mnemonic.split(/\s+/).length : 0
             if (!mnemonic) {
                 output.textContent = ''
                 return
