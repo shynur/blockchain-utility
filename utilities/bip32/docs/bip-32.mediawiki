@@ -28,10 +28,6 @@ The specification consists of two parts.
 In the first part, a system for deriving a tree of keypairs from a single seed is presented.
 The second part demonstrates how to build a wallet structure on top of such a tree.
 
-==Copyright==
-
-This BIP is licensed under the 2-clause BSD license.
-
 ==Motivation==
 
 The Bitcoin reference client uses randomly generated keys.
