@@ -1,4 +1,4 @@
-#!/root/.nvm/versions/node/v24.14.0/bin/node
+#!/usr/bin/env node
 
 import { bip39, validateMnemonicSentence, mnemonicSentenceToSeed } from './index.mjs'
 import { createInterface } from 'node:readline'

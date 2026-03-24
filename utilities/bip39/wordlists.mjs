@@ -8,7 +8,7 @@ const en = ['abandon', 'ability', 'able', 'about', 'above', 'absent', 'absorb', 
 
 console.assert(en.length == 2**11)
 
-/** @type {Record<string, readonly string[]>} */
+/** @type {Readonly<Record<string, readonly string[]>>} */
 export default {
     en,
     zh_Hans,

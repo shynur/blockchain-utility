@@ -104,15 +104,19 @@ export async function validateMnemonicSentence(mnemonicSentence, wordlist_langua
 }
 
 /**
- * @param {string} mnemonicSentence - word 按单个空格分隔的 mnemonic sentence
+ * @param {string} mnemonicSentence - words 按照空白字符分隔的 mnemonic sentence
  * @param {string} [passphrase='']
  * @returns {Promise<Uint8Array>} 512-bit seed
+ * @throws {Error} mnemonicSentence 未通过校验
  */
 export async function mnemonicSentenceToSeed(mnemonicSentence, passphrase = '') {
+    if (!await validateMnemonicSentence(mnemonicSentence))
+        throw new Error('Invalid mnemonic sentence')
+    mnemonicSentence = mnemonicSentence.trim().normalize('NFKD').split(/\s+/).join(' ')
     const encoder = new TextEncoder
     const keyMaterial = await crypto.subtle.importKey(
         'raw',
-        encoder.encode(mnemonicSentence.normalize('NFKD')),
+        encoder.encode(mnemonicSentence),
         'PBKDF2',
         false,
         ['deriveBits']

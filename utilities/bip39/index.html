@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang='zh-Hans'>
+<head>
+    <meta charset="UTF-8">
+    <title>BIP 39</title>
+</head>
+<body>
+    <h1>BIP 39</h1>
+
+    <fieldset>
+        <legend>语言</legend>
+        <select id="lang">
+            <option value="en" selected>English</option>
+            <option value="zh_Hans">简体中文</option>
+        </select>
+    </fieldset>
+
+    <hr>
+
+    <fieldset>
+        <legend>生成 Mnemonic Sentence 与 Seed</legend>
+        <label>
+            词数:
+            <select id="gen-word-count">
+                <option value="12" selected>12</option>
+                <option value="15">15</option>
+                <option value="18">18</option>
+                <option value="21">21</option>
+                <option value="24">24</option>
+            </select>
+        </label>
+        <br>
+        <label>Passphrase: <input id="gen-passphrase" type="text"></label>
+        <br>
+        <button id="gen-btn">生成</button>
+        <pre id="gen-output"></pre>
+    </fieldset>
+
+    <hr>
+
+    <fieldset>
+        <legend>Mnemonic Sentence → Seed</legend>
+        <label>Mnemonic sentence:<br>
+            <textarea id="seed-mnemonic" rows="3" cols="60"></textarea>
+        </label>
+        <br>
+        <label>Passphrase: <input id="seed-passphrase" type="text"></label>
+        <br>
+        <button id="seed-btn">生成 Seed</button>
+        <pre id="seed-output"></pre>
+    </fieldset>
+
+    <script type="module">
+        import * as bip39 from './index.mjs'
+
+        const toHex = bytes =>
+            Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
+
+        document.getElementById('gen-btn').addEventListener('click', async () => {
+            const output = document.getElementById('gen-output')
+            const MS = parseInt(document.getElementById('gen-word-count').value)
+            const passphrase = document.getElementById('gen-passphrase').value
+            const lang = document.getElementById('lang').value
+            output.textContent = '生成中...'
+            try {
+                const { MnemonicSentence, Seed } = await bip39.bip39(MS, passphrase, lang)
+                output.textContent = MnemonicSentence + '\n' + toHex(Seed)
+            } catch (e) {
+                output.textContent = '错误: ' + e.message
+            }
+        })
+
+        document.getElementById('seed-btn').addEventListener('click', async () => {
+            const output = document.getElementById('seed-output')
+            const mnemonic = document.getElementById('seed-mnemonic').value.trim()
+            const passphrase = document.getElementById('seed-passphrase').value
+            const lang = document.getElementById('lang').value
+            if (!mnemonic) {
+                output.textContent = '错误: Mnemonic sentence 不能为空.'
+                return
+            }
+            output.textContent = '校验中...'
+            try {
+                if (!await bip39.validateMnemonicSentence(mnemonic, lang)) {
+                    output.textContent = '错误: Invalid mnemonic sentence.'
+                    return
+                }
+                const seed = await bip39.mnemonicSentenceToSeed(mnemonic, passphrase)
+                output.textContent = toHex(seed)
+            } catch (e) {
+                output.textContent = '错误: ' + e.message
+            }
+        })
+    </script>
+</body>
+</html>

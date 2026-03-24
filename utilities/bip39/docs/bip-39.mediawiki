@@ -98,7 +98,7 @@ Since the vast majority of BIP39 wallets supports only the English wordlist, it 
 
 If you still feel your application really needs to use a localized wordlist, use one of the following instead of inventing your own.
 
-* [[https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md|Wordlists]]
+* [[https://raw.githubusercontent.com/bitcoin/bips/refs/heads/master/bip-0039/bip-0039-wordlists.md|Wordlists]]
 
 ==Test vectors==
 
