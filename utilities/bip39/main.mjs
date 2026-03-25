@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 
-import { bip39, validateMnemonicSentence, mnemonicSentenceToSeed } from './index.mjs'
 import { createInterface } from 'node:readline'
+import {
+    bip39,
+    validateMnemonicSentence,
+    mnemonicSentenceToSeed,
+} from './index.mjs'
 
 const HELP = `
 Options:
