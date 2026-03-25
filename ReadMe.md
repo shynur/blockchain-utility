@@ -2,6 +2,10 @@
 
 [在线测试工具 (可离线使用)](utilities/bip39)
 
+## BIP 32
+
+[在线测试工具 (可离线使用)](utilities/bip32)
+
 ____
 
 <footer>
