@@ -21,25 +21,26 @@ import {
 
 /**
  * base58 编码
- * @param {Uint8Array} bytes
+ * @param {Uint8Array} bytes (big-endian)
  * @returns {string}
  */
 function base58Encode(bytes) {
     const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+    console.assert(
+        /^[^0OIl+/]{58}$/.test(ALPHABET)
+            && [...ALPHABET].every((ch, idx, str) => idx==0 || str[idx-1].charCodeAt(0)<ch.charCodeAt(0))
+    )
 
     let leadingZeros = 0
-    for (let i = 0; i < bytes.length && bytes[i] == 0; ++i)
+    for (const byte of bytes) {
+        if (byte)
+            break
         ++leadingZeros
-
-    let num = 0n
-    for (const byte of bytes)
-        num = num * 256n + BigInt(byte)
+    }
 
     let result = ''
-    while (num > 0n) {
+    for (let num = bytes.reduce((acc, byte) => acc * 256n + BigInt(byte), 0n); num > 0n; num /= 58n)
         result = ALPHABET[Number(num % 58n)] + result
-        num /= 58n
-    }
 
     return '1'.repeat(leadingZeros) + result
 }
