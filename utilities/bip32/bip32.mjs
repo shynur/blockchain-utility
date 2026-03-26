@@ -44,3 +44,40 @@ function base58Encode(bytes) {
 
     return '1'.repeat(leadingZeros) + result
 }
+
+/**
+ * base58 解码
+ * @param {string} base58
+ * @returns {Uint8Array} (big-endian)
+ * @throws {RangeError} 不是合法的 base58 字符
+ */
+function base58Decode(base58) {
+    const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+
+    let leadingOnes = 0
+    for (const ch of base58) {
+        if (ch !== '1')
+            break
+        ++leadingOnes
+    }
+
+    let num = 0n
+    for (const ch of base58) {
+        const digit = ALPHABET.indexOf(ch)
+        if (digit == -1)
+            throw new RangeError(`Invalid base58 character: '${ch}'`)
+        num = num * 58n + BigInt(digit)
+    }
+
+    const hex = num == 0n ? '' : num.toString(16)
+    const paddedHex = hex.length % 2 ? '0' + hex : hex
+    const dataBytes = new Uint8Array(paddedHex.length / 2)
+    for (let i = 0; i < dataBytes.length; ++i)
+        dataBytes[i] = parseInt(paddedHex.slice(2 * i, 2 * i + 2), 16)
+
+    const result = new Uint8Array(leadingOnes + dataBytes.length)
+    result.set(dataBytes, leadingOnes)
+
+    console.assert(base58Encode(result) == base58)
+    return result
+}
