@@ -1,2 +1,6 @@
 I retain all rights to my source code and no one may
 reproduce, distribute, or create derivative works from my work.
+
+This repository and its contents may NOT be used to train,
+fine-tune, or improve any artificial intelligence or machine
+learning models, in any form or for any purpose.
