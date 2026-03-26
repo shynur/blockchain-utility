@@ -88,7 +88,7 @@ function base58Decode(base58) {
  * @returns {Promise<string>}
  */
 async function base58check_encode(payload) {
-    const sha256 = async (data) => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
+    const sha256 = async data => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
     const checksum = (await sha256(await sha256(payload))).slice(0, 4)
 
     const data = new Uint8Array(payload.length + 4)
@@ -99,26 +99,26 @@ async function base58check_encode(payload) {
 }
 
 /**
- * base58check 解码: base58string → payload (验证 checksum)
- * @param {string} base58string
+ * base58check 解码: base58 → payload (验证 checksum)
+ * @param {string} base58
  * @returns {Promise<Uint8Array>} payload (big-endian)
  * @throws {RangeError} 解码后数据不足 4B (一个 checksum 的长度)
  * @throws {Error} checksum 校验失败
  */
-async function base58check_decode(base58string) {
-    const data = base58Decode(base58string)
+async function base58check_decode(base58) {
+    const data = base58Decode(base58)
     if (data.length < 4)
         throw new RangeError(`base58check: expected at least 4B, got ${data.length}`)
 
     const payload = data.slice(0, -4)
     const checksum = data.slice(-4)
 
-    const sha256 = async (data) => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
+    const sha256 = async data => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
     const expected = (await sha256(await sha256(payload))).slice(0, 4)
 
-    if (!checksum.every((byte, i) => byte === expected[i]))
+    if (!checksum.every((byte, i) => byte == expected[i]))
         throw new Error('base58check checksum mismatch')
 
-    console.assert(await base58check_encode(payload) == base58string)
+    console.assert(await base58check_encode(payload) == base58)
     return payload
 }
