@@ -81,3 +81,19 @@ function base58Decode(base58) {
     console.assert(base58Encode(result) == base58)
     return result
 }
+
+/**
+ * base58check 编码: payload → base58(payload ‖ double_sha256(payload)[:4])
+ * @param {Uint8Array} payload (big-endian)
+ * @returns {Promise<string>}
+ */
+async function base58check_encode(payload) {
+    const sha256 = async (data) => new Uint8Array(await crypto.subtle.digest('SHA-256', data))
+    const checksum = (await sha256(await sha256(payload))).slice(0, 4)
+
+    const data = new Uint8Array(payload.length + 4)
+    data.set(payload)
+    data.set(checksum, payload.length)
+
+    return base58Encode(data)
+}
