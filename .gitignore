@@ -47,3 +47,5 @@ gcm.cache/
 compile_commands.json
 
 ?*.deb
+
+.claude/
