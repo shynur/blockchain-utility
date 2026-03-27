@@ -27,7 +27,7 @@ console.assert(
  * @param {Uint8Array} bytes (big-endian)
  * @returns {string}
  */
-export function base58Encode(bytes) {
+function base58Encode(bytes) {
     let leadingZeros = 0
     for (const byte of bytes) {
         if (byte)
@@ -48,7 +48,7 @@ export function base58Encode(bytes) {
  * @returns {Uint8Array} (big-endian)
  * @throws {RangeError} 不是合法的 base58 字符
  */
-export function base58Decode(base58) {
+function base58Decode(base58) {
     let leadingOnes = 0
     for (const ch of base58) {
         if (ch !== '1')
@@ -82,7 +82,7 @@ export function base58Decode(base58) {
  * @param {Uint8Array} payload (big-endian)
  * @returns {Promise<string>}
  */
-export async function base58checkEncode(payload) {
+async function base58checkEncode(payload) {
     const checksum = (await SHA256(await SHA256(payload))).slice(0, 4)
 
     const data = new Uint8Array(payload.length + 4)
@@ -99,7 +99,7 @@ export async function base58checkEncode(payload) {
  * @throws {RangeError} 解码后数据不足 4B (一个 checksum 的长度)
  * @throws {Error} checksum 校验失败
  */
-export async function base58checkDecode(base58) {
+async function base58checkDecode(base58) {
     const data = base58Decode(base58)
     if (data.length < 4)
         throw new RangeError(`base58check: expected at least 4B, got ${data.length}`)
@@ -122,7 +122,7 @@ export async function base58checkDecode(base58) {
  * @param {Uint8Array} data
  * @returns {Promise<Uint8Array>}
  */
-export async function HMAC_SHA512(key, data) {
+async function HMAC_SHA512(key, data) {
     const rawKey = typeof key == 'string' ? new TextEncoder().encode(key) : key
     const cryptoKey = await crypto.subtle.importKey(
         'raw', rawKey, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign'],
