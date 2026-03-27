@@ -15,6 +15,7 @@
 import {
 
 } from './secp256k1.mjs'
+import {RIPEMD160} from './RIPEMD-160.mjs'
 
 const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 console.assert(
