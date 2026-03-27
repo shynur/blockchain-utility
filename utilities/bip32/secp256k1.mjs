@@ -18,5 +18,35 @@
 
 import * as libsecp256k1 from './noble-secp256k1.mjs'
 
-/** @type {bigint} secp256k1 曲线阶 */
+/** @type {bigint} order of the curve */
 export const n = libsecp256k1.Point.CURVE().n
+
+export class Point {
+    /** @type {bigint} */ #x
+    /** @type {bigint} */ #y
+
+    /**
+     * @param {bigint} x
+     * @param {bigint} y
+     */
+    constructor(x, y) {
+        this.#x = x
+        this.#y = y
+        Object.freeze(this)
+    }
+
+    get x() { return this.#x }
+    get y() { return this.#y }
+
+    /**
+     * @param {Point} A
+     * @param {Point} B
+     * @returns {Point}
+     */
+    static Add(A, B) {
+        const sum = libsecp256k1.Point.fromAffine({ x: A.x, y: A.y })
+              .add(libsecp256k1.Point.fromAffine({ x: B.x, y: B.y }))
+              .toAffine()
+        return new Point(sum.x, sum.y)
+    }
+}

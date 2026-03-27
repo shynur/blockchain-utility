@@ -71,8 +71,7 @@ function base58Decode(base58) {
     for (let i = 0; i < dataBytes.length; ++i)
         dataBytes[i] = parseInt(paddedHex.slice(2 * i, 2 * i + 2), 16)
 
-    const result = new Uint8Array(leadingOnes + dataBytes.length)
-    result.set(dataBytes, leadingOnes)
+    const result = cat(new Uint8Array(leadingOnes), dataBytes)
 
     console.assert(base58Encode(result) == base58)
     return result
@@ -86,9 +85,7 @@ function base58Decode(base58) {
 async function base58checkEncode(payload) {
     const checksum = (await SHA256(await SHA256(payload))).slice(0, 4)
 
-    const data = new Uint8Array(payload.length + 4)
-    data.set(payload)
-    data.set(checksum, payload.length)
+    const data = cat(payload, checksum)
 
     return base58Encode(data)
 }
@@ -115,6 +112,21 @@ async function base58checkDecode(base58) {
 
     console.assert(await base58checkEncode(payload) == base58)
     return payload
+}
+
+/**
+ * Concatenate byte sequences.
+ * @param {Readonly<Uint8Array>[]} byte_sequences
+ * @returns {Uint8Array}
+ */
+function cat(...byte_sequences) {
+    const result = new Uint8Array(byte_sequences.reduce((len, a) => len + a.length, 0))
+    let offset = 0
+    for (const a of byte_sequences) {
+        result.set(a, offset)
+        offset += a.length
+    }
+    return result
 }
 
 /**
