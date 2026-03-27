@@ -23,7 +23,7 @@ Options:
 Copyright (C) 2026  谢骐 <shynur@outlook.com>.  All Rights Reserved.
 `.trim()
 
-const toHex = /** @param {Uint8Array} bytes */ bytes =>
+const toHex = /** @param {Readonly<Uint8Array>} bytes */ bytes =>
     Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
 
 let mode = null, lang = 'en'

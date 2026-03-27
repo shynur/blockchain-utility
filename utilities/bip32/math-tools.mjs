@@ -25,7 +25,7 @@ console.assert(
 
 /**
  * base58 编码
- * @param {Uint8Array} bytes (big-endian)
+ * @param {Readonly<Uint8Array>} bytes (big-endian)
  * @returns {string}
  */
 function base58Encode(bytes) {
@@ -80,7 +80,7 @@ function base58Decode(base58) {
 
 /**
  * base58check 编码: payload → base58(payload ‖ SHA256(SHA256(payload))[:4])
- * @param {Uint8Array} payload (big-endian)
+ * @param {Readonly<Uint8Array>} payload (big-endian)
  * @returns {Promise<string>}
  */
 async function base58checkEncode(payload) {
@@ -119,8 +119,8 @@ async function base58checkDecode(base58) {
 
 /**
  * HMAC-SHA512 (RFC 4231).
- * @param {string | Uint8Array} key - 字符串会经 UTF-8 编码为字节
- * @param {Uint8Array} data
+ * @param {string | Readonly<Uint8Array>} key - 字符串会经 UTF-8 编码为字节
+ * @param {Readonly<Uint8Array>} data
  * @returns {Promise<Uint8Array>}
  */
 async function HMAC_SHA512(key, data) {
@@ -132,8 +132,8 @@ async function HMAC_SHA512(key, data) {
 }
 
 /**
- * @param {BufferSource} data
- * @returns {Promise<Uint8Array>} (big-endian)
+ * @param {Readonly<Uint8Array>} data
+ * @returns {Promise<Uint8Array>}
  */
 async function SHA256(data) {
     return new Uint8Array(await crypto.subtle.digest('SHA-256', data))

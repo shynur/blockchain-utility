@@ -14,7 +14,7 @@ import WORDLISTS from './wordlists.mjs'
 /**
  * 生成指定长度的随机熵.
  * @param {number} ENT - 熵的位数, 属于 {128, 160, 192, 224, 256}
- * @returns {Uint8Array} 随机熵的字节数组
+ * @returns {Readonly<Uint8Array>} 随机熵的字节数组
  * @throws {RangeError} ENT 不属于合法值集合
  */
 function generateEntropy(ENT) {
@@ -28,7 +28,7 @@ function generateEntropy(ENT) {
 
 /**
  * 计算熵的 checksum (SHA-256 的前 ENT/32 位).
- * @param {Uint8Array} entropy
+ * @param {Readonly<Uint8Array>} entropy
  * @returns {Promise<string>} 表示 checksum 的二进制字符串, 长度为 entropy.length*8/32
  */
 async function calculateChecksum(entropy) {
@@ -41,7 +41,7 @@ async function calculateChecksum(entropy) {
 }
 
 /**
- * @param {Uint8Array} entropy
+ * @param {Readonly<Uint8Array>} entropy
  * @returns {Promise<string>} 表示 熵 + checksum 的二进制字符串
  */
 async function appendChecksum(entropy) {
@@ -106,7 +106,7 @@ export async function validateMnemonicSentence(mnemonicSentence, wordlist_langua
 /**
  * @param {string} mnemonicSentence - words 按照空白字符分隔的 mnemonic sentence
  * @param {string} [passphrase='']
- * @returns {Promise<Uint8Array>} 512-bit seed
+ * @returns {Promise<Readonly<Uint8Array>>} 512-bit seed
  */
 export async function mnemonicSentenceToSeed(mnemonicSentence, passphrase = '') {
     mnemonicSentence = mnemonicSentence.trim().normalize('NFKD').split(/\s+/).join(' ')
@@ -135,7 +135,7 @@ export async function mnemonicSentenceToSeed(mnemonicSentence, passphrase = '') 
  * @param {number} MS - 助记句的单词数
  * @param {string} [wordlist_language='en']
  * @param {string} [passphrase='']
- * @returns {Promise<{MnemonicSentence: string, Seed: Uint8Array}>}
+ * @returns {Promise<Readonly<{MnemonicSentence: string, Seed: Readonly<Uint8Array>}>>}
  */
 export async function bip39(MS = 12, passphrase = '', wordlist_language = 'en') {
     const ENT = MS * 32 / 3
