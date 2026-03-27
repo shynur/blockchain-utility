@@ -1,3 +1,6 @@
+> [!NOTE]
+> 在线测试工具需要在 <https://shynur.github.io/blockchain-utility> 页面打开使用.
+
 ## BIP 39
 
 [在线测试工具 (可离线使用)](utilities/bip39)

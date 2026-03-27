@@ -117,8 +117,22 @@ export async function base58checkDecode(base58) {
 }
 
 /**
+ * HMAC-SHA512 (RFC 4231).
+ * @param {string | Uint8Array} key - 字符串会经 UTF-8 编码为字节
+ * @param {Uint8Array} data
+ * @returns {Promise<Uint8Array>}
+ */
+export async function HMAC_SHA512(key, data) {
+    const rawKey = typeof key == 'string' ? new TextEncoder().encode(key) : key
+    const cryptoKey = await crypto.subtle.importKey(
+        'raw', rawKey, { name: 'HMAC', hash: 'SHA-512' }, false, ['sign'],
+    )
+    return new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, data))
+}
+
+/**
  * @param {BufferSource} data
- * @returns {Promise<Uint8Array>} big-endian
+ * @returns {Promise<Uint8Array>} (big-endian)
  */
 async function SHA256(data) {
     return new Uint8Array(await crypto.subtle.digest('SHA-256', data))
