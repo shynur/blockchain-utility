@@ -150,3 +150,12 @@ async function HMAC_SHA512(key, data) {
 async function SHA256(data) {
     return new Uint8Array(await crypto.subtle.digest('SHA-256', data))
 }
+
+/**
+ * RIPEMD160 after SHA256
+ * @param {Readonly<Uint8Array>} data
+ * @returns {Promise<Uint8Array>} 20B
+ */
+async function Hash160(data) {
+    return RIPEMD160(await SHA256(data))
+}
