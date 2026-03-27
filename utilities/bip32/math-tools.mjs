@@ -213,16 +213,16 @@ function parse_256(p) {
  * Extended Public Key (K, c)
  */
 class ExtendedPublicKey {
-    /** @type {Point_secp256k1} */
+    /**
+     * 32B public key
+     * @type {Point_secp256k1} */
     #K
-    /** @type {bigint} */
+    /**
+     * 32B chain code
+     * @type {Uint8Array} */
     #c
 
-    /**
-     * @param {Point_secp256k1} K
-     * @param {bigint} c
-     */
-    constructor(K, c) {
+    constructor(/** @type {Point_secp256k1} */ K, /** @type {Uint8Array} */ c) {
         this.#K = K
         this.#c = c
     }
@@ -235,16 +235,16 @@ class ExtendedPublicKey {
  * Extended Private Key (k, c)
  */
 class ExtendedPrivateKey {
-    /** @type {bigint} */
+    /**
+     * 32B private key
+     * @type {Uint8Array} */
     #k
-    /** @type {bigint} */
+    /**
+     * 32B chain code
+     * @type {Uint8Array} */
     #c
 
-    /**
-     * @param {bigint} k
-     * @param {bigint} c
-     */
-    constructor(k, c) {
+    constructor(/** @type {Uint8Array} */ k, /** @type {Uint8Array} */ c) {
         this.#k = k
         this.#c = c
     }

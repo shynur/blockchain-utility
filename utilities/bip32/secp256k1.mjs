@@ -25,11 +25,7 @@ export class Point {
     /** @type {bigint} */ #x
     /** @type {bigint} */ #y
 
-    /**
-     * @param {bigint} x
-     * @param {bigint} y
-     */
-    constructor(x, y) {
+    constructor(/** @type {bigint} */ x, /** @type {bigint} */ y) {
         this.#x = x
         this.#y = y
         Object.freeze(this)
@@ -53,10 +49,9 @@ export class Point {
 
         /**
          * Serialize an integer as a byte sequence, most significant byte first.
-         * @param {bigint} x
          * @returns {Uint8Array} 32B
          */
-        function ser_256(x) {
+        function ser_256(/** @type {bigint} */ x) {
             const bytes = new Uint8Array(32)
             for (let i = 31; i >= 0; i--) {
                 bytes[i] = Number(x & 0xFFn)
@@ -66,19 +61,12 @@ export class Point {
         }
     }
 
-    /**
-     * @param {bigint} scalar
-     */
-    static multiply(scalar) {
+    static multiply(/** @type {bigint} */ scalar) {
         const product = libsecp256k1.Point.BASE.multiply(scalar).toAffine()
         return new Point(product.x, product.y)
     }
 
-    /**
-     * @param {Point} A
-     * @param {Point} B
-     */
-    static add(A, B) {
+    static add(/** @type {Point} */ A, /** @type {Point} */ B) {
         const sum = libsecp256k1.Point.fromAffine({ x: A.x, y: A.y })
               .add(libsecp256k1.Point.fromAffine({ x: B.x, y: B.y }))
               .toAffine()
