@@ -41,7 +41,6 @@ export class Point {
     /**
      * @param {Point} A
      * @param {Point} B
-     * @returns {Point}
      */
     static Add(A, B) {
         const sum = libsecp256k1.Point.fromAffine({ x: A.x, y: A.y })
@@ -50,3 +49,9 @@ export class Point {
         return new Point(sum.x, sum.y)
     }
 }
+
+/** base point (generator) of the curve */
+const G = function() {
+    const { x, y } = libsecp256k1.Point.BASE.toAffine()
+    return new Point(x, y)
+}()
