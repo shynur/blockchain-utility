@@ -16,6 +16,7 @@
  *   类型注解使用 JSDoc, 可用 tsc 检查.
  */
 
-import {
+import * as libsecp256k1 from './noble-secp256k1.mjs'
 
-} from './noble-secp256k1.mjs'
+/** @type {bigint} secp256k1 曲线阶 */
+export const n = libsecp256k1.Point.CURVE().n

@@ -13,7 +13,7 @@
  */
 
 import {
-
+    n as N_SECP256K1_ORDER,
 } from './secp256k1.mjs'
 import {RIPEMD160} from './RIPEMD-160.mjs'
 
