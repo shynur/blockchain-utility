@@ -159,3 +159,13 @@ async function SHA256(data) {
 async function Hash160(data) {
     return RIPEMD160(await SHA256(data))
 }
+
+/**
+ * Serialize an unsigned integer as a byte sequence, most significant byte first.
+ * @param {number} i - a 32-bit unsigned integer
+ * @returns {Uint8Array} 4B
+ */
+function ser_32(i) {
+    console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+    return new Uint8Array([i >>> 24, (i >>> 16) & 0xff, (i >>> 8) & 0xff, i & 0xff])
+}
