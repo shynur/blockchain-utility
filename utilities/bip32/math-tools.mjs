@@ -169,3 +169,18 @@ function ser_32(i) {
     console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
     return new Uint8Array([i >>> 24, (i >>> 16) & 0xff, (i >>> 8) & 0xff, i & 0xff])
 }
+
+/**
+ * Serializes an integer as a byte sequence, most significant byte first.
+ * @param {bigint} p
+ * @returns {Uint8Array} 32B
+ */
+function ser_256(p) {
+    console.assert(typeof p == 'bigint' && 0n <= p && p < 2n ** 256n)
+    const result = new Uint8Array(32)
+    for (let i = 31; i >= 0; --i) {
+        result[i] = Number(p & 0xffn)
+        p >>= 8n
+    }
+    return result
+}
