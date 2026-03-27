@@ -14,6 +14,7 @@
 
 import {
     n as N_SECP256K1_ORDER,
+    Point as Point_secp256k1,
 } from './secp256k1.mjs'
 import {RIPEMD160} from './RIPEMD-160.mjs'
 
@@ -183,6 +184,19 @@ function ser_256(p) {
         p >>= 8n
     }
     return result
+}
+
+/**
+ * Return the coordinate pair resulting from EC point multiplication
+ * (repeated application of the EC group operation) of the secp256k1
+ * base point with the integer p (i.e., the operation used to compute
+ * a public key from a private key).
+ * @param {bigint} p
+ * @returns {{x: bigint, y: bigint}}
+ */
+function point(p) {
+    const {x, y} = Point_secp256k1.multiply(p)
+    return {x, y}
 }
 
 /**
