@@ -15,6 +15,4 @@
  *   类型注解使用 JSDoc, 可用 tsc 检查.
  */
 
-import {
-
-} from './math-tools.mjs'
+import * as math_tools from './math-tools.mjs'
