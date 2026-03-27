@@ -39,6 +39,34 @@ export class Point {
     get y() { return this.#y }
 
     /**
+     * Serializes the coordinate pair as a byte sequence using SEC1's compressed form:
+     *     (0x02 or 0x03) || ser_256(x),
+     * where the header byte depends on the parity of the omitted y coordinate.
+     * @returns {Uint8Array} 33B SEC1 compressed encoding */
+    serialize() {
+        const header = this.#y % 2n === 0n ? 0x02 : 0x03
+        const body = ser_256(this.#x)
+        const result = new Uint8Array(33)
+        result[0] = header
+        result.set(body, 1)
+        return result
+
+        /**
+         * Serialize an integer as a byte sequence, most significant byte first.
+         * @param {bigint} x
+         * @returns {Uint8Array} 32B
+         */
+        function ser_256(x) {
+            const bytes = new Uint8Array(32)
+            for (let i = 31; i >= 0; i--) {
+                bytes[i] = Number(x & 0xFFn)
+                x >>= 8n
+            }
+            return bytes
+        }
+    }
+
+    /**
      * @param {bigint} scalar
      */
     static multiply(scalar) {
