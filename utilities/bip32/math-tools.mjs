@@ -208,3 +208,47 @@ function parse_256(p) {
     console.assert(p.length == 32)
     return p.reduce((acc, byte) => acc << 8n | BigInt(byte), 0n)
 }
+
+/**
+ * Extended Public Key (K, c)
+ */
+class ExtendedPublicKey {
+    /** @type {Point_secp256k1} */
+    #K
+    /** @type {bigint} */
+    #c
+
+    /**
+     * @param {Point_secp256k1} K
+     * @param {bigint} c
+     */
+    constructor(K, c) {
+        this.#K = K
+        this.#c = c
+    }
+
+    get K() { return this.#K }
+    get c() { return this.#c }
+}
+
+/**
+ * Extended Private Key (k, c)
+ */
+class ExtendedPrivateKey {
+    /** @type {bigint} */
+    #k
+    /** @type {bigint} */
+    #c
+
+    /**
+     * @param {bigint} k
+     * @param {bigint} c
+     */
+    constructor(k, c) {
+        this.#k = k
+        this.#c = c
+    }
+
+    get k() { return this.#k }
+    get c() { return this.#c }
+}
