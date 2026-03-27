@@ -171,7 +171,7 @@ function ser_32(i) {
 }
 
 /**
- * Serializes an integer as a byte sequence, most significant byte first.
+ * Serialize an integer as a byte sequence, most significant byte first.
  * @param {bigint} p
  * @returns {Uint8Array} 32B
  */
@@ -183,4 +183,14 @@ function ser_256(p) {
         p >>= 8n
     }
     return result
+}
+
+/**
+ * Interpret a byte sequence as a number, most significant byte first.
+ * @param {Readonly<Uint8Array>} p - 32B
+ * @returns {bigint} 256-bit
+ */
+function parse_256(p) {
+    console.assert(p.length == 32)
+    return p.reduce((acc, byte) => acc << 8n | BigInt(byte), 0n)
 }

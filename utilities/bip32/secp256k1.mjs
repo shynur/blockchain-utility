@@ -39,10 +39,18 @@ export class Point {
     get y() { return this.#y }
 
     /**
+     * @param {bigint} scalar
+     */
+    static multiply(scalar) {
+        const product = libsecp256k1.Point.BASE.multiply(scalar).toAffine()
+        return new Point(product.x, product.y)
+    }
+
+    /**
      * @param {Point} A
      * @param {Point} B
      */
-    static Add(A, B) {
+    static add(A, B) {
         const sum = libsecp256k1.Point.fromAffine({ x: A.x, y: A.y })
               .add(libsecp256k1.Point.fromAffine({ x: B.x, y: B.y }))
               .toAffine()
