@@ -19,7 +19,7 @@
 import * as libsecp256k1 from './noble-secp256k1.mjs'
 
 /** @type {bigint} order of the curve */
-export const n = libsecp256k1.Point.CURVE().n
+export const CURVE_ORDER = libsecp256k1.Point.CURVE().n
 
 export class Point {
     /** @type {bigint} */ #x

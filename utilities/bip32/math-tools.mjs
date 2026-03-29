@@ -13,7 +13,7 @@
  */
 
 import {
-    n as N_SECP256K1_ORDER,
+    CURVE_ORDER as N_SECP256K1_ORDER,
     Point as Point_secp256k1,
 } from './secp256k1.mjs'
 import {RIPEMD160} from './RIPEMD-160.mjs'
@@ -207,6 +207,17 @@ function point(p) {
 function parse_256(p) {
     console.assert(p.length == 32)
     return p.reduce((acc, byte) => acc << 8n | BigInt(byte), 0n)
+}
+
+/**
+ * Serializes the coordinate pair P = (x,y) as a byte sequence using SEC1's compressed form:
+ *     (0x02 or 0x03) || ser_256(x),
+ * where the header byte depends on the parity of the omitted y coordinate.
+ * @param {{x: bigint, y: bigint}} P
+ * @returns {Uint8Array} 33B
+ */
+function ser_P(P) {
+    return new Point_secp256k1(P.x, P.y).serialize()
 }
 
 /**
