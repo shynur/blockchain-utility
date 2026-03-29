@@ -54,7 +54,7 @@ function base58Encode(bytes) {
 function base58Decode(base58) {
     let leadingOnes = 0
     for (const ch of base58) {
-        if (ch !== '1')
+        if (ch != '1')
             break
         ++leadingOnes
     }
