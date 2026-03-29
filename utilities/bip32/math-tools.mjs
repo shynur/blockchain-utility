@@ -14,6 +14,7 @@
 
 import {
     CURVE_ORDER as N_SECP256K1_ORDER,
+    G as G_SECP256K1
     Point as Point_secp256k1,
 } from './secp256k1.mjs'
 import {RIPEMD160} from './RIPEMD-160.mjs'
@@ -195,7 +196,7 @@ function ser_256(p) {
  * @returns {{x: bigint, y: bigint}}
  */
 function point(p) {
-    const {x, y} = Point_secp256k1.multiply(p)
+    const {x, y} = G_SECP256K1.multiply(p)
     return {x, y}
 }
 

@@ -78,7 +78,7 @@ export class Point {
 }
 
 /** base point (generator) of the curve */
-const G = function() {
+export const G = function() {
     const {x, y} = libsecp256k1.Point.BASE.toAffine()
     return new Point(x, y)
 }()
