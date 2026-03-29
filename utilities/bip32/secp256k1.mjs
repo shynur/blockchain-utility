@@ -40,8 +40,8 @@ export class Point {
      * where the header byte depends on the parity of the omitted y coordinate.
      * @returns {Uint8Array} 33B SEC1 compressed encoding */
     serialize() {
-        const header = this.#y % 2n === 0n ? 0x02 : 0x03
-        const body = ser_256(this.#x)
+        const header = this.y % 2n === 0n ? 0x02 : 0x03
+        const body = ser_256(this.x)
         const result = new Uint8Array(33)
         result[0] = header
         result.set(body, 1)
@@ -61,14 +61,16 @@ export class Point {
         }
     }
 
-    static multiply(/** @type {bigint} */ scalar) {
-        const product = libsecp256k1.Point.BASE.multiply(scalar).toAffine()
+    multiply(/** @type {bigint} */ scalar) {
+        const product = libsecp256k1.Point.fromAffine({x: this.x, y: this.y})
+              .multiply(scalar)
+              .toAffine()
         return new Point(product.x, product.y)
     }
 
     static add(/** @type {Point} */ A, /** @type {Point} */ B) {
-        const sum = libsecp256k1.Point.fromAffine({ x: A.x, y: A.y })
-              .add(libsecp256k1.Point.fromAffine({ x: B.x, y: B.y }))
+        const sum = libsecp256k1.Point.fromAffine({x: A.x, y: A.y})
+              .add(libsecp256k1.Point.fromAffine({x: B.x, y: B.y}))
               .toAffine()
         return new Point(sum.x, sum.y)
     }
@@ -76,6 +78,6 @@ export class Point {
 
 /** base point (generator) of the curve */
 const G = function() {
-    const { x, y } = libsecp256k1.Point.BASE.toAffine()
+    const {x, y} = libsecp256k1.Point.BASE.toAffine()
     return new Point(x, y)
 }()
