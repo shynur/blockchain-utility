@@ -26,6 +26,7 @@ export class Point {
     /** @type {bigint} */ #y
 
     constructor(/** @type {bigint} */ x, /** @type {bigint} */ y) {
+        libsecp256k1.Point.fromAffine({x, y})  // validate point is on curve
         this.#x = x
         this.#y = y
         Object.freeze(this)
