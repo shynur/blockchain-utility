@@ -296,6 +296,29 @@ class XKey {
 
         return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
     }
+
+    async serialize() {
+        const is_pub_key = this instanceof XPublicKey
+
+        const version_bytes = this.version == 'mainnet'
+            ? (is_pub_key ? 0x0488B21E : 0x0488ADE4)
+            : (is_pub_key ? 0x043587CF : 0x04358394)
+
+        const key_data = this instanceof XPublicKey
+            ? ser_P({x: this.K.x, y: this.K.y})
+            : cat(new Uint8Array([0x00]), ser_256(this.k))
+
+        const payload = cat(
+            ser_32(version_bytes),
+            new Uint8Array([this.depth]),
+            this.parent_fingerprint,
+            ser_32(this.i),
+            ser_256(this.c),
+            key_data,
+        )
+
+        return base58checkEncode(payload)
+    }
 }
 
 /**

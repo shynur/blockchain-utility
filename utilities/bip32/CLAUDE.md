@@ -6,3 +6,8 @@
 - `RIPEMD-160.mjs`：RIPEMD-160 hash function.
 - `math-tools.mjs`：提供 BIP 32 所需的数学工具函数 (还在实现阶段, 不考虑哪些函数需要 export), `bip32.mjs` 仅依赖此 module 来实现数学运算.  依赖包含: `secp256k1.mjs`, `RIPEMD-160.mjs`.
 - `bip32.mjs`：BIP 32 implementation, 关注逻辑部分, 并 export 相关 API.
+
+## 代码风格
+
+- 专注于可读性: 逻辑清晰, 严格遵循 BIP 所描述的算法执行, 不跳步骤
+- 尽可能使用不可变类型
