@@ -230,24 +230,25 @@ class XKey {
 
     /**
      * child number
-     * @type {number} 4B
-     */
+     * @type {number} 4B */
     i
 
     /**
-     * @type {number} 1B
-     */
+     * @type {number} 1B */
     depth
 
     /**
-     * @type {'mainnet' | 'testnet'}
-     */
+     * @type {'mainnet' | 'testnet'} */
     version
+
+    /**
+     * @type {Readonly<Uint8Array>} 4B */
+    parent_fingerprint
 
     constructor(
         /** @type {bigint} */ chain_code,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ {
-            ChildNumber=0, Depth=0, Version='mainnet'
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ {
+            ChildNumber=0, Depth=0, Version='mainnet', ParentFingerprint=new Uint8Array(4)
         } = {}
     ) {
         console.assert(0n <= chain_code && chain_code < 2n**256n)
@@ -264,6 +265,10 @@ class XKey {
 
         this.version = Version
         Object.defineProperty(this, 'version', {writable: false, configurable: false})
+
+        console.assert(ParentFingerprint.length == 4)
+        this.parent_fingerprint = Object.freeze(new Uint8Array(ParentFingerprint))
+        Object.defineProperty(this, 'parent_fingerprint', {writable: false, configurable: false})
     }
 
     /**
@@ -304,7 +309,7 @@ class XPublicKey extends XKey {
 
     constructor(
         /** @type {Point_secp256k1} */ K, /** @type {bigint} */ c,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ derivation_info
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
     ) {
         super(c, derivation_info)
         this.K = K
@@ -351,6 +356,7 @@ class XPublicKey extends XKey {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,
+            ParentFingerprint: await this.fingerprint(),
         })
     }
 }
@@ -366,7 +372,7 @@ class XPrivateKey extends XKey {
 
     constructor(
         /** @type {bigint} */ k, /** @type {bigint} */ c,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ derivation_info
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
     ) {
         super(c, derivation_info)
         console.assert(0n <= k && k < 2n ** 256n)
@@ -393,6 +399,7 @@ class XPrivateKey extends XKey {
             ChildNumber: this.i,
             Depth: this.depth,
             Version: this.version,
+            ParentFingerprint: this.parent_fingerprint,
         })
     }
 
@@ -423,6 +430,7 @@ class XPrivateKey extends XKey {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,
+            ParentFingerprint: await this.fingerprint(),
         })
     }
 }
