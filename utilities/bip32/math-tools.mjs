@@ -223,6 +223,28 @@ function ser_P(P) {
 }
 
 /**
+ * Cascade CKD constructions to build a tree.
+ * @param {ExtendedPrivateKey | ExtendedPublicKey} key
+ * @param {string} path - e.g. "/0'/1/2H/3"
+ * @returns {Promise<ExtendedPrivateKey | ExtendedPublicKey>}
+ */
+async function tree(key, path) {
+    path = path.replace(/\s/g, '')
+    if (path == '')
+        return key
+    console.assert(path[0] == '/' && path[path.length-1] != '/')
+
+    const nodes = path.slice(1).split('/')
+    const firstNode = nodes[0]
+    const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
+    const firstKey = await key.CKD(
+        parseInt(firstNode) + (firstIsHardened ? 2**31 : 0)
+    )
+
+    return tree(firstKey, nodes.slice(1).map(i => `/${i}`).join(''))
+}
+
+/**
  * Extended Public Key (K, c)
  */
 class ExtendedPublicKey {
@@ -244,6 +266,8 @@ class ExtendedPublicKey {
 
     get K() { return this.#K }
     get c() { return this.#c }
+
+    async tree(/** @type {string} */ path) { return tree(this, path) }
 
     /**
      * CKDpub
@@ -313,22 +337,7 @@ class ExtendedPrivateKey {
         return new Point_secp256k1(x, y)
     }
 
-    async tree(/** @type {string} */ path) {
-        path = path.replace(/\s/g, '')
-        if (path == '')
-            return this
-        console.assert(path[0] == '/' && path[path.length - 1] != '/')
-        // 保证形如 /a'/b'/c
-
-        const nodes = path.slice(1).split('/')
-        const firstNode = nodes[0]
-        const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
-        const firstKey = await (firstIsHardened ? this : this.N()).CKD(
-            parseInt(firstNode) + (firstIsHardened ? 2 ** 31 : 0)
-        )
-
-        return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
-    }
+    async tree(/** @type {string} */ path) { return tree(this, path) }
 
     /**
      * CKDpriv
