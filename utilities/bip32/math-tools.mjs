@@ -279,11 +279,9 @@ class XKey {
         const nodes = path.slice(1).split('/')
         const firstNode = nodes[0]
         const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
-        const firstKey = await this.CKD(
-            parseInt(firstNode) + (firstIsHardened ? 2**31 : 0)
-        )
+        const firstKey = await this.CKD(parseInt(firstNode) + (firstIsHardened ? 2**31 : 0))
 
-        return tree(firstKey, nodes.slice(1).map(i => `/${i}`).join(''))
+        return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
     }
 }
 
@@ -364,10 +362,9 @@ class XPrivateKey extends XKey {
      * N((k, c)) → (K, c)
      * Compute the extended public key corresponding to an extended private key
      * (the “neutered” version, as it removes the ability to sign transactions).
-     * @param {XPrivateKey} extendedPrivateKey
      * @returns {XPublicKey} */
     N() {
-        const {k_x, k_y} = point(this.k)
+        const {x: k_x, y: k_y} = point(this.k)
         return new XPublicKey(new Point_secp256k1(k_x, k_y), this.c, {
             ChildNumber: this.i,
             Depth: this.depth,
