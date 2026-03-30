@@ -226,15 +226,45 @@ class XKey {
     /**
      * 32B chain code
      * @type {bigint} */
-    #c
+    c
 
-    constructor(/** @type {bigint} */ chain_code) {
-        console.assert(0n <= chain_code && chain_code < 2n ** 256n)
-        this.#c = chain_code
-        Object.freeze(this)
+    /**
+     * child number
+     * @type {number} 4B
+     */
+    i
+
+    /**
+     * @type {number} 1B
+     */
+    depth
+
+    /**
+     * @type {'mainnet' | 'testnet'}
+     */
+    version
+
+    constructor(
+        /** @type {bigint} */ chain_code,
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ {
+            ChildNumber=0, Depth=0, Version='mainnet'
+        } = {}
+    ) {
+        console.assert(0n <= chain_code && chain_code < 2n**256n)
+        this.c = chain_code
+        Object.defineProperty(this, 'c', {writable: false, configurable: false})
+
+        console.assert(Number.isInteger(ChildNumber) && 0 <= ChildNumber && ChildNumber < 2**32)
+        this.i = ChildNumber
+        Object.defineProperty(this, 'i', {writable: false, configurable: false})
+
+        console.assert(Number.isInteger(Depth) && 0 <= Depth && Depth < 256)
+        this.depth = Depth
+        Object.defineProperty(this, 'depth', {writable: false, configurable: false})
+
+        this.version = Version
+        Object.defineProperty(this, 'version', {writable: false, configurable: false})
     }
-
-    get c() { return this.#c }
 
     /**
      * Cascade CKD constructions to build a tree.
@@ -264,15 +294,13 @@ class XPublicKey extends XKey {
     /**
      * 32B public key
      * @type {Point_secp256k1} */
-    #K
+    K
 
     constructor(/** @type {Point_secp256k1} */ K, /** @type {bigint} */ c) {
         super(c)
-        this.#K = K
-        Object.freeze(this)
+        this.K = K
+        Object.defineProperty(this, 'K', {writable: false, configurable: false})
     }
-
-    get K() { return this.#K }
 
     /**
      * CKDpub
@@ -313,16 +341,14 @@ class XPrivateKey extends XKey {
     /**
      * 32B private key
      * @type {bigint} */
-    #k
+    k
 
     constructor(/** @type {bigint} */ k, /** @type {bigint} */ c) {
         super(c)
         console.assert(0n <= k && k < 2n ** 256n)
-        this.#k = k
-        Object.freeze(this)
+        this.k = k
+        Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
-
-    get k() { return this.#k }
 
     /**
      * N((k, c)) → (K, c)
