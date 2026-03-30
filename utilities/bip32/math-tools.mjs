@@ -271,6 +271,7 @@ class ExtendedPrivateKey {
     get c() { return this.#c }
 
     generateExtendedPublicKey() {
-        return new ExtendedPublicKey(point(this.#k), this.#c)
+        return new ExtendedPublicKey(this.generatePublicKey(), this.#c)
     }
+    generatePublicKey() { return point(this.#k)  }
 }
