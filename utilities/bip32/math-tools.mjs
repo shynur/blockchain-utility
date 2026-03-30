@@ -270,7 +270,7 @@ class ExtendedPublicKey {
             }(),
             this.K
         )
-        if (K_i.x == 0n && K_i.y == 0n)
+        if (K_i.atInfinity())
             return this.CKD(i + 1)
 
         return new ExtendedPublicKey(K_i, parse_256(I_R))

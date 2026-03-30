@@ -36,6 +36,13 @@ export class Point {
     get y() { return this.#y }
 
     /**
+     * @returns {boolean} whether the point at infinity
+     */
+    atInfinity() {
+        return libsecp256k1.Point.fromAffine({x: this.x, y: this.y}).is0()
+    }
+
+    /**
      * Serializes the coordinate pair as a byte sequence using SEC1's compressed form:
      *     (0x02 or 0x03) || ser_256(x),
      * where the header byte depends on the parity of the omitted y coordinate.
