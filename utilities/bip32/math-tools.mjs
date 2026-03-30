@@ -296,8 +296,11 @@ class XPublicKey extends XKey {
      * @type {Point_secp256k1} */
     K
 
-    constructor(/** @type {Point_secp256k1} */ K, /** @type {bigint} */ c) {
-        super(c)
+    constructor(
+        /** @type {Point_secp256k1} */ K, /** @type {bigint} */ c,
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ derivation_info
+    ) {
+        super(c, derivation_info)
         this.K = K
         Object.defineProperty(this, 'K', {writable: false, configurable: false})
     }
@@ -330,7 +333,11 @@ class XPublicKey extends XKey {
         if (K_i.atInfinity())
             return this.CKD(i + 1)
 
-        return new XPublicKey(K_i, parse_256(I_R))
+        return new XPublicKey(K_i, parse_256(I_R), {
+            ChildNumber: i,
+            Depth: this.depth + 1,
+            Version: this.version,
+        })
     }
 }
 
@@ -343,8 +350,11 @@ class XPrivateKey extends XKey {
      * @type {bigint} */
     k
 
-    constructor(/** @type {bigint} */ k, /** @type {bigint} */ c) {
-        super(c)
+    constructor(
+        /** @type {bigint} */ k, /** @type {bigint} */ c,
+        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet'}} */ derivation_info
+    ) {
+        super(c, derivation_info)
         console.assert(0n <= k && k < 2n ** 256n)
         this.k = k
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
@@ -358,7 +368,11 @@ class XPrivateKey extends XKey {
      * @returns {XPublicKey} */
     N() {
         const {k_x, k_y} = point(this.k)
-        return new XPublicKey(new Point_secp256k1(k_x, k_y), this.c)
+        return new XPublicKey(new Point_secp256k1(k_x, k_y), this.c, {
+            ChildNumber: this.i,
+            Depth: this.depth,
+            Version: this.version,
+        })
     }
 
     /**
@@ -384,6 +398,10 @@ class XPrivateKey extends XKey {
         if (k_i == 0n)
             return this.CKD(i + 1)
 
-        return new XPrivateKey(k_i, parse_256(I_R))
+        return new XPrivateKey(k_i, parse_256(I_R), {
+            ChildNumber: i,
+            Depth: this.depth + 1,
+            Version: this.version,
+        })
     }
 }
