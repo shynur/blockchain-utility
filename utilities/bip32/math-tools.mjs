@@ -244,6 +244,37 @@ class ExtendedPublicKey {
 
     get K() { return this.#K }
     get c() { return this.#c }
+
+    /**
+     * CKDpub
+     * @param {number | bigint} i
+     * @returns {Promise<ExtendedPublicKey>} */
+    async CKD(i) {
+        i = Number(i)
+        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+
+        if (i >= 2 ** 31)
+            throw new RangeError(`CKDpub is only defined for normal child key: i=${i}`)
+
+        const I = await HMAC_SHA512(ser_256(this.c), cat(ser_P({x: this.K.x, y: this.K.y}), ser_32(i)))
+        const I_L = I.slice(0, 32)
+        const I_R = I.slice(32)
+
+        if (parse_256(I_L) >= N_SECP256K1_ORDER)
+            return this.CKD(i + 1)
+
+        const K_i = Point_secp256k1.add(
+            function() {
+                const {x, y} = point(parse_256(I_L))
+                return new Point_secp256k1(x, y);
+            }(),
+            this.K
+        )
+        if (K_i.x == 0n && K_i.y == 0n)
+            return this.CKD(i + 1)
+
+        return new ExtendedPublicKey(K_i, parse_256(I_R))
+    }
 }
 
 /**
