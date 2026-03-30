@@ -316,8 +316,18 @@ class XKey {
             ser_256(this.c),
             key_data,
         )
+        console.assert(payload.length == 78)
 
-        return base58checkEncode(payload)
+        const base58check = await base58checkEncode(payload)
+        console.assert(
+            encoded.length == 111
+                && encoded.startsWith(
+                    this.version == 'mainnet'
+                        ? (is_pub_key ? 0x0488B21E : 0x0488ADE4)
+                        : (is_pub_key ? 0x043587CF : 0x04358394)
+                )
+        )
+        return base58check
     }
 }
 
