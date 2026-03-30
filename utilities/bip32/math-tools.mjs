@@ -335,3 +335,14 @@ class ExtendedPrivateKey {
         return new ExtendedPrivateKey(k_i, parse_256(I_R))
     }
 }
+
+/**
+ * N((k, c)) → (K, c)
+ * Compute the extended public key corresponding to an extended private key
+ * (the “neutered” version, as it removes the ability to sign transactions).
+ * @param {ExtendedPrivateKey} extendedPrivateKey
+ * @returns {ExtendedPublicKey}
+ */
+function N(extendedPrivateKey) {
+    return extendedPrivateKey.generateExtendedPublicKey()
+}
