@@ -267,6 +267,14 @@ class XKey {
     }
 
     /**
+     * The first 32 bits of the identifier are called the key fingerprint.
+     * @returns {Promise<Uint8Array>} 4B
+     */
+    async fingerprint() {
+        return (await this.identifier()).slice(0, 4)
+    }
+
+    /**
      * Cascade CKD constructions to build a tree.
      * @param {string} path - e.g. "/0'/1/2H/3"
      */
@@ -301,6 +309,14 @@ class XPublicKey extends XKey {
         super(c, derivation_info)
         this.K = K
         Object.defineProperty(this, 'K', {writable: false, configurable: false})
+    }
+
+    /**
+     * Hash160(ser_P(K)): the key identifier.
+     * @returns {Promise<Uint8Array>} 20B
+     */
+    async identifier() {
+        return Hash160(ser_P({x: this.K.x, y: this.K.y}))
     }
 
     /**
@@ -356,6 +372,14 @@ class XPrivateKey extends XKey {
         console.assert(0n <= k && k < 2n ** 256n)
         this.k = k
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
+    }
+
+    /**
+     * Hash160(ser_P(point(k))): the key identifier.
+     * @returns {Promise<Uint8Array>} 20B
+     */
+    async identifier() {
+        return Hash160(ser_P(point(this.k)))
     }
 
     /**
