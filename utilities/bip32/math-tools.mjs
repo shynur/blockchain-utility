@@ -273,5 +273,34 @@ class ExtendedPrivateKey {
     generateExtendedPublicKey() {
         return new ExtendedPublicKey(this.generatePublicKey(), this.#c)
     }
-    generatePublicKey() { return point(this.#k)  }
+    generatePublicKey() {
+        const {x, y} = point(this.#k)
+        return new Point_secp256k1(x, y)
+    }
+
+    /**
+     * CKDpriv
+     * @param {number | bigint} i
+     * @returns {Promise<ExtendedPrivateKey>} */
+    async CKD(i) {
+        i = Number(i)
+        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+
+        const data = i >= 2 ** 31
+            ? cat(new Uint8Array([0x00]), ser_256(this.k), ser_32(i))
+            : cat(ser_P(point(this.k)), ser_32(i))
+
+        const I = await HMAC_SHA512(ser_256(this.c), data)
+        const I_L = I.slice(0, 32)
+        const I_R = I.slice(32)
+
+        if (parse_256(I_L) >= N_SECP256K1_ORDER)
+            return this.CKD(i + 1)
+
+        const k_i = (parse_256(I_L) + this.k) % N_SECP256K1_ORDER
+        if (k_i == 0n)
+            return this.CKD(i + 1)
+
+        return new ExtendedPrivateKey(k_i, parse_256(I_R))
+    }
 }
