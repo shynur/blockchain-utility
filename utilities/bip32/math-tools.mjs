@@ -14,7 +14,7 @@
 
 import {
     CURVE_ORDER as N_SECP256K1_ORDER,
-    G as G_SECP256K1
+    G as G_SECP256K1,
     Point as Point_secp256k1,
 } from './secp256k1.mjs'
 import {RIPEMD160} from './RIPEMD-160.mjs'
@@ -164,10 +164,11 @@ async function Hash160(data) {
 
 /**
  * Serialize an unsigned integer as a byte sequence, most significant byte first.
- * @param {number} i - a 32-bit unsigned integer
+ * @param {number | bigint} i - a 32-bit unsigned integer
  * @returns {Uint8Array} 4B
  */
 function ser_32(i) {
+    i = Number(i)
     console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
     return new Uint8Array([i >>> 24, (i >>> 16) & 0xff, (i >>> 8) & 0xff, i & 0xff])
 }
@@ -178,7 +179,7 @@ function ser_32(i) {
  * @returns {Uint8Array} 32B
  */
 function ser_256(p) {
-    console.assert(typeof p == 'bigint' && 0n <= p && p < 2n ** 256n)
+    console.assert(0n <= p && p < 2n ** 256n)
     const result = new Uint8Array(32)
     for (let i = 31; i >= 0; --i) {
         result[i] = Number(p & 0xffn)
