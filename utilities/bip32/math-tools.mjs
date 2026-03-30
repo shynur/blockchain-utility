@@ -222,7 +222,7 @@ function ser_P(P) {
     return new Point_secp256k1(P.x, P.y).serialize()
 }
 
-class ExtendedKey {
+class XKey {
     /**
      * 32B chain code
      * @type {bigint} */
@@ -260,7 +260,7 @@ class ExtendedKey {
 /**
  * Extended Public Key (K, c)
  */
-class ExtendedPublicKey extends ExtendedKey {
+class XPublicKey extends XKey {
     /**
      * 32B public key
      * @type {Point_secp256k1} */
@@ -277,7 +277,7 @@ class ExtendedPublicKey extends ExtendedKey {
     /**
      * CKDpub
      * @param {number | bigint} i
-     * @returns {Promise<ExtendedPublicKey>} */
+     * @returns {Promise<XPublicKey>} */
     async CKD(i) {
         i = Number(i)
         console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
@@ -302,14 +302,14 @@ class ExtendedPublicKey extends ExtendedKey {
         if (K_i.atInfinity())
             return this.CKD(i + 1)
 
-        return new ExtendedPublicKey(K_i, parse_256(I_R))
+        return new XPublicKey(K_i, parse_256(I_R))
     }
 }
 
 /**
  * Extended Private Key (k, c)
  */
-class ExtendedPrivateKey extends ExtendedKey {
+class XPrivateKey extends XKey {
     /**
      * 32B private key
      * @type {bigint} */
@@ -328,17 +328,17 @@ class ExtendedPrivateKey extends ExtendedKey {
      * N((k, c)) → (K, c)
      * Compute the extended public key corresponding to an extended private key
      * (the “neutered” version, as it removes the ability to sign transactions).
-     * @param {ExtendedPrivateKey} extendedPrivateKey
-     * @returns {ExtendedPublicKey} */
+     * @param {XPrivateKey} extendedPrivateKey
+     * @returns {XPublicKey} */
     N() {
         const {k_x, k_y} = point(this.k)
-        return new ExtendedPublicKey(new Point_secp256k1(k_x, k_y), this.c)
+        return new XPublicKey(new Point_secp256k1(k_x, k_y), this.c)
     }
 
     /**
      * CKDpriv
      * @param {number | bigint} i
-     * @returns {Promise<ExtendedPrivateKey>} */
+     * @returns {Promise<XPrivateKey>} */
     async CKD(i) {
         i = Number(i)
         console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
@@ -358,6 +358,6 @@ class ExtendedPrivateKey extends ExtendedKey {
         if (k_i == 0n)
             return this.CKD(i + 1)
 
-        return new ExtendedPrivateKey(k_i, parse_256(I_R))
+        return new XPrivateKey(k_i, parse_256(I_R))
     }
 }
