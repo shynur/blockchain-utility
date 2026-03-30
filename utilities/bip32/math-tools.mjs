@@ -301,11 +301,15 @@ class ExtendedPrivateKey {
     get k() { return this.#k }
     get c() { return this.#c }
 
-    generateExtendedPublicKey() {
-        return new ExtendedPublicKey(this.generatePublicKey(), this.#c)
-    }
+    /**
+     * N((k, c)) → (K, c)
+     * Compute the extended public key corresponding to an extended private key
+     * (the “neutered” version, as it removes the ability to sign transactions).
+     * @param {ExtendedPrivateKey} extendedPrivateKey
+     * @returns {ExtendedPublicKey} */
+    N() { return new ExtendedPublicKey(this.generatePublicKey(), this.c) }
     generatePublicKey() {
-        const {x, y} = point(this.#k)
+        const {x, y} = point(this.k)
         return new Point_secp256k1(x, y)
     }
 
@@ -334,15 +338,4 @@ class ExtendedPrivateKey {
 
         return new ExtendedPrivateKey(k_i, parse_256(I_R))
     }
-}
-
-/**
- * N((k, c)) → (K, c)
- * Compute the extended public key corresponding to an extended private key
- * (the “neutered” version, as it removes the ability to sign transactions).
- * @param {ExtendedPrivateKey} extendedPrivateKey
- * @returns {ExtendedPublicKey}
- */
-function N(extendedPrivateKey) {
-    return extendedPrivateKey.generateExtendedPublicKey()
 }
