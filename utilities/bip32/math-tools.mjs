@@ -267,7 +267,7 @@ class XKey {
         Object.defineProperty(this, 'version', {writable: false, configurable: false})
 
         console.assert(ParentFingerprint.length == 4)
-        this.parent_fingerprint = Object.freeze(new Uint8Array(ParentFingerprint))
+        this.parent_fingerprint = ParentFingerprint
         Object.defineProperty(this, 'parent_fingerprint', {writable: false, configurable: false})
     }
 
@@ -320,11 +320,11 @@ class XKey {
 
         const base58check = await base58checkEncode(payload)
         console.assert(
-            encoded.length == 111
-                && encoded.startsWith(
+            base58check.length == 111
+                && base58check.startsWith(
                     this.version == 'mainnet'
-                        ? (is_pub_key ? 0x0488B21E : 0x0488ADE4)
-                        : (is_pub_key ? 0x043587CF : 0x04358394)
+                        ? (is_pub_key ? 'xpub' : 'xprv')
+                        : (is_pub_key ? 'tpub' : 'tprv')
                 )
         )
         return base58check
@@ -397,7 +397,7 @@ class XPublicKey extends XKey {
 /**
  * Extended Private Key (k, c)
  */
-class XPrivateKey extends XKey {
+export class XPrivateKey extends XKey {
     /**
      * 32B private key
      * @type {bigint} */
