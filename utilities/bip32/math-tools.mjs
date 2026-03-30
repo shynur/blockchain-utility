@@ -313,6 +313,24 @@ class ExtendedPrivateKey {
         return new Point_secp256k1(x, y)
     }
 
+    tree(/** @type {string} */ path) {
+        path = /* TODO: 删除 path 的所有空白字符 */;
+
+        if (path == '')
+            return this
+
+        console.assert(path[0] == '/' && path[path.length - 1] != '/')
+        // 保证形如 /a'/b'/c
+
+        const nodes = path.slice(1).split('/')
+
+        return (
+            /* TODO: nodes[0] ends with `'` or H */ ?
+            this :
+            this.N()
+        ).CKD(/* TODO: parse nodes[0] as integer */).tree(indices.slice(1).map(i => `/${i}`).join(''))
+    }
+
     /**
      * CKDpriv
      * @param {number | bigint} i
