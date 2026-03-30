@@ -222,52 +222,57 @@ function ser_P(P) {
     return new Point_secp256k1(P.x, P.y).serialize()
 }
 
-/**
- * Cascade CKD constructions to build a tree.
- * @param {ExtendedPrivateKey | ExtendedPublicKey} key
- * @param {string} path - e.g. "/0'/1/2H/3"
- * @returns {Promise<ExtendedPrivateKey | ExtendedPublicKey>}
- */
-async function tree(key, path) {
-    path = path.replace(/\s/g, '')
-    if (path == '')
-        return key
-    console.assert(path[0] == '/' && path[path.length-1] != '/')
-
-    const nodes = path.slice(1).split('/')
-    const firstNode = nodes[0]
-    const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
-    const firstKey = await key.CKD(
-        parseInt(firstNode) + (firstIsHardened ? 2**31 : 0)
-    )
-
-    return tree(firstKey, nodes.slice(1).map(i => `/${i}`).join(''))
-}
-
-/**
- * Extended Public Key (K, c)
- */
-class ExtendedPublicKey {
-    /**
-     * 32B public key
-     * @type {Point_secp256k1} */
-    #K
+class ExtendedKey {
     /**
      * 32B chain code
      * @type {bigint} */
     #c
 
+    constructor(/** @type {bigint} */ chain_code) {
+        console.assert(0n <= chain_code && chain_code < 2n ** 256n)
+        this.#c = chain_code
+        Object.freeze(this)
+    }
+
+    get c() { return this.#c }
+
+    /**
+     * Cascade CKD constructions to build a tree.
+     * @param {string} path - e.g. "/0'/1/2H/3"
+     */
+    async tree(path) {
+        path = path.replace(/\s/g, '')
+        if (path == '')
+            return this
+        console.assert(path[0] == '/' && path[path.length-1] != '/')
+
+        const nodes = path.slice(1).split('/')
+        const firstNode = nodes[0]
+        const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
+        const firstKey = await this.CKD(
+            parseInt(firstNode) + (firstIsHardened ? 2**31 : 0)
+        )
+
+        return tree(firstKey, nodes.slice(1).map(i => `/${i}`).join(''))
+    }
+}
+
+/**
+ * Extended Public Key (K, c)
+ */
+class ExtendedPublicKey extends ExtendedKey {
+    /**
+     * 32B public key
+     * @type {Point_secp256k1} */
+    #K
+
     constructor(/** @type {Point_secp256k1} */ K, /** @type {bigint} */ c) {
-        console.assert(0n <= c && c < 2n ** 256n)
+        super(c)
         this.#K = K
-        this.#c = c
         Object.freeze(this)
     }
 
     get K() { return this.#K }
-    get c() { return this.#c }
-
-    async tree(/** @type {string} */ path) { return tree(this, path) }
 
     /**
      * CKDpub
@@ -304,26 +309,20 @@ class ExtendedPublicKey {
 /**
  * Extended Private Key (k, c)
  */
-class ExtendedPrivateKey {
+class ExtendedPrivateKey extends ExtendedKey {
     /**
      * 32B private key
      * @type {bigint} */
     #k
-    /**
-     * 32B chain code
-     * @type {bigint} */
-    #c
 
     constructor(/** @type {bigint} */ k, /** @type {bigint} */ c) {
+        super(c)
         console.assert(0n <= k && k < 2n ** 256n)
-        console.assert(0n <= c && c < 2n ** 256n)
         this.#k = k
-        this.#c = c
         Object.freeze(this)
     }
 
     get k() { return this.#k }
-    get c() { return this.#c }
 
     /**
      * N((k, c)) → (K, c)
@@ -331,13 +330,10 @@ class ExtendedPrivateKey {
      * (the “neutered” version, as it removes the ability to sign transactions).
      * @param {ExtendedPrivateKey} extendedPrivateKey
      * @returns {ExtendedPublicKey} */
-    N() { return new ExtendedPublicKey(this.generatePublicKey(), this.c) }
-    generatePublicKey() {
-        const {x, y} = point(this.k)
-        return new Point_secp256k1(x, y)
+    N() {
+        const {k_x, k_y} = point(this.k)
+        return new ExtendedPublicKey(new Point_secp256k1(k_x, k_y), this.c)
     }
-
-    async tree(/** @type {string} */ path) { return tree(this, path) }
 
     /**
      * CKDpriv
