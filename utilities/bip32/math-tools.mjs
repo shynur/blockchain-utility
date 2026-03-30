@@ -232,12 +232,14 @@ class ExtendedPublicKey {
     #K
     /**
      * 32B chain code
-     * @type {Uint8Array} */
+     * @type {bigint} */
     #c
 
-    constructor(/** @type {Point_secp256k1} */ K, /** @type {Uint8Array} */ c) {
+    constructor(/** @type {Point_secp256k1} */ K, /** @type {bigint} */ c) {
+        console.assert(0n <= c && c < 2n ** 256n)
         this.#K = K
         this.#c = c
+        Object.freeze(this)
     }
 
     get K() { return this.#K }
@@ -250,18 +252,25 @@ class ExtendedPublicKey {
 class ExtendedPrivateKey {
     /**
      * 32B private key
-     * @type {Uint8Array} */
+     * @type {bigint} */
     #k
     /**
      * 32B chain code
-     * @type {Uint8Array} */
+     * @type {bigint} */
     #c
 
-    constructor(/** @type {Uint8Array} */ k, /** @type {Uint8Array} */ c) {
+    constructor(/** @type {bigint} */ k, /** @type {bigint} */ c) {
+        console.assert(0n <= k && k < 2n ** 256n)
+        console.assert(0n <= c && c < 2n ** 256n)
         this.#k = k
         this.#c = c
+        Object.freeze(this)
     }
 
     get k() { return this.#k }
     get c() { return this.#c }
+
+    generateExtendedPublicKey() {
+        return new ExtendedPublicKey(point(this.#k), this.#c)
+    }
 }
