@@ -202,6 +202,16 @@ function point(p) {
 }
 
 /**
+ * Interpret a 4-byte sequence as an unsigned 32-bit integer, most significant byte first.
+ * @param {Readonly<Uint8Array>} bytes - 4B
+ * @returns {number}
+ */
+function parse_32(bytes) {
+    console.assert(bytes.length == 4)
+    return (bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]) >>> 0
+}
+
+/**
  * Interpret a byte sequence as a number, most significant byte first.
  * @param {Readonly<Uint8Array>} p - 32B
  * @returns {bigint} 256-bit
@@ -295,6 +305,48 @@ class XKey {
         const firstKey = await this.CKD(parseInt(firstNode) + (firstIsHardened ? 2**31 : 0))
 
         return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
+    }
+
+    /**
+     * Deserialize a base58check-encoded extended key (xpub/xprv/tpub/tprv).
+     * Inverse of {@link XKey.prototype.serialize}.
+     * @param {string} base58check - 111-char base58check string
+     * @returns {Promise<XPublicKey | XPrivateKey>}
+     * @throws {Error} checksum 校验失败, 或 version bytes 无法识别
+     */
+    static async deserialize(base58check) {
+        const payload = await base58checkDecode(base58check)
+        console.assert(payload.length == 78)
+
+        const version_bytes = parse_32(payload.slice(0, 4))
+        const depth = payload[4]
+        const parent_fingerprint = payload.slice(5, 9)
+        const child_number = parse_32(payload.slice(9, 13))
+        const chain_code = parse_256(payload.slice(13, 45))
+        const key_data = payload.slice(45, 78)
+
+        const is_public = version_bytes == 0x0488B21E || version_bytes == 0x043587CF
+        const is_private = version_bytes == 0x0488ADE4 || version_bytes == 0x04358394
+        if (!is_public && !is_private)
+            throw new Error(`Unknown version bytes: 0x${version_bytes.toString(16).padStart(8, '0')}`)
+
+        const version = (version_bytes == 0x0488B21E || version_bytes == 0x0488ADE4) ? 'mainnet' : 'testnet'
+
+        const derivation_info = {
+            ChildNumber: child_number,
+            Depth: depth,
+            Version: version,
+            ParentFingerprint: parent_fingerprint,
+        }
+
+        if (is_public) {
+            const K = Point_secp256k1.deserialize(key_data)
+            return new XPublicKey(K, chain_code, derivation_info)
+        } else {
+            console.assert(key_data[0] == 0x00)
+            const k = parse_256(key_data.slice(1))
+            return new XPrivateKey(k, chain_code, derivation_info)
+        }
     }
 
     async serialize() {

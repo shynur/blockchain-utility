@@ -76,6 +76,16 @@ export class Point {
         return new Point(product.x, product.y)
     }
 
+    /**
+     * Deserialize a SEC1 compressed encoding back to a Point.
+     * @param {Readonly<Uint8Array>} bytes - 33B SEC1 compressed encoding
+     * @returns {Point}
+     */
+    static deserialize(bytes) {
+        const {x, y} = libsecp256k1.Point.fromBytes(bytes).toAffine()
+        return new Point(x, y)
+    }
+
     static add(/** @type {Point} */ A, /** @type {Point} */ B) {
         const sum = libsecp256k1.Point.fromAffine({x: A.x, y: A.y})
               .add(libsecp256k1.Point.fromAffine({x: B.x, y: B.y}))
