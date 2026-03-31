@@ -413,10 +413,18 @@ export class XPrivateKey extends XKey {
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
 
-    static from(/** @type {bigint} */ seed) {
-        const k = seed >> 256n
-        const c = seed % (2n**256n)
-        return new XPrivateKey(k, c)
+    /**
+     * BIP 32 master key generation.
+     * @param {Readonly<Uint8Array>} seed - 128-512 bits
+     * @returns {Promise<XPrivateKey>}
+     */
+    static async from(seed) {
+        const I = await HMAC_SHA512('Bitcoin seed', seed)
+        const I_L = I.slice(0, 32)
+        const I_R = I.slice(32)
+
+        console.assert(parse_256(I_L) != 0n && parse_256(I_L) < N_SECP256K1_ORDER)
+        return new XPrivateKey(parse_256(I_L), parse_256(I_R))
     }
 
     /**
