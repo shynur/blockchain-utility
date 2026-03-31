@@ -22,7 +22,8 @@ import {RIPEMD160} from './RIPEMD-160.mjs'
 const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 console.assert(
     /^[^0OIl+/]{58}$/.test(BASE58_ALPHABET)
-        && [...BASE58_ALPHABET].every((ch, idx, str) => idx==0 || str[idx-1].charCodeAt(0)<ch.charCodeAt(0))
+        && [...BASE58_ALPHABET].every((ch, idx, str) => idx==0 || str[idx-1].charCodeAt(0)<ch.charCodeAt(0)),
+    'BASE58_ALPHABET must be 58 strictly-ascending chars excluding 0, O, I, l',
 )
 
 /**
@@ -75,7 +76,7 @@ function base58Decode(base58) {
 
     const result = cat(new Uint8Array(leadingOnes), dataBytes)
 
-    console.assert(base58Encode(result) == base58)
+    console.assert(base58Encode(result) == base58, `base58 round-trip failed: ${base58}`)
     return result
 }
 
@@ -112,7 +113,7 @@ async function base58checkDecode(base58) {
     if (!checksum.every((byte, i) => byte == expected[i]))
         throw new Error('base58check checksum mismatch')
 
-    console.assert(await base58checkEncode(payload) == base58)
+    console.assert(await base58checkEncode(payload) == base58, `base58check round-trip failed: ${base58}`)
     return payload
 }
 
@@ -169,7 +170,7 @@ async function Hash160(data) {
  */
 function ser_32(i) {
     i = Number(i)
-    console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+    console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `ser_32: expected uint32, got ${i}`)
     return new Uint8Array([i >>> 24, (i >>> 16) & 0xff, (i >>> 8) & 0xff, i & 0xff])
 }
 
@@ -179,7 +180,7 @@ function ser_32(i) {
  * @returns {Uint8Array} 32B
  */
 function ser_256(p) {
-    console.assert(0n <= p && p < 2n ** 256n)
+    console.assert(0n <= p && p < 2n ** 256n, `ser_256: expected 256-bit unsigned integer, got ${p}`)
     const result = new Uint8Array(32)
     for (let i = 31; i >= 0; --i) {
         result[i] = Number(p & 0xffn)
@@ -207,7 +208,7 @@ function point(p) {
  * @returns {number}
  */
 function parse_32(bytes) {
-    console.assert(bytes.length == 4)
+    console.assert(bytes.length == 4, `parse_32: expected 4B, got ${bytes.length}B`)
     return (bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]) >>> 0
 }
 
@@ -217,7 +218,7 @@ function parse_32(bytes) {
  * @returns {bigint} 256-bit
  */
 function parse_256(p) {
-    console.assert(p.length == 32)
+    console.assert(p.length == 32, `parse_256: expected 32B, got ${p.length}B`)
     return p.reduce((acc, byte) => acc << 8n | BigInt(byte), 0n)
 }
 
@@ -261,22 +262,22 @@ class XKey {
             ChildNumber=0, Depth=0, Version='mainnet', ParentFingerprint=new Uint8Array(4)
         } = {}
     ) {
-        console.assert(0n <= chain_code && chain_code < 2n**256n)
+        console.assert(0n <= chain_code && chain_code < 2n**256n, `XKey: chain_code out of 256-bit range`)
         this.c = chain_code
         Object.defineProperty(this, 'c', {writable: false, configurable: false})
 
-        console.assert(Number.isInteger(ChildNumber) && 0 <= ChildNumber && ChildNumber < 2**32)
+        console.assert(Number.isInteger(ChildNumber) && 0 <= ChildNumber && ChildNumber < 2**32, `XKey: ChildNumber must be uint32, got ${ChildNumber}`)
         this.i = ChildNumber
         Object.defineProperty(this, 'i', {writable: false, configurable: false})
 
-        console.assert(Number.isInteger(Depth) && 0 <= Depth && Depth < 256)
+        console.assert(Number.isInteger(Depth) && 0 <= Depth && Depth < 256, `XKey: Depth must be uint8, got ${Depth}`)
         this.depth = Depth
         Object.defineProperty(this, 'depth', {writable: false, configurable: false})
 
         this.version = Version
         Object.defineProperty(this, 'version', {writable: false, configurable: false})
 
-        console.assert(ParentFingerprint.length == 4)
+        console.assert(ParentFingerprint.length == 4, `XKey: ParentFingerprint must be 4B, got ${ParentFingerprint.length}B`)
         this.parent_fingerprint = ParentFingerprint
         Object.defineProperty(this, 'parent_fingerprint', {writable: false, configurable: false})
     }
@@ -297,7 +298,7 @@ class XKey {
         path = path.replace(/\s/g, '')
         if (path == '')
             return this
-        console.assert(path[0] == '/' && path[path.length-1] != '/')
+        console.assert(path[0] == '/' && path[path.length-1] != '/', `tree: invalid path format: "${path}"`)
 
         const nodes = path.slice(1).split('/')
         const firstNode = nodes[0]
@@ -314,9 +315,9 @@ class XKey {
      * @throws {Error} checksum 校验失败, 或 version 无法识别
      */
     static async deserialize(base58check) {
-        console.assert(base58check.length == 111)
+        console.assert(base58check.length == 111, `deserialize: expected 111-char base58check string, got ${base58check.length} chars`)
         const payload = await base58checkDecode(base58check)
-        console.assert(payload.length == 78)
+        console.assert(payload.length == 78, `deserialize: expected 78B payload, got ${payload.length}B`)
 
         const version_bytes = parse_32(payload.slice(0, 4))
         const depth = payload[4]
@@ -343,7 +344,7 @@ class XKey {
             const K = Point_secp256k1.deserialize(key_data)
             return new XPublicKey(K, chain_code, derivation_info)
         } else {
-            console.assert(key_data[0] == 0x00)
+            console.assert(key_data[0] == 0x00, `deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
             const k = parse_256(key_data.slice(1))
             return new XPrivateKey(k, chain_code, derivation_info)
         }
@@ -368,7 +369,7 @@ class XKey {
             ser_256(this.c),
             key_data,
         )
-        console.assert(payload.length == 78)
+        console.assert(payload.length == 78, `serialize: expected 78B payload, got ${payload.length}B`)
 
         const base58check = await base58checkEncode(payload)
         console.assert(
@@ -377,7 +378,8 @@ class XKey {
                     this.version == 'mainnet'
                         ? (is_pub_key ? 'xpub' : 'xprv')
                         : (is_pub_key ? 'tpub' : 'tprv')
-                )
+                ),
+            `serialize: unexpected base58check output: ${base58check.slice(0, 10)}... (length ${base58check.length})`,
         )
         return base58check
     }
@@ -415,7 +417,7 @@ class XPublicKey extends XKey {
      * @returns {Promise<XPublicKey>} */
     async CKD(i) {
         i = Number(i)
-        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `CKDpub: i must be uint32, got ${i}`)
 
         if (i >= 2 ** 31)
             throw new RangeError(`CKDpub is only defined for normal child key: i=${i}`)
@@ -460,7 +462,7 @@ export class XPrivateKey extends XKey {
         /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
     ) {
         super(c, derivation_info)
-        console.assert(0n <= k && k < 2n ** 256n)
+        console.assert(0n <= k && k < 2n ** 256n, `XPrivateKey: k out of 256-bit range`)
         this.k = k
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
@@ -475,7 +477,7 @@ export class XPrivateKey extends XKey {
         const I_L = I.slice(0, 32)
         const I_R = I.slice(32)
 
-        console.assert(parse_256(I_L) != 0n && parse_256(I_L) < N_SECP256K1_ORDER)
+        console.assert(parse_256(I_L) != 0n && parse_256(I_L) < N_SECP256K1_ORDER, 'master key generation: I_L must be non-zero and less than curve order')
         return new XPrivateKey(parse_256(I_L), parse_256(I_R))
     }
 
@@ -508,7 +510,7 @@ export class XPrivateKey extends XKey {
      * @returns {Promise<XPrivateKey>} */
     async CKD(i) {
         i = Number(i)
-        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32)
+        console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `CKDpriv: i must be uint32, got ${i}`)
 
         const data = i >= 2 ** 31
             ? cat(new Uint8Array([0x00]), ser_256(this.k), ser_32(i))
