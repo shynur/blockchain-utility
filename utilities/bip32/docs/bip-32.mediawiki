@@ -11,7 +11,6 @@ RECENT CHANGES:
   Layer: Applications
   Title: Hierarchical Deterministic Wallets
   Authors: Pieter Wuille <pieter.wuille@gmail.com>
-  Status: Deployed
   Type: Informational
   Assigned: 2012-02-11
 </pre>
@@ -63,7 +62,6 @@ As standard conversion functions, we assume:
 * ser<sub>256</sub>(p): serializes the integer p as a 32-byte sequence, most significant byte first.
 * ser<sub>P</sub>(P): serializes the coordinate pair P = (x,y) (i.e., the public key) as a byte sequence using [https://www.secg.org/sec1-v2.pdf SEC1]’s compressed form: (0x02 or 0x03) || ser<sub>256</sub>(x), where the header byte depends on the parity of the omitted y coordinate.
 * parse<sub>256</sub>(p): interprets a 32-byte sequence as a 256-bit number, most significant byte first.
-
 
 ===Extended keys===
 
@@ -121,10 +119,6 @@ To compute the public child key of a parent private key:
 * CKDpub(N(k<sub>par</sub>, c<sub>par</sub>), i) (works only for non-hardened child keys).
 The fact that they are equivalent is what makes non-hardened keys useful (one can derive child public keys of a given parent key without knowing any private key), and also what distinguishes them from hardened keys.
 The reason for not always using non-hardened keys (which are more useful) is security; see further below for more information.
-
-====Public parent key &rarr; private child key====
-
-This is not possible.
 
 ===The key tree===
 
@@ -239,30 +233,6 @@ This means someone illegally obtaining access to the webserver can at most see a
 To comply with this standard, a client must at least be able to import an extended public or private key, to give access to its direct descendants as wallet keys.
 The wallet structure (master/account/chain/subchain) presented in the second part of the specification is advisory only, but is suggested as a minimal structure for easy compatibility - even when no separate accounts or distinction between internal and external chains is made.
 However, implementations may deviate from it for specific needs; more complex applications may call for a more complex tree structure.
-
-==Security==
-
-In addition to the expectations from the EC public-key cryptography itself:
-* Given a public key K, an attacker cannot find the corresponding private key more efficiently than by solving the EC discrete logarithm problem (assumed to require 2<sup>128</sup> group operations).
-The intended security properties of this standard are:
-* Given a child extended private key (k<sub>i</sub>,c<sub>i</sub>) and the integer i, an attacker cannot find the parent private key k<sub>par</sub> more efficiently than a 2<sup>256</sup> brute force of HMAC-SHA512.
-* Given any number (2 ≤ N ≤ 2<sup>32</sup>-1) of (index, extended private key) tuples (i<sub>j</sub>,(k<sub>i<sub>j</sub></sub>,c<sub>i<sub>j</sub></sub>)), with distinct i<sub>j</sub>’s, determining whether they are derived from a common parent extended private key (i.e., whether there exists a (k<sub>par</sub>,c<sub>par</sub>) such that for each j in (0..N-1) CKDpriv((k<sub>par</sub>,c<sub>par</sub>),i<sub>j</sub>)=(k<sub>i<sub>j</sub></sub>,c<sub>i<sub>j</sub></sub>)), cannot be done more efficiently than a 2<sup>256</sup> brute force of HMAC-SHA512.
-Note however that the following properties do not exist:
-* Given a parent extended public key (K<sub>par</sub>,c<sub>par</sub>) and a child public key (K<sub>i</sub>), it is hard to find i.
-* Given a parent extended public key (K<sub>par</sub>,c<sub>par</sub>) and a non-hardened child private key (k<sub>i</sub>), it is hard to find k<sub>par</sub>.
-
-===Implications===
-
-Private and public keys must be kept safe as usual.
-Leaking a private key means access to coins - leaking a public key can mean loss of privacy.
-
-Somewhat more care must be taken regarding extended keys, as these correspond to an entire (sub)tree of keys.
-
-One weakness that may not be immediately obvious, is that knowledge of a parent extended public key plus any non-hardened private key descending from it is equivalent to knowing the parent extended private key (and thus every private and public key descending from it).
-This means that extended public keys must be treated more carefully than regular public keys.
-It is also the reason for the existence of hardened keys, and why they are used for the account level in the tree.
-This way, a leak of account-specific (or below) private keys never risks compromising the master or other accounts.
-
 
 ==Test Vectors==
 
