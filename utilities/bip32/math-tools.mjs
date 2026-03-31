@@ -308,13 +308,13 @@ class XKey {
     }
 
     /**
-     * Deserialize a base58check-encoded extended key (xpub/xprv/tpub/tprv).
-     * Inverse of {@link XKey.prototype.serialize}.
+     * Deserialize a serialized extended key.  See BIP 32.
      * @param {string} base58check - 111-char base58check string
      * @returns {Promise<XPublicKey | XPrivateKey>}
-     * @throws {Error} checksum 校验失败, 或 version bytes 无法识别
+     * @throws {Error} checksum 校验失败, 或 version 无法识别
      */
     static async deserialize(base58check) {
+        console.assert(base58check.length == 111)
         const payload = await base58checkDecode(base58check)
         console.assert(payload.length == 78)
 
