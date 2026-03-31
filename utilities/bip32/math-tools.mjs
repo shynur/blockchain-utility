@@ -413,6 +413,12 @@ export class XPrivateKey extends XKey {
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
 
+    static from(/** @type {bigint} */ seed) {
+        const k = seed >> 256n
+        const c = seed % (2n**256n)
+        return new XPrivateKey(k, c)
+    }
+
     /**
      * Hash160(ser_P(point(k))): the key identifier.
      * @returns {Promise<Uint8Array>} 20B
