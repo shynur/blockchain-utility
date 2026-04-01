@@ -84,6 +84,7 @@ class ExtendedKey {
     /**
      * Cascade CKD constructions to build a tree.
      * @param {string} path - e.g. "/0'/1/2H/3"
+     * @returns {Promise<ExtendedKey>}
      */
     async tree(path) {
         path = path.toLowerCase().replace(/\s/g, '')
@@ -165,8 +166,8 @@ class ExtendedKey {
             : (this.is_public_key() ? 0x043587CF : 0x04358394)
 
         const key_data = this.is_public_key()
-            ? bip32math.ser_P({x: this.K.x, y: this.K.y})
-            : bip32math.cat(new Uint8Array([0x00]), bip32math.ser_256(this.k))
+            ? bip32math.ser_P({x: /** @type {ExtendedPublicKey} */(/** @type {unknown} */(this)).K.x, y: /** @type {ExtendedPublicKey} */(/** @type {unknown} */(this)).K.y})
+            : bip32math.cat(new Uint8Array([0x00]), bip32math.ser_256(/** @type {ExtendedPrivateKey} */(/** @type {unknown} */(this)).k))
 
         const payload = bip32math.cat(
             bip32math.ser_32(version_bytes),
@@ -298,7 +299,7 @@ class ExtendedPrivateKey extends ExtendedKey {
             bip32math.parse_256(I_L) != 0n && bip32math.parse_256(I_L) < bip32math.N_SECP256K1_ORDER,
             'master key generation: I_L must be non-zero and less than curve order'
         )
-        return new ExtendedPrivateKey(bip32math.parse_256(I_L), bip32math.parse_256(I_R))
+        return new ExtendedPrivateKey(bip32math.parse_256(I_L), bip32math.parse_256(I_R), undefined)
     }
 
     /**

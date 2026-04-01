@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {XKey, XPrv} from './index.mjs'
+import {XKey, XPrv, XPub} from './index.mjs'
 
 const HELP = `
 Usage: echo SEED_OR_XPRV_OR_XPUB | ./this-file [ARGUMENTS] [PATH]
@@ -43,7 +43,7 @@ async function main() {
     if (stdin.startsWith('xprv') || stdin.startsWith('xpub') || stdin.startsWith('tprv') || stdin.startsWith('tpub')) {
         key = await XKey.deserialize(stdin)
     } else {
-        const seed = Uint8Array.from(stdin.match(/.{2}/g).map(b => parseInt(b, 16)))
+        const seed = Uint8Array.from(stdin.match(/.{2}/g).map(/** @param {string} b */ b => parseInt(b, 16)))
         key = await XPrv.from(seed)
     }
 
@@ -58,9 +58,9 @@ async function main() {
         else if (arg === 'depth') console.log(key.depth)
         else if (arg === 'v') console.log(key.version)
         else if (arg === 'xprv') console.log(await (key.is_public_key() ? Promise.reject('Cannot derive xprv from xpub') : key.serialize()))
-        else if (arg === 'xpub') console.log(await (key.is_public_key() ? key : key.N()).serialize())
-        else if (arg === 'K') console.log('0x' + (key.is_public_key() ? key.K.x : key.N().K.x).toString(16))
-        else if (arg === 'k') console.log(key.is_public_key() ? '' : '0x' + key.k.toString(16))
+        else if (arg === 'xpub') console.log(await (key.is_public_key() ? key : /** @type {XPrv} */(key).N()).serialize())
+        else if (arg === 'K') console.log('0x' + (key.is_public_key() ? /** @type {XPub} */(key).K.x : /** @type {XPrv} */(key).N().K.x).toString(16))
+        else if (arg === 'k') console.log(key.is_public_key() ? '' : '0x' + /** @type {XPrv} */(key).k.toString(16))
         else if (arg === 'c') console.log('0x' + key.c.toString(16))
         else if (arg === 'id') console.log('0x' + Array.from(await key.identifier()).map(b => b.toString(16).padStart(2, '0')).join(''))
     }

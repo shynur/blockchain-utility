@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * implementation of secp256k1 ECDSA / Schnorr signatures & ECDH.
  * Compliant with RFC6979 & BIP340.
