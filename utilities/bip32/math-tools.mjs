@@ -302,7 +302,7 @@ class ExtendedKey {
 
         const nodes = path.slice(1).split('/')
         const firstNode = nodes[0]
-        const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('H')
+        const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('h')
         const firstKey = await this.CKD(parseInt(firstNode) + (firstIsHardened ? 2**31 : 0))
 
         return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
@@ -484,8 +484,11 @@ export class ExtendedPrivateKey extends ExtendedKey {
      * BIP 32 master key generation.
      * @param {Readonly<Uint8Array>} seed - 128-512 bits
      * @returns {Promise<ExtendedPrivateKey>}
+     * @throws {RangeError} 不合法的 seed 长度
      */
     static async from(seed) {
+        if (seed.length < 16 || 64 < seed.length)
+            throw new RangeError(`master key generation: seed must be 16..64 bytes (128..512 bits), got ${seed.length} bytes`)
         const I = await HMAC_SHA512('Bitcoin seed', seed)
         const I_L = I.slice(0, 32)
         const I_R = I.slice(32)
