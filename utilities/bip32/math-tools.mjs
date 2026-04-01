@@ -233,7 +233,7 @@ function ser_P(P) {
     return new Point_secp256k1(P.x, P.y).serialize()
 }
 
-class XKey {
+class ExtendedKey {
     /**
      * 32B chain code
      * @type {bigint} */
@@ -262,22 +262,22 @@ class XKey {
             ChildNumber=0, Depth=0, Version='mainnet', ParentFingerprint=new Uint8Array(4)
         } = {}
     ) {
-        console.assert(0n <= chain_code && chain_code < 2n**256n, `XKey: chain_code out of 256-bit range`)
+        console.assert(0n <= chain_code && chain_code < 2n**256n, `ExtendedKey: chain_code out of 256-bit range`)
         this.c = chain_code
         Object.defineProperty(this, 'c', {writable: false, configurable: false})
 
-        console.assert(Number.isInteger(ChildNumber) && 0 <= ChildNumber && ChildNumber < 2**32, `XKey: ChildNumber must be uint32, got ${ChildNumber}`)
+        console.assert(Number.isInteger(ChildNumber) && 0 <= ChildNumber && ChildNumber < 2**32, `ExtendedKey: ChildNumber must be uint32, got ${ChildNumber}`)
         this.i = ChildNumber
         Object.defineProperty(this, 'i', {writable: false, configurable: false})
 
-        console.assert(Number.isInteger(Depth) && 0 <= Depth && Depth < 256, `XKey: Depth must be uint8, got ${Depth}`)
+        console.assert(Number.isInteger(Depth) && 0 <= Depth && Depth < 256, `ExtendedKey: Depth must be uint8, got ${Depth}`)
         this.depth = Depth
         Object.defineProperty(this, 'depth', {writable: false, configurable: false})
 
         this.version = Version
         Object.defineProperty(this, 'version', {writable: false, configurable: false})
 
-        console.assert(ParentFingerprint.length == 4, `XKey: ParentFingerprint must be 4B, got ${ParentFingerprint.length}B`)
+        console.assert(ParentFingerprint.length == 4, `ExtendedKey: ParentFingerprint must be 4B, got ${ParentFingerprint.length}B`)
         this.parent_fingerprint = ParentFingerprint
         Object.defineProperty(this, 'parent_fingerprint', {writable: false, configurable: false})
     }
@@ -311,7 +311,7 @@ class XKey {
     /**
      * Deserialize a serialized extended key.  See BIP 32.
      * @param {string} base58check - 111-char base58check string
-     * @returns {Promise<XPublicKey | XPrivateKey>}
+     * @returns {Promise<ExtendedPublicKey | ExtendedPrivateKey>}
      * @throws {Error} checksum 校验失败, 或 version 无法识别
      */
     static async deserialize(base58check) {
@@ -342,22 +342,22 @@ class XKey {
 
         if (is_public) {
             const K = Point_secp256k1.deserialize(key_data)
-            return new XPublicKey(K, chain_code, derivation_info)
+            return new ExtendedPublicKey(K, chain_code, derivation_info)
         } else {
             console.assert(key_data[0] == 0x00, `deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
             const k = parse_256(key_data.slice(1))
-            return new XPrivateKey(k, chain_code, derivation_info)
+            return new ExtendedPrivateKey(k, chain_code, derivation_info)
         }
     }
 
     async serialize() {
-        const is_pub_key = this instanceof XPublicKey
+        const is_pub_key = this instanceof ExtendedPublicKey
 
         const version_bytes = this.version == 'mainnet'
             ? (is_pub_key ? 0x0488B21E : 0x0488ADE4)
             : (is_pub_key ? 0x043587CF : 0x04358394)
 
-        const key_data = this instanceof XPublicKey
+        const key_data = this instanceof ExtendedPublicKey
             ? ser_P({x: this.K.x, y: this.K.y})
             : cat(new Uint8Array([0x00]), ser_256(this.k))
 
@@ -388,7 +388,7 @@ class XKey {
 /**
  * Extended Public Key (K, c)
  */
-class XPublicKey extends XKey {
+class ExtendedPublicKey extends ExtendedKey {
     /**
      * 32B public key
      * @type {Point_secp256k1} */
@@ -414,7 +414,7 @@ class XPublicKey extends XKey {
     /**
      * CKDpub
      * @param {number | bigint} i
-     * @returns {Promise<XPublicKey>} */
+     * @returns {Promise<ExtendedPublicKey>} */
     async CKD(i) {
         i = Number(i)
         console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `CKDpub: i must be uint32, got ${i}`)
@@ -439,7 +439,7 @@ class XPublicKey extends XKey {
         if (K_i.atInfinity())
             return this.CKD(i + 1)
 
-        return new XPublicKey(K_i, parse_256(I_R), {
+        return new ExtendedPublicKey(K_i, parse_256(I_R), {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,
@@ -451,7 +451,7 @@ class XPublicKey extends XKey {
 /**
  * Extended Private Key (k, c)
  */
-export class XPrivateKey extends XKey {
+export class ExtendedPrivateKey extends ExtendedKey {
     /**
      * 32B private key
      * @type {bigint} */
@@ -462,7 +462,7 @@ export class XPrivateKey extends XKey {
         /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
     ) {
         super(c, derivation_info)
-        console.assert(0n <= k && k < 2n ** 256n, `XPrivateKey: k out of 256-bit range`)
+        console.assert(0n <= k && k < 2n ** 256n, `ExtendedPrivateKey: k out of 256-bit range`)
         this.k = k
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
@@ -470,7 +470,7 @@ export class XPrivateKey extends XKey {
     /**
      * BIP 32 master key generation.
      * @param {Readonly<Uint8Array>} seed - 128-512 bits
-     * @returns {Promise<XPrivateKey>}
+     * @returns {Promise<ExtendedPrivateKey>}
      */
     static async from(seed) {
         const I = await HMAC_SHA512('Bitcoin seed', seed)
@@ -478,7 +478,7 @@ export class XPrivateKey extends XKey {
         const I_R = I.slice(32)
 
         console.assert(parse_256(I_L) != 0n && parse_256(I_L) < N_SECP256K1_ORDER, 'master key generation: I_L must be non-zero and less than curve order')
-        return new XPrivateKey(parse_256(I_L), parse_256(I_R))
+        return new ExtendedPrivateKey(parse_256(I_L), parse_256(I_R))
     }
 
     /**
@@ -493,10 +493,10 @@ export class XPrivateKey extends XKey {
      * N((k, c)) → (K, c)
      * Compute the extended public key corresponding to an extended private key
      * (the “neutered” version, as it removes the ability to sign transactions).
-     * @returns {XPublicKey} */
+     * @returns {ExtendedPublicKey} */
     N() {
         const {x: k_x, y: k_y} = point(this.k)
-        return new XPublicKey(new Point_secp256k1(k_x, k_y), this.c, {
+        return new ExtendedPublicKey(new Point_secp256k1(k_x, k_y), this.c, {
             ChildNumber: this.i,
             Depth: this.depth,
             Version: this.version,
@@ -507,7 +507,7 @@ export class XPrivateKey extends XKey {
     /**
      * CKDpriv
      * @param {number | bigint} i
-     * @returns {Promise<XPrivateKey>} */
+     * @returns {Promise<ExtendedPrivateKey>} */
     async CKD(i) {
         i = Number(i)
         console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `CKDpriv: i must be uint32, got ${i}`)
@@ -527,7 +527,7 @@ export class XPrivateKey extends XKey {
         if (k_i == 0n)
             return this.CKD(i + 1)
 
-        return new XPrivateKey(k_i, parse_256(I_R), {
+        return new ExtendedPrivateKey(k_i, parse_256(I_R), {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,

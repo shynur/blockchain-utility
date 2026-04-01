@@ -5,9 +5,6 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 /*
- * Overview:
- *   TODO
- *
  * 依赖关系:
  *   本文件不依赖任何第三方库或宿主特定的 API, 仅使用 JavaScript 标准库, 当前目录的 modules, 或 Web API.
  *
@@ -15,4 +12,12 @@
  *   类型注解使用 JSDoc, 可用 tsc 检查.
  */
 
-import * as math_tools from './math-tools.mjs'
+import {
+    ExtendedPrivateKey as XPrv,
+    ExtendedPublicKey  as XPub,
+} from './math-tools.mjs'
+
+export {
+    XPrv,
+    XPub,
+}
