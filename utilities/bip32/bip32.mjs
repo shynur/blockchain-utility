@@ -279,6 +279,8 @@ class ExtendedPrivateKey extends ExtendedKey {
         Object.defineProperty(this, 'k', {writable: false, configurable: false})
     }
 
+    is_public_key() { return false }
+
     /**
      * BIP 32 master key generation.
      * @param {Readonly<Uint8Array>} seed - 128-512 bits
