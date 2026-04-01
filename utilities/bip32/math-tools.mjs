@@ -312,13 +312,15 @@ class ExtendedKey {
      * Deserialize a serialized extended key.  See BIP 32.
      * @param {string} base58check - 111-char base58check string
      * @returns {Promise<ExtendedPublicKey | ExtendedPrivateKey>}
-     * @throws {RangeError} TODO
-     * @throws {Error} TODO
+     * @throws {RangeError} 序列化格式不合法 (长度, version bytes, key data, 结构一致性)
+     * @throws {Error} base58check checksum 校验失败
      */
     static async deserialize(base58check) {
-        console.assert(base58check.length == 111, `deserialize: expected 111-char base58check string, got ${base58check.length} chars`)
+        if (base58check.length != 111)
+            throw new RangeError(`deserialize: expected 111-char base58check string, got ${base58check.length} chars`)
         const payload = await base58checkDecode(base58check)
-        console.assert(payload.length == 78, `deserialize: expected 78B payload, got ${payload.length}B`)
+        if (payload.length != 78)
+            throw new RangeError(`deserialize: expected 78B payload, got ${payload.length}B`)
 
         const version_bytes = parse_32(payload.slice(0, 4))
         const depth = payload[4]
@@ -330,7 +332,7 @@ class ExtendedKey {
         const is_public = version_bytes == 0x0488B21E || version_bytes == 0x043587CF
         const is_private = version_bytes == 0x0488ADE4 || version_bytes == 0x04358394
         if (!is_public && !is_private)
-            throw new Error(`Unknown version bytes: 0x${version_bytes.toString(16).padStart(8, '0')}`)
+            throw new RangeError(`Unknown version bytes: 0x${version_bytes.toString(16).padStart(8, '0')}`)
 
         const version = (version_bytes == 0x0488B21E || version_bytes == 0x0488ADE4) ? 'mainnet' : 'testnet'
 
@@ -341,12 +343,11 @@ class ExtendedKey {
             ParentFingerprint: parent_fingerprint,
         }
 
-        // Zero depth must have zero parent fingerprint and zero child number
         if (depth == 0) {
             if (!parent_fingerprint.every(b => b == 0))
-                throw new Error('deserialize: zero depth with non-zero parent fingerprint')
+                throw new RangeError('deserialize: zero depth with non-zero parent fingerprint')
             if (child_number != 0)
-                throw new Error('deserialize: zero depth with non-zero index')
+                throw new RangeError('deserialize: zero depth with non-zero index')
         }
 
         if (is_public) {
@@ -354,10 +355,10 @@ class ExtendedKey {
             return new ExtendedPublicKey(K, chain_code, derivation_info)
         } else {
             if (key_data[0] != 0x00)
-                throw new Error(`deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
+                throw new RangeError(`deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
             const k = parse_256(key_data.slice(1))
             if (k == 0n || k >= N_SECP256K1_ORDER)
-                throw new Error(`deserialize: private key must be in 1..n-1`)
+                throw new RangeError(`deserialize: private key must be in 1..n-1`)
             return new ExtendedPrivateKey(k, chain_code, derivation_info)
         }
     }
