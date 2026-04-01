@@ -87,7 +87,7 @@ export async function validateMnemonicSentence(mnemonicSentence, wordlist_langua
     const indices = []
     for (const word of words) {
         const idx = WORDLISTS[wordlist_language].indexOf(word)
-        if (idx == -1)
+        if (idx === -1)
             return false
         indices.push(idx)
     }
@@ -100,7 +100,7 @@ export async function validateMnemonicSentence(mnemonicSentence, wordlist_langua
     for (let i = 0; i < ENT / 8; i++)
         entropy[i] = parseInt(entropyBits.slice(i * 8, (i + 1) * 8), 2)
     const expectedChecksum = await calculateChecksum(entropy)
-    return checksumBits == expectedChecksum
+    return checksumBits === expectedChecksum
 }
 
 /**
@@ -133,8 +133,8 @@ export async function mnemonicSentenceToSeed(mnemonicSentence, passphrase = '') 
 
 /**
  * @param {number} MS - 助记句的单词数
- * @param {string} [wordlist_language='en']
  * @param {string} [passphrase='']
+ * @param {string} [wordlist_language='en']
  * @returns {Promise<Readonly<{MnemonicSentence: string, Seed: Readonly<Uint8Array>}>>}
  */
 export async function bip39(MS = 12, passphrase = '', wordlist_language = 'en') {
