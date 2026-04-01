@@ -1,6 +1,7 @@
 ## 文件组织架构
 
 - `docs/bip-32.mediawiki`：BIP 32 paper.
+- `test.mjs`: 测试 BIP 32 的章节 "Test Vectors" 提供的所有用例.
 - `noble-secp256k1.mjs`：vendored secp256k1 库 (所谓的 `@noble/secp256k1`), 不直接使用.
 - `secp256k1.mjs`：借助 `noble-secp256k1.mjs` 实现 BIP 32 所需的 secp256k1 APIs.
 - `RIPEMD-160.mjs`：RIPEMD-160 hash function.
