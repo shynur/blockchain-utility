@@ -32,7 +32,7 @@ for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
         case '-g': mode = 'generate'; break
         case '-s': mode = 'seed'; break
-        case '-l': lang = args[++i]; break
+        case '-l': lang = /** @type {'en' | 'zh_Hans'} */ (args[++i]); break
         default: console.error(HELP); process.exit(1)
     }
 }
@@ -67,7 +67,7 @@ if (mode === 'generate') {
     }
     const passphrase = await ask('Passphrase []: ')
     rl.close()
-    const { MnemonicSentence, Seed } = await bip39(MS, passphrase, lang)
+    const { MnemonicSentence, Seed } = await bip39(/** @type {12 | 15 | 18 | 21 | 24} */ (MS), passphrase, lang)
     console.log(MnemonicSentence)
     console.log(toHex(Seed))
 } else {  // -s
