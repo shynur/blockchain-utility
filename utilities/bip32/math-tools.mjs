@@ -312,7 +312,8 @@ class ExtendedKey {
      * Deserialize a serialized extended key.  See BIP 32.
      * @param {string} base58check - 111-char base58check string
      * @returns {Promise<ExtendedPublicKey | ExtendedPrivateKey>}
-     * @throws {Error} checksum 校验失败, 或 version 无法识别
+     * @throws {RangeError} TODO
+     * @throws {Error} TODO
      */
     static async deserialize(base58check) {
         console.assert(base58check.length == 111, `deserialize: expected 111-char base58check string, got ${base58check.length} chars`)
@@ -340,12 +341,23 @@ class ExtendedKey {
             ParentFingerprint: parent_fingerprint,
         }
 
+        // Zero depth must have zero parent fingerprint and zero child number
+        if (depth == 0) {
+            if (!parent_fingerprint.every(b => b == 0))
+                throw new Error('deserialize: zero depth with non-zero parent fingerprint')
+            if (child_number != 0)
+                throw new Error('deserialize: zero depth with non-zero index')
+        }
+
         if (is_public) {
             const K = Point_secp256k1.deserialize(key_data)
             return new ExtendedPublicKey(K, chain_code, derivation_info)
         } else {
-            console.assert(key_data[0] == 0x00, `deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
+            if (key_data[0] != 0x00)
+                throw new Error(`deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
             const k = parse_256(key_data.slice(1))
+            if (k == 0n || k >= N_SECP256K1_ORDER)
+                throw new Error(`deserialize: private key must be in 1..n-1`)
             return new ExtendedPrivateKey(k, chain_code, derivation_info)
         }
     }
