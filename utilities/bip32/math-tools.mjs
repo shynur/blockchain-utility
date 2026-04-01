@@ -388,7 +388,7 @@ class ExtendedKey {
 /**
  * Extended Public Key (K, c)
  */
-class ExtendedPublicKey extends ExtendedKey {
+export class ExtendedPublicKey extends ExtendedKey {
     /**
      * 32B public key
      * @type {Point_secp256k1} */

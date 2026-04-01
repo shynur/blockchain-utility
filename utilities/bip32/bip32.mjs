@@ -13,11 +13,9 @@
  */
 
 import {
-    ExtendedPrivateKey as XPrv,
-    ExtendedPublicKey  as XPub,
+    ExtendedPrivateKey,
+    ExtendedPublicKey,
 } from './math-tools.mjs'
 
-export {
-    XPrv,
-    XPub,
-}
+export const XPrv = ExtendedPrivateKey
+export const XPub = ExtendedPublicKey
