@@ -295,7 +295,7 @@ class XKey {
      * @param {string} path - e.g. "/0'/1/2H/3"
      */
     async tree(path) {
-        path = path.replace(/\s/g, '')
+        path = path.toLowerCase().replace(/\s/g, '')
         if (path == '')
             return this
         console.assert(path[0] == '/' && path[path.length-1] != '/', `tree: invalid path format: "${path}"`)
