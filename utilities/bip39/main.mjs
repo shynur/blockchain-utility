@@ -26,7 +26,7 @@ Copyright (C) 2026  谢骐 <shynur@outlook.com>.  All Rights Reserved.
 const toHex = /** @param {Readonly<Uint8Array>} bytes */ bytes =>
     Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
 
-let mode = null, lang = 'en'
+let mode = null, /** @type {'en' | 'zh_Hans'} */ lang = 'en'
 const args = process.argv.slice(2)
 for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
