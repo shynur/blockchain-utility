@@ -39,7 +39,7 @@ class ExtendedKey {
 
     constructor(
         /** @type {bigint} */ chain_code,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ {
+        /** @type {Partial<{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}>} */ {
             ChildNumber=0, Depth=0, Version='mainnet', ParentFingerprint=new Uint8Array(4)
         } = {}
     ) {
@@ -126,7 +126,7 @@ class ExtendedKey {
         if (!is_public && !is_private)
             throw new RangeError(`Unknown version bytes: 0x${version_bytes.toString(16).padStart(8, '0')}`)
 
-        const version = (version_bytes == 0x0488B21E || version_bytes == 0x0488ADE4) ? 'mainnet' : 'testnet'
+        const version = /** @type {'mainnet' | 'testnet'} */ ((version_bytes == 0x0488B21E || version_bytes == 0x0488ADE4) ? 'mainnet' : 'testnet')
 
         const derivation_info = {
             ChildNumber: child_number,
@@ -204,7 +204,7 @@ class ExtendedPublicKey extends ExtendedKey {
 
     constructor(
         /** @type {bip32math.Point_secp256k1} */ K, /** @type {bigint} */ c,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
+        /** @type {Partial<{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}>} */ derivation_info
     ) {
         super(c, derivation_info)
         this.K = K
@@ -272,7 +272,7 @@ class ExtendedPrivateKey extends ExtendedKey {
 
     constructor(
         /** @type {bigint} */ k, /** @type {bigint} */ c,
-        /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
+        /** @type {Partial<{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}>} */ derivation_info
     ) {
         super(c, derivation_info)
         console.assert(0n <= k && k < 2n ** 256n, `ExtendedPrivateKey: k out of 256-bit range`)
