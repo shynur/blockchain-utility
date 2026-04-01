@@ -1,3 +1,3 @@
 export {
-    XPrv, XPub,
+    XKey, XPrv, XPub,
 } from './bip32.mjs'

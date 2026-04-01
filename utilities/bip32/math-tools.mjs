@@ -233,7 +233,7 @@ function ser_P(P) {
     return new Point_secp256k1(P.x, P.y).serialize()
 }
 
-class ExtendedKey {
+export class ExtendedKey {
     /**
      * 32B chain code
      * @type {bigint} */
@@ -291,6 +291,16 @@ class ExtendedKey {
     }
 
     /**
+     * @returns {Promise<Uint8Array>} 20B
+     */
+    identifier() {throw new Error('identifier() must be implemented by subclasses')}
+
+    /**
+     * @param {number | bigint} i
+     * @returns {Promise<ExtendedKey>} */
+    CKD(i) {throw new Error('CKD() must be implemented by subclasses')}
+
+    /**
      * Cascade CKD constructions to build a tree.
      * @param {string} path - e.g. "/0'/1/2H/3"
      */
@@ -311,7 +321,7 @@ class ExtendedKey {
     /**
      * Deserialize a serialized extended key.  See BIP 32.
      * @param {string} base58check - 111-char base58check string
-     * @returns {Promise<ExtendedPublicKey | ExtendedPrivateKey>}
+     * @returns {Promise<ExtendedKey>}
      * @throws {RangeError} 序列化格式不合法 (长度, version bytes, key data, 结构一致性)
      * @throws {Error} base58check checksum 校验失败
      */
@@ -363,14 +373,17 @@ class ExtendedKey {
         }
     }
 
+    /**
+     * @returns {boolean}
+     */
+    is_public_key() {throw new Error('is_public_key() must be implemented by subclasses')}
+
     async serialize() {
-        const is_pub_key = this instanceof ExtendedPublicKey
-
         const version_bytes = this.version == 'mainnet'
-            ? (is_pub_key ? 0x0488B21E : 0x0488ADE4)
-            : (is_pub_key ? 0x043587CF : 0x04358394)
+            ? (this.is_public_key() ? 0x0488B21E : 0x0488ADE4)
+            : (this.is_public_key() ? 0x043587CF : 0x04358394)
 
-        const key_data = this instanceof ExtendedPublicKey
+        const key_data = this.is_public_key()
             ? ser_P({x: this.K.x, y: this.K.y})
             : cat(new Uint8Array([0x00]), ser_256(this.k))
 
@@ -389,8 +402,8 @@ class ExtendedKey {
             base58check.length == 111
                 && base58check.startsWith(
                     this.version == 'mainnet'
-                        ? (is_pub_key ? 'xpub' : 'xprv')
-                        : (is_pub_key ? 'tpub' : 'tprv')
+                        ? (this.is_public_key() ? 'xpub' : 'xprv')
+                        : (this.is_public_key() ? 'tpub' : 'tprv')
                 ),
             `serialize: unexpected base58check output: ${base58check.slice(0, 10)}... (length ${base58check.length})`,
         )
@@ -415,6 +428,8 @@ export class ExtendedPublicKey extends ExtendedKey {
         this.K = K
         Object.defineProperty(this, 'K', {writable: false, configurable: false})
     }
+
+    is_public_key() { return true }
 
     /**
      * Hash160(ser_P(K)): the key identifier.
