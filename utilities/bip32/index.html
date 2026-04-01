@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>BIP32</title>
+</head>
+<body>
+<input id="root" placeholder="hex seed / xprv / xpub">
+<div id="tree"></div>
+<script type="module">
+import {XPrv, XKey} from './index.mjs'
+
+const rootInput = document.getElementById('root')
+const treeDiv = document.getElementById('tree')
+let rootKey = null
+
+rootInput.addEventListener('input', async () => {
+  const val = rootInput.value.trim()
+  if (!val) return
+
+  try {
+    if (val.match(/^[0-9a-f]+$/i)) {
+      const seed = new Uint8Array(val.match(/.{2}/g).map(b => parseInt(b, 16)))
+      rootKey = await XPrv.from(seed)
+    } else {
+      rootKey = await XKey.deserialize(val)
+    }
+    render()
+  } catch (e) {
+    console.error(e)
+  }
+})
+
+async function render() {
+  treeDiv.innerHTML = ''
+  if (!rootKey) return
+  await addNode(rootKey, rootKey.is_public_key() ? 'M' : 'm', treeDiv)
+}
+
+async function addNode(key, path, parent) {
+  const div = document.createElement('div')
+  div.style.marginLeft = '20px'
+
+  const label = document.createElement('div')
+  label.textContent = path
+  label.style.fontWeight = 'bold'
+  div.appendChild(label)
+
+  const display = document.createElement('div')
+  display.style.fontFamily = 'monospace'
+  display.style.fontSize = '12px'
+  display.style.cursor = 'pointer'
+  display.textContent = `c: ${key.c.toString(16).padStart(64, '0')}`
+
+  let showChain = true
+  display.addEventListener('click', () => {
+    if (key.is_public_key()) {
+      showChain = !showChain
+      display.textContent = showChain
+        ? `c: ${key.c.toString(16).padStart(64, '0')}`
+        : `K: ${key.K.x.toString(16).padStart(64, '0')}`
+    } else {
+      showChain = !showChain
+      display.textContent = showChain
+        ? `c: ${key.c.toString(16).padStart(64, '0')}`
+        : `k: ${key.k.toString(16).padStart(64, '0')}`
+    }
+  })
+  div.appendChild(display)
+
+  const input = document.createElement('input')
+  input.placeholder = 'path (e.g. /0/1)'
+  input.style.width = '200px'
+  div.appendChild(input)
+
+  const childrenDiv = document.createElement('div')
+  div.appendChild(childrenDiv)
+
+  input.addEventListener('change', async () => {
+    const p = input.value.trim()
+    if (!p) return
+
+    try {
+      const derived = await key.tree(p)
+      childrenDiv.innerHTML = ''
+      const childPath = path + p.replace(/h/gi, "'")
+      await addNode(derived, childPath, childrenDiv)
+    } catch (e) {
+      console.error(e)
+    }
+  })
+
+  parent.appendChild(div)
+}
+</script>
+</body>
+</html>
