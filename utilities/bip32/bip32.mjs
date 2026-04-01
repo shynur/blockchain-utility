@@ -94,7 +94,7 @@ class ExtendedKey {
         const nodes = path.slice(1).split('/')
         const firstNode = nodes[0]
         const firstIsHardened = firstNode.endsWith("'") || firstNode.endsWith('h')
-        const firstKey = await this.CKD(parseInt(firstNode) + (firstIsHardened ? 2**31 : 0))
+        const firstKey = await this.CKD((parseInt(firstNode)||0) + (firstIsHardened ? 2**31 : 0))
 
         return firstKey.tree(nodes.slice(1).map(i => `/${i}`).join(''))
     }
