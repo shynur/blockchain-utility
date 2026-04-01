@@ -109,15 +109,15 @@ class ExtendedKey {
     static async deserialize(base58check) {
         if (base58check.length != 111)
             throw new RangeError(`deserialize: expected 111-char base58check string, got ${base58check.length} chars`)
-        const payload = await base58checkDecode(base58check)
+        const payload = await bip32math.base58checkDecode(base58check)
         if (payload.length != 78)
             throw new RangeError(`deserialize: expected 78B payload, got ${payload.length}B`)
 
-        const version_bytes = parse_32(payload.slice(0, 4))
+        const version_bytes = bip32math.parse_32(payload.slice(0, 4))
         const depth = payload[4]
         const parent_fingerprint = payload.slice(5, 9)
-        const child_number = parse_32(payload.slice(9, 13))
-        const chain_code = parse_256(payload.slice(13, 45))
+        const child_number = bip32math.parse_32(payload.slice(9, 13))
+        const chain_code = bip32math.parse_256(payload.slice(13, 45))
         const key_data = payload.slice(45, 78)
 
         const is_public = version_bytes == 0x0488B21E || version_bytes == 0x043587CF
@@ -142,13 +142,13 @@ class ExtendedKey {
         }
 
         if (is_public) {
-            const K = Point_secp256k1.deserialize(key_data)
+            const K = bip32math.Point_secp256k1.deserialize(key_data)
             return new ExtendedPublicKey(K, chain_code, derivation_info)
         } else {
             if (key_data[0] != 0x00)
                 throw new RangeError(`deserialize: private key_data must start with 0x00, got 0x${key_data[0].toString(16).padStart(2, '0')}`)
-            const k = parse_256(key_data.slice(1))
-            if (k == 0n || k >= N_SECP256K1_ORDER)
+            const k = bip32math.parse_256(key_data.slice(1))
+            if (k == 0n || k >= bip32math.N_SECP256K1_ORDER)
                 throw new RangeError(`deserialize: private key must be in 1..n-1`)
             return new ExtendedPrivateKey(k, chain_code, derivation_info)
         }
@@ -165,20 +165,20 @@ class ExtendedKey {
             : (this.is_public_key() ? 0x043587CF : 0x04358394)
 
         const key_data = this.is_public_key()
-            ? ser_P({x: this.K.x, y: this.K.y})
-            : cat(new Uint8Array([0x00]), ser_256(this.k))
+            ? bip32math.ser_P({x: this.K.x, y: this.K.y})
+            : bip32math.cat(new Uint8Array([0x00]), bip32math.ser_256(this.k))
 
-        const payload = cat(
-            ser_32(version_bytes),
+        const payload = bip32math.cat(
+            bip32math.ser_32(version_bytes),
             new Uint8Array([this.depth]),
             this.parent_fingerprint,
-            ser_32(this.i),
-            ser_256(this.c),
+            bip32math.ser_32(this.i),
+            bip32math.ser_256(this.c),
             key_data,
         )
         console.assert(payload.length == 78, `serialize: expected 78B payload, got ${payload.length}B`)
 
-        const base58check = await base58checkEncode(payload)
+        const base58check = await bip32math.base58checkEncode(payload)
         console.assert(
             base58check.length == 111
                 && base58check.startsWith(
@@ -198,11 +198,11 @@ class ExtendedKey {
 class ExtendedPublicKey extends ExtendedKey {
     /**
      * 32B public key
-     * @type {Point_secp256k1} */
+     * @type {bip32math.Point_secp256k1} */
     K
 
     constructor(
-        /** @type {Point_secp256k1} */ K, /** @type {bigint} */ c,
+        /** @type {bip32math.Point_secp256k1} */ K, /** @type {bigint} */ c,
         /** @type {{ChildNumber:number, Depth:number, Version:'mainnet'|'testnet', ParentFingerprint:Readonly<Uint8Array>}} */ derivation_info
     ) {
         super(c, derivation_info)
@@ -217,7 +217,7 @@ class ExtendedPublicKey extends ExtendedKey {
      * @returns {Promise<Uint8Array>} 20B
      */
     async identifier() {
-        return Hash160(ser_P({x: this.K.x, y: this.K.y}))
+        return bip32math.Hash160(bip32math.ser_P({x: this.K.x, y: this.K.y}))
     }
 
     /**
@@ -231,24 +231,27 @@ class ExtendedPublicKey extends ExtendedKey {
         if (i >= 2 ** 31)
             throw new RangeError(`CKDpub is only defined for normal child key: i=${i}`)
 
-        const I = await HMAC_SHA512(ser_256(this.c), cat(ser_P({x: this.K.x, y: this.K.y}), ser_32(i)))
+        const I = await bip32math.HMAC_SHA512(
+            bip32math.ser_256(this.c),
+            bip32math.cat(bip32math.ser_P({x: this.K.x, y: this.K.y}), bip32math.ser_32(i))
+        )
         const I_L = I.slice(0, 32)
         const I_R = I.slice(32)
 
-        if (parse_256(I_L) >= N_SECP256K1_ORDER)
+        if (bip32math.parse_256(I_L) >= bip32math.N_SECP256K1_ORDER)
             return this.CKD(i + 1)
 
-        const K_i = Point_secp256k1.add(
+        const K_i = bip32math.Point_secp256k1.add(
             function() {
-                const {x, y} = point(parse_256(I_L))
-                return new Point_secp256k1(x, y);
+                const {x, y} = bip32math.point(bip32math.parse_256(I_L))
+                return new bip32math.Point_secp256k1(x, y);
             }(),
             this.K
         )
         if (K_i.atInfinity())
             return this.CKD(i + 1)
 
-        return new ExtendedPublicKey(K_i, parse_256(I_R), {
+        return new ExtendedPublicKey(K_i, bip32math.parse_256(I_R), {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,
@@ -285,12 +288,15 @@ class ExtendedPrivateKey extends ExtendedKey {
     static async from(seed) {
         if (seed.length < 16 || 64 < seed.length)
             throw new RangeError(`master key generation: seed must be 16..64 bytes (128..512 bits), got ${seed.length} bytes`)
-        const I = await HMAC_SHA512('Bitcoin seed', seed)
+        const I = await bip32math.HMAC_SHA512('Bitcoin seed', seed)
         const I_L = I.slice(0, 32)
         const I_R = I.slice(32)
 
-        console.assert(parse_256(I_L) != 0n && parse_256(I_L) < N_SECP256K1_ORDER, 'master key generation: I_L must be non-zero and less than curve order')
-        return new ExtendedPrivateKey(parse_256(I_L), parse_256(I_R))
+        console.assert(
+            bip32math.parse_256(I_L) != 0n && bip32math.parse_256(I_L) < bip32math.N_SECP256K1_ORDER,
+            'master key generation: I_L must be non-zero and less than curve order'
+        )
+        return new ExtendedPrivateKey(bip32math.parse_256(I_L), bip32math.parse_256(I_R))
     }
 
     /**
@@ -298,7 +304,7 @@ class ExtendedPrivateKey extends ExtendedKey {
      * @returns {Promise<Uint8Array>} 20B
      */
     async identifier() {
-        return Hash160(ser_P(point(this.k)))
+        return bip32math.Hash160(bip32math.ser_P(bip32math.point(this.k)))
     }
 
     /**
@@ -307,8 +313,8 @@ class ExtendedPrivateKey extends ExtendedKey {
      * (the “neutered” version, as it removes the ability to sign transactions).
      * @returns {ExtendedPublicKey} */
     N() {
-        const {x: k_x, y: k_y} = point(this.k)
-        return new ExtendedPublicKey(new Point_secp256k1(k_x, k_y), this.c, {
+        const {x: k_x, y: k_y} = bip32math.point(this.k)
+        return new ExtendedPublicKey(new bip32math.Point_secp256k1(k_x, k_y), this.c, {
             ChildNumber: this.i,
             Depth: this.depth,
             Version: this.version,
@@ -325,21 +331,21 @@ class ExtendedPrivateKey extends ExtendedKey {
         console.assert(Number.isInteger(i) && 0 <= i && i < 2 ** 32, `CKDpriv: i must be uint32, got ${i}`)
 
         const data = i >= 2 ** 31
-            ? cat(new Uint8Array([0x00]), ser_256(this.k), ser_32(i))
-            : cat(ser_P(point(this.k)), ser_32(i))
+            ? bip32math.cat(new Uint8Array([0x00]), bip32math.ser_256(this.k), bip32math.ser_32(i))
+            : bip32math.cat(bip32math.ser_P(bip32math.point(this.k)), bip32math.ser_32(i))
 
-        const I = await HMAC_SHA512(ser_256(this.c), data)
+        const I = await bip32math.HMAC_SHA512(bip32math.ser_256(this.c), data)
         const I_L = I.slice(0, 32)
         const I_R = I.slice(32)
 
-        if (parse_256(I_L) >= N_SECP256K1_ORDER)
+        if (bip32math.parse_256(I_L) >= bip32math.N_SECP256K1_ORDER)
             return this.CKD(i + 1)
 
-        const k_i = (parse_256(I_L) + this.k) % N_SECP256K1_ORDER
+        const k_i = (bip32math.parse_256(I_L) + this.k) % bip32math.N_SECP256K1_ORDER
         if (k_i == 0n)
             return this.CKD(i + 1)
 
-        return new ExtendedPrivateKey(k_i, parse_256(I_R), {
+        return new ExtendedPrivateKey(k_i, bip32math.parse_256(I_R), {
             ChildNumber: i,
             Depth: this.depth + 1,
             Version: this.version,

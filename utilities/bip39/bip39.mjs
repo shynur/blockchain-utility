@@ -76,7 +76,7 @@ function toMnemonicSentence(entropyWithChecksum, wordlist) {
 /**
  * 检查单词数量、单词是否在词表中、以及 checksum 是否正确.
  * @param {string} mnemonicSentence - 助记句
- * @param {string} [wordlist_language='en']
+ * @param {'en' | 'zh_Hans'} [wordlist_language='en']
  * @returns {Promise<boolean>}
  */
 export async function validateMnemonicSentence(mnemonicSentence, wordlist_language = 'en') {
@@ -132,9 +132,9 @@ export async function mnemonicSentenceToSeed(mnemonicSentence, passphrase = '') 
 }
 
 /**
- * @param {number} MS - 助记句的单词数
+ * @param {12 | 15 | 18 | 21 | 24} MS - 助记句的单词数
  * @param {string} [passphrase='']
- * @param {string} [wordlist_language='en']
+ * @param {'en' | 'zh_Hans'} [wordlist_language='en']
  * @returns {Promise<Readonly<{MnemonicSentence: string, Seed: Readonly<Uint8Array>}>>}
  */
 export async function bip39(MS = 12, passphrase = '', wordlist_language = 'en') {

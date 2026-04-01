@@ -232,3 +232,13 @@ function parse_256(p) {
 function ser_P(P) {
     return new Point_secp256k1(P.x, P.y).serialize()
 }
+
+export {
+    N_SECP256K1_ORDER, Point_secp256k1,
+    base58checkEncode, base58checkDecode,
+    cat,
+    HMAC_SHA512, Hash160,
+    ser_32, ser_256, ser_P,
+    point,
+    parse_32, parse_256,
+}
