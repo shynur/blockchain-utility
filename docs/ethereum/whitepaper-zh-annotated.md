@@ -302,9 +302,10 @@ Note that the state is not encoded in the block in any way; it is purely an abst
 需要注意的是，state 并不会以任何形式被编码进 block；它纯粹是由验证节点记住的一种抽象，并且只有从 genesis state 开始，按顺序对每个 block 中的每一笔 transaction 逐一应用，才能为任意 block 安全地计算出对应的 state。
 
 > **state 不存储在 block 中**<br />
-> 这是 Bitcoin 和 Ethereum 的一个重要区别.
-> Bitcoin 的 block 只存 transaction 列表, 要知道 state 必须从头 replay 所有交易.
-> Ethereum 后来改进了这一点: 每个 block 中包含 state root (状态树的根 hash), 使得节点不需要从创世块重放.
+> 更准确地说, Bitcoin 和 Ethereum 的 block 都不直接存完整 state.
+> Bitcoin 的 block 只存 transaction 列表; 要恢复某一时刻的 UTXO 集, 需要按顺序处理历史交易.
+> Ethereum 的 block header 额外承诺了 state root (状态树的根 hash), 便于校验「计算出来的 state 是否正确」.
+> 但这并不意味着 full node 可以完全跳过历史执行; 只是同步和校验方式比白皮书当年设想得更灵活.
 
 Additionally, note that the order in which the miner includes transactions into the block matters; if there are two transactions A and B in a block such that B spends a UTXO created by A, then the block will be valid if A comes before B but not otherwise.
 
@@ -333,7 +334,7 @@ At the current target of ~2<sup>187</sup>, the network must make an average of ~
 > **difficulty adjustment (难度调整)**<br />
 > 2016 个 blocks × 10 分钟 = 约 2 周.
 > 如果过去 2 周出块过快, 说明全网算力增加了, 难度就调高; 反之调低.
-> 这种自适应机制确保了无论全网算力如何变化, 出块间隔始终稳定在约 10 分钟.
+> 这种自适应机制会把长期平均出块间隔拉回到约 10 分钟, 但短期仍会因 retarget 滞后而波动.
 
 In order to compensate miners for this computational work, the miner of every block is entitled to include a transaction giving themselves 25 BTC out of nowhere.
 
@@ -421,7 +422,7 @@ In order for the attacker to make his blockchain the longest, he would need to h
 
 > **51% attack (51% 攻击)**<br />
 > 准确地说, 攻击者不需要恰好 51%, 只要超过其余所有人的总和即可.
-> 但即便掌握了多数算力, 攻击者也只能做两件事: (1) 双花 (double-spend) 自己的币; (2) 阻止某些交易被确认.
+> 但即便掌握了多数算力, 攻击者主要能做的仍是重组近期区块、双花自己的币, 或阻止某些交易被确认.
 > 攻击者 *无法* 凭空创造新币, 也 *无法* 窃取他人的币, 因为这需要伪造数字签名.
 
 > **确认数 (confirmations)**<br />
@@ -490,7 +491,7 @@ This allows light nodes to determine with a strong guarantee of security what th
 这样一来，light nodes 只需下载整条 blockchain 中极小的一部分数据，就能在强安全保证下判断任意 Bitcoin transaction 的状态以及自己的当前余额。
 
 > **SPV (简化支付验证)**<br />
-> SPV 使得手机等资源受限的设备也能安全地使用 Bitcoin.
+> SPV 让手机等资源受限的设备, 可以在不运行 full node 的前提下验证常见支付场景.
 > light node 只需存储 block headers (每个约 80 bytes) 而非完整 blocks.
 > 截至 2024 年, 所有 block headers 总共仅约 60 MB, 而完整 blockchain 已超过 500 GB.
 
@@ -1543,7 +1544,7 @@ Provided an oracle or SchellingCoin, prediction markets are also easy to impleme
 只要有 oracle 或 SchellingCoin，prediction markets 也很容易实现；而 prediction markets 与 SchellingCoin 结合起来，可能会成为 [futarchy](https://mason.gmu.edu/~rhanson/futarchy.html) 作为去中心化组织治理协议的首个主流应用。
 
 > **现实实现: 预测市场**<br />
-> Augur (2018) 是 Ethereum 上第一个去中心化预测市场, 但因用户体验复杂而未获广泛采用.
+> Augur (2018) 是 Ethereum 上最早一批、也最知名的去中心化预测市场之一, 但因用户体验复杂而未获广泛采用.
 > Polymarket (基于 Polygon) 在 2024 年美国大选期间引起广泛关注, 成为最知名的链上预测市场.
 > **futarchy**: 经济学家 Robin Hanson 提出的治理模型 — "用预测市场来选择政策, 用投票来定义目标".
 
@@ -1588,15 +1589,17 @@ As described by Sompolinsky and Zohar, GHOST solves the first issue of network s
 按照 Sompolinsky 和 Zohar 的描述，GHOST 通过把 stale blocks 纳入"哪条链是最长链"的计算，来解决网络安全损失的第一个问题；也就是说，不仅一个 block 的父块及更早祖先会被计算在内，该 block 祖先的 stale descendants（在 Ethereum 术语中称为 "uncles"）也会被纳入"哪个 block 获得最多总 proof-of-work 支持"的计算中。
 
 > **uncle block (叔块)**<br />
-> 当两个 miner 几乎同时挖出有效 block 时, 只有一个会进入主链, 另一个就成了 uncle (stale block).
-> 在 Bitcoin 中, uncle block 的工作量完全白费.
-> 在 Ethereum 的 GHOST 机制下, uncle block 仍能获得部分奖励, 其工作量也计入链的"权重".
+> 当两个 miner 几乎同时挖出有效 block 时, 往往只有一个会进入主链, 另一个会变成 stale block.
+> 在 Bitcoin 中, 类似的 stale block 没有直接奖励, 也不会被计入主链.
+> 在 Ethereum PoW 中, 若该 stale block 满足条件并被后续主链 block 引用, 它才会成为 uncle/ommer 并获得部分奖励.
+> 不过在主网实际实现里, ommer 的奖励机制被采纳了, 但链选择仍主要看 canonical chain 的 total difficulty, 而不是把 ommer 直接计入链权重.
 > 这鼓励小矿工继续参与, 减缓了大矿池的中心化优势.
 
 > **历史与当前差异**<br />
 > uncle block 机制是 PoW 时代的产物.
 > 2022 年 The Merge 后, Ethereum 切换到 PoS, 不再有 mining, 也不再有 uncle blocks.
-> PoS 下的出块者是由协议指定的, 不会出现"同时挖出两个块"的竞争.
+> PoS 下每个 slot 只指定一个 proposer; 正常情况下不会再出现 PoW 式的 uncle/ommer 奖励机制.
+> 但网络延迟或 proposer equivocation 仍可能造成临时分叉, 只是处理方式已经改由 PoS 的 fork-choice 与 slashing 规则约束.
 
 To solve the second issue of centralization bias, we go beyond the protocol described by Sompolinsky and Zohar, and also provide block rewards to stales: a stale block receives 87.5% of its base reward, and the nephew that includes the stale block receives the remaining 12.5%.
 
@@ -1771,7 +1774,7 @@ This delay disincentive is a significant consideration in Bitcoin, but less so i
 > 这一章的核心论证: 纯市场化的 fee 机制不完美, 但通过浮动 gas limit 等监管手段可以补救.
 > 实际演化: 2021 年 EIP-1559 引入了 base fee + priority fee 的双层模型.
 > base fee 由协议根据上一个 block 的 gas 使用率自动调节, 且被直接销毁 (burn) 而非支付给矿工.
-> 这让用户的 gas 估算变得更可预测, 也让 ETH 在高活跃期成为通缩资产.
+> 这让用户的 gas 估算变得更可预测, 也使 ETH 在高活跃期可能出现净通缩.
 
 ### Computation And Turing-Completeness
 
