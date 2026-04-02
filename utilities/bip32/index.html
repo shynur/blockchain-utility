@@ -102,5 +102,497 @@
 
 
 <html>
-  <!-- TODO -->
+<head>
+<meta charset="utf-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 16px; }
+
+#input-section { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+#seed-input {
+  flex: 1; padding: 8px 12px; font-family: inherit; font-size: 14px;
+  background: #16213e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 4px; outline: none;
+}
+#seed-input:focus { border-color: #53a8b6; }
+#input-type { font-size: 12px; color: #53a8b6; min-width: 50px; text-align: right; }
+#input-error { font-size: 12px; color: #e74c3c; min-height: 18px; margin-bottom: 4px; }
+
+#info-section {
+  background: #16213e; border: 1px solid #0f3460; border-radius: 4px; padding: 10px 14px;
+  margin-bottom: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+  min-height: 20px;
+}
+#info-section:empty { display: none; }
+
+#tree-container { overflow: auto; }
+svg text { user-select: none; }
+.edge-line { fill: none; stroke: #53a8b6; stroke-width: 1.5; }
+.edge-hardened { stroke-dasharray: 6 4; }
+.node-circle { fill: #0f3460; stroke: #53a8b6; stroke-width: 2; cursor: pointer; }
+.node-circle:hover { fill: #1a3a6e; }
+.node-label {
+  fill: #e0e0e0; font-size: 13px; font-family: 'Courier New', monospace;
+  text-anchor: middle; dominant-baseline: central; pointer-events: none;
+}
+.node-annotation {
+  fill: #8a8a8a; font-size: 11px; font-family: 'Courier New', monospace;
+  text-anchor: middle; pointer-events: none;
+}
+.node-info-text {
+  fill: #53a8b6; font-size: 10px; font-family: 'Courier New', monospace;
+  text-anchor: middle; pointer-events: none;
+}
+.path-input {
+  width: 120px; padding: 2px 4px; font-family: 'Courier New', monospace; font-size: 11px;
+  background: #1a1a2e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 3px; outline: none;
+}
+.path-input:focus { border-color: #53a8b6; }
+
+#context-menu {
+  display: none; position: fixed; background: #16213e; border: 1px solid #0f3460;
+  border-radius: 4px; padding: 4px 0; z-index: 1000; min-width: 140px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+#context-menu .menu-item {
+  padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Courier New', monospace;
+}
+#context-menu .menu-item:hover { background: #0f3460; }
+</style>
+</head>
+<body>
+
+<div id="input-section">
+  <input id="seed-input" type="text" placeholder="种子 (hex) / xprv / xpub / tprv / tpub" spellcheck="false" autocomplete="off">
+  <span id="input-type"></span>
+</div>
+<div id="input-error"></div>
+<div id="info-section"></div>
+<div id="tree-container">
+  <svg id="tree-svg"></svg>
+</div>
+<div id="context-menu"></div>
+
+<script type="module">
+import { XKey, XPrv, XPub } from './index.mjs'
+
+const HARDENED = 2 ** 31
+const NODE_R = 20
+const H_GAP = 80      // horizontal spacing between leaf centers
+const V_GAP = 90       // vertical spacing between levels
+const TOP_PAD = 40     // top padding inside SVG
+const SIDE_PAD = 80    // side padding
+
+// ── State ──
+
+let rootKey = null
+let isMaster = false
+let treeRoot = null
+
+class TreeNode {
+  constructor(key, parent) {
+    this.key = key
+    this.children = []
+    this.parent = parent || null
+    this.annotation = ''
+    this.infoState = 0   // 0: hidden, 1: c+k, 2: K
+    this.x = 0
+    this.y = 0
+  }
+
+  get index() { return this.key.i }
+  get isHardened() { return this.index >= HARDENED }
+  get displayIndex() {
+    return this.isHardened ? (this.index - HARDENED) + "'" : String(this.index)
+  }
+  get label() {
+    if (!this.parent) return this.key.is_public_key() ? 'M' : 'm'
+    return this.displayIndex
+  }
+
+  sortChildren() {
+    this.children.sort((a, b) => {
+      const am = a.isHardened ? a.index - HARDENED : a.index
+      const bm = b.isHardened ? b.index - HARDENED : b.index
+      if (am !== bm) return am - bm
+      return (a.isHardened ? 1 : 0) - (b.isHardened ? 1 : 0)
+    })
+  }
+
+  findChild(index) {
+    return this.children.find(c => c.index === index)
+  }
+
+  fileSegment() {
+    const mod = this.isHardened ? this.index - HARDENED : this.index
+    return String(mod) + (this.isHardened ? 'H' : '')
+  }
+
+  pathFromRoot() {
+    const p = []
+    for (let n = this; n; n = n.parent) p.unshift(n)
+    return p
+  }
+}
+
+// ── Helpers ──
+
+function toHex(bytes) {
+  return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+function hexToBytes(hex) {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < bytes.length; i++)
+    bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
+  return bytes
+}
+
+// ── Annotation parsing (spec steps 1-9) ──
+
+function parseAnnotations(pathStr) {
+  const groups = pathStr.match(/\/[^/]*/g) || []
+  return groups.map(g => {
+    let s = g.slice(1)                  // step 4: trim leading /
+    s = s.replace(/\s+$/, '')           // step 5: trim trailing whitespace
+    s = s.replace(/['Hh]$/, '')         // step 6: trim trailing hardened char
+    const m = s.match(/^\d+/)           // step 7: parseInt from start
+    if (m) s = s.slice(m[0].length)     //         trim parsed digits
+    return s.trim()                     // step 8: trim remaining whitespace
+  })
+}
+
+// ── Derivation path parsing ──
+
+function parseIndices(pathStr) {
+  const cleaned = pathStr.toLowerCase().replace(/\s/g, '')
+  if (!cleaned.startsWith('/')) return null
+  const raw = cleaned.replace(/\/+$/, '')  // trim trailing slashes
+  if (raw === '') return null
+  const parts = raw.slice(1).split('/')
+  return parts.map(p => {
+    const hardened = p.endsWith("'") || p.endsWith('h')
+    const num = parseInt(p) || 0
+    return num + (hardened ? HARDENED : 0)
+  })
+}
+
+// ── Derive and merge into tree ──
+
+async function derivePath(node, pathStr) {
+  const indices = parseIndices(pathStr)
+  const annotations = parseAnnotations(pathStr)
+  if (!indices || indices.length === 0) return
+
+  let current = node
+  for (let i = 0; i < indices.length; i++) {
+    const idx = indices[i]
+    let child = current.findChild(idx)
+    if (!child) {
+      const childKey = await current.key.CKD(idx)
+      child = new TreeNode(childKey, current)
+      current.children.push(child)
+      current.sortChildren()
+    }
+    if (annotations[i]) child.annotation = annotations[i]
+    current = child
+  }
+}
+
+// ── Input handling ──
+
+const seedInput = document.getElementById('seed-input')
+const inputTypeEl = document.getElementById('input-type')
+const inputErrorEl = document.getElementById('input-error')
+const infoEl = document.getElementById('info-section')
+
+let inputTimer = null
+seedInput.addEventListener('input', () => {
+  clearTimeout(inputTimer)
+  inputTimer = setTimeout(handleInput, 200)
+})
+
+async function handleInput() {
+  const raw = seedInput.value.trim()
+  inputErrorEl.textContent = ''
+  inputTypeEl.textContent = ''
+  infoEl.textContent = ''
+
+  if (!raw) {
+    rootKey = null; treeRoot = null; render(); return
+  }
+
+  try {
+    if (/^[xt]p(rv|ub)/.test(raw)) {
+      inputTypeEl.textContent = raw.slice(0, 4)
+      const key = await XKey.deserialize(raw)
+      rootKey = key
+      isMaster = key.depth === 0
+      treeRoot = new TreeNode(key, null)
+      render()
+    } else if (/^[0-9a-fA-F]*$/.test(raw)) {
+      if (raw.length % 2 !== 0) { inputErrorEl.textContent = 'hex 需要偶数字符'; return }
+      if (raw.length < 32 || raw.length > 128) { inputErrorEl.textContent = 'seed: 16-64 字节 (32-128 hex)'; return }
+      inputTypeEl.textContent = 'seed'
+      const key = await XPrv.from(hexToBytes(raw))
+      rootKey = key
+      isMaster = true
+      treeRoot = new TreeNode(key, null)
+      render()
+    } else {
+      inputErrorEl.textContent = '无法识别的格式'
+    }
+  } catch (e) {
+    inputErrorEl.textContent = e.message
+  }
+}
+
+// ── Info section ──
+
+function updateInfo() {
+  if (!rootKey) { infoEl.textContent = ''; return }
+  const k = rootKey
+  const lines = []
+  lines.push(`type: ${k.is_public_key() ? 'public' : 'private'}`)
+  lines.push(`network: ${k.version}`)
+  lines.push(`depth: ${k.depth}`)
+  if (k.depth > 0) {
+    const idx = k.i
+    lines.push(`index: ${idx >= HARDENED ? (idx - HARDENED) + "'" : idx}`)
+    lines.push(`parent fingerprint: ${toHex(k.parent_fingerprint)}`)
+  }
+  lines.push(`chain code: ${k.c.toString(16).padStart(64, '0')}`)
+  if (!k.is_public_key())
+    lines.push(`private key: ${k.k.toString(16).padStart(64, '0')}`)
+  else
+    lines.push(`public key: ${toHex(k.K.serialize())}`)
+  infoEl.textContent = lines.join('\n')
+}
+
+// ── Tree layout ──
+
+function layoutTree() {
+  if (!treeRoot) return
+  let leafX = 0
+  assignPositions(treeRoot, 0)
+
+  function assignPositions(node, depth) {
+    node.y = depth * V_GAP + TOP_PAD
+    if (node.children.length === 0) {
+      node.x = leafX
+      leafX += H_GAP
+      return
+    }
+    for (const child of node.children) assignPositions(child, depth + 1)
+    const first = node.children[0].x
+    const last = node.children[node.children.length - 1].x
+    node.x = (first + last) / 2
+  }
+}
+
+function treeBounds(node) {
+  let minX = node.x, maxX = node.x, maxY = node.y
+  for (const ch of node.children) {
+    const b = treeBounds(ch)
+    if (b.minX < minX) minX = b.minX
+    if (b.maxX > maxX) maxX = b.maxX
+    if (b.maxY > maxY) maxY = b.maxY
+  }
+  return { minX, maxX, maxY }
+}
+
+// ── SVG rendering ──
+
+const svg = document.getElementById('tree-svg')
+const NS = 'http://www.w3.org/2000/svg'
+
+function el(tag, attrs) {
+  const e = document.createElementNS(NS, tag)
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
+  return e
+}
+
+function render() {
+  svg.innerHTML = ''
+  updateInfo()
+  if (!treeRoot) { svg.removeAttribute('width'); svg.removeAttribute('height'); return }
+
+  layoutTree()
+  const b = treeBounds(treeRoot)
+  const ox = -b.minX + SIDE_PAD
+  const w = b.maxX - b.minX + SIDE_PAD * 2
+  const h = b.maxY + TOP_PAD + 80
+  svg.setAttribute('width', w)
+  svg.setAttribute('height', h)
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`)
+
+  // edges first (behind nodes)
+  drawEdges(treeRoot, ox)
+  // nodes on top
+  drawNodes(treeRoot, ox)
+}
+
+function drawEdges(node, ox) {
+  for (const ch of node.children) {
+    const x1 = node.x + ox, y1 = node.y + NODE_R
+    const x2 = ch.x + ox, y2 = ch.y - NODE_R
+    const my = (y1 + y2) / 2
+    const p = el('path', {
+      d: `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`,
+      class: 'edge-line' + (ch.isHardened ? ' edge-hardened' : ''),
+    })
+    svg.appendChild(p)
+    drawEdges(ch, ox)
+  }
+}
+
+function drawNodes(node, ox) {
+  const cx = node.x + ox
+  const cy = node.y
+
+  // circle
+  const circle = el('circle', { cx, cy, r: NODE_R, class: 'node-circle' })
+  circle.addEventListener('click', () => {
+    node.infoState = (node.infoState + 1) % 3
+    render()
+  })
+  circle.addEventListener('contextmenu', e => { e.preventDefault(); showContextMenu(e, node) })
+  svg.appendChild(circle)
+
+  // label
+  const lbl = el('text', { x: cx, y: cy, class: 'node-label' })
+  lbl.textContent = node.label
+  svg.appendChild(lbl)
+
+  // annotation
+  if (node.annotation) {
+    const ann = el('text', { x: cx, y: cy + NODE_R + 14, class: 'node-annotation' })
+    ann.textContent = node.annotation
+    svg.appendChild(ann)
+  }
+
+  // info text (c+k or K)
+  if (node.infoState > 0) {
+    const infoY = cy + NODE_R + (node.annotation ? 28 : 14)
+    const key = node.key
+    const lines = []
+    if (node.infoState === 1) {
+      lines.push('c: ' + key.c.toString(16).padStart(64, '0'))
+      if (!key.is_public_key()) lines.push('k: ' + key.k.toString(16).padStart(64, '0'))
+    } else {
+      const pub = key.is_public_key() ? key : key.N()
+      lines.push('K: ' + toHex(pub.K.serialize()))
+    }
+    lines.forEach((line, i) => {
+      const t = el('text', { x: cx, y: infoY + i * 13, class: 'node-info-text' })
+      t.textContent = line
+      svg.appendChild(t)
+    })
+  }
+
+  // path input (foreignObject)
+  const fo = el('foreignObject', { x: cx - 60, y: cy - NODE_R - 26, width: 120, height: 22 })
+  const inp = document.createElement('input')
+  inp.type = 'text'
+  inp.className = 'path-input'
+  inp.placeholder = '/path'
+  inp.addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return
+    const val = inp.value.trim()
+    if (!val || !val.startsWith('/')) return
+    try {
+      await derivePath(node, val)
+      inp.value = ''
+      render()
+    } catch (err) {
+      inp.style.borderColor = '#e74c3c'
+      setTimeout(() => inp.style.borderColor = '', 1500)
+    }
+  })
+  fo.appendChild(inp)
+  svg.appendChild(fo)
+
+  // recurse
+  for (const ch of node.children) drawNodes(ch, ox)
+}
+
+// ── Context menu ──
+
+const ctxMenu = document.getElementById('context-menu')
+document.addEventListener('click', () => ctxMenu.style.display = 'none')
+
+function showContextMenu(e, node) {
+  ctxMenu.innerHTML = ''
+  const key = node.key
+
+  // delete (not for root)
+  if (node.parent) {
+    addMenuItem('删除子树', () => {
+      node.parent.children = node.parent.children.filter(c => c !== node)
+      render()
+    })
+  }
+
+  // export prv
+  if (!key.is_public_key()) {
+    const tag = key.version === 'mainnet' ? 'xprv' : 'tprv'
+    addMenuItem(`导出 ${tag}`, async () => {
+      const s = await key.serialize()
+      download(buildFilename(node, 'prv') + '.txt', s)
+    })
+  }
+
+  // export pub
+  const pubTag = key.version === 'mainnet' ? 'xpub' : 'tpub'
+  addMenuItem(`导出 ${pubTag}`, async () => {
+    const pub = key.is_public_key() ? key : key.N()
+    const s = await pub.serialize()
+    download(buildFilename(node, 'pub') + '.txt', s)
+  })
+
+  if (ctxMenu.children.length === 0) return
+  ctxMenu.style.display = 'block'
+  ctxMenu.style.left = e.clientX + 'px'
+  ctxMenu.style.top = e.clientY + 'px'
+}
+
+function addMenuItem(text, onClick) {
+  const d = document.createElement('div')
+  d.className = 'menu-item'
+  d.textContent = text
+  d.addEventListener('click', e => { e.stopPropagation(); ctxMenu.style.display = 'none'; onClick() })
+  ctxMenu.appendChild(d)
+}
+
+// ── Export filename ──
+
+function buildFilename(node, type) {
+  const path = node.pathFromRoot()
+  const segs = []
+
+  if (type === 'prv') {
+    segs.push('m')
+  } else if (isMaster) {
+    segs.push('M')
+  }
+
+  for (let i = 1; i < path.length; i++) segs.push(path[i].fileSegment())
+
+  if (type === 'pub' && !isMaster) {
+    if (segs.length > 0) segs[segs.length - 1] += 'N'
+    else segs.push('N')
+  }
+
+  return segs.join('-')
+}
+
+function download(name, content) {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }))
+  a.download = name
+  a.click()
+  URL.revokeObjectURL(a.href)
+}
+
+</script>
+</body>
 </html>
