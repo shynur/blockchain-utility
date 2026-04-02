@@ -535,19 +535,30 @@ function drawNodes(node, ox) {
 const pathPopup = document.getElementById('path-popup')
 const pathInput = pathPopup.querySelector('input')
 let pathPopupNode = null
+const drafts = new WeakMap()
 
 function openPathPopup(node, btnEl) {
+  // toggle: if already open for this node, save draft and close
+  if (pathPopupNode === node && pathPopup.style.display === 'block') {
+    drafts.set(node, pathInput.value)
+    closePathPopup()
+    return
+  }
+  // save draft of previous node if switching
+  if (pathPopupNode && pathPopupNode !== node) drafts.set(pathPopupNode, pathInput.value)
   pathPopupNode = node
   const rect = btnEl.getBoundingClientRect()
   pathPopup.style.display = 'block'
   pathPopup.style.left = (rect.right + 4) + 'px'
   pathPopup.style.top = (rect.top - 4) + 'px'
-  pathInput.value = ''
+  pathInput.value = drafts.get(node) || ''
   pathInput.style.borderColor = ''
   pathInput.focus()
 }
 
-function closePathPopup() {
+function closePathPopup(clearDraft) {
+  if (pathPopupNode && !clearDraft) drafts.set(pathPopupNode, pathInput.value)
+  if (pathPopupNode && clearDraft) drafts.delete(pathPopupNode)
   pathPopup.style.display = 'none'
   pathPopupNode = null
 }
@@ -559,7 +570,7 @@ pathInput.addEventListener('keydown', async e => {
   if (!val || !val.startsWith('/')) return
   try {
     await derivePath(pathPopupNode, val)
-    closePathPopup()
+    closePathPopup(true)
     render()
   } catch (err) {
     pathInput.style.borderColor = '#e74c3c'
