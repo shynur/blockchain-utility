@@ -174,24 +174,31 @@ function sortChildren(children) {
 
 let root = null
 
-function makeNode(key, path) {
-    return { key, path, children: [], displayState: 0 }
+function makeNode(key, path, note) {
+    return { key, path, children: [], displayState: 0, note: note || '' }
 }
 
 function parseDerivePath(input) {
-    input = input.trim().replace(/\s/g, '')
+    input = input.trim()
     if (!input.startsWith('/'))
         throw new Error('路径必须以 / 开头')
-    if (input.endsWith('/'))
-        throw new Error('路径不能以 / 结尾')
-    input = input.slice(1)
-    if (!input) return []
-    return input.split('/').map(seg => {
-        const hardened = seg.endsWith("'") || seg.toUpperCase().endsWith('H')
-        const idx = parseInt(hardened ? seg.slice(0, -1) : seg)
-        if (!Number.isInteger(idx) || idx < 0 || idx >= 2**31)
+    const raw = input.slice(1)
+    if (!raw) return []
+    return raw.split('/').map(seg => {
+        const idx = parseInt(seg)
+        if (isNaN(idx) || idx < 0 || idx >= 2**31)
             throw new Error(`Invalid index: ${seg}`)
-        return { index: idx, hardened }
+        // remove the parsed integer digits (and any leading whitespace)
+        let rest = seg.replace(/^\s*\d+/, '')
+        // trim trailing whitespace
+        rest = rest.trimEnd()
+        // remove a single trailing hardened indicator
+        let hardened = false
+        if (rest.endsWith("'") || rest.endsWith('h') || rest.endsWith('H')) {
+            hardened = true
+            rest = rest.slice(0, -1)
+        }
+        return { index: idx, hardened, note: rest.trim() }
     })
 }
 
@@ -201,7 +208,7 @@ async function derivePath(parentKey, segments) {
     for (const seg of segments) {
         const childNum = seg.index + (seg.hardened ? 2**31 : 0)
         current = await current.CKD(childNum)
-        results.push({ key: current, childNumber: childNum })
+        results.push({ key: current, childNumber: childNum, note: seg.note })
     }
     return results
 }
@@ -214,7 +221,7 @@ function mergeInto(node, derivedSteps) {
             current = existing
         } else {
             const childPath = current.path + '/' + formatIndex(step.childNumber)
-            const child = makeNode(step.key, childPath)
+            const child = makeNode(step.key, childPath, step.note)
             current.children.push(child)
             current.children = sortChildren(current.children)
             current = child
@@ -352,6 +359,11 @@ function renderTree() {
         const circle = createSVGEl('circle', {
             cx: node._x, cy: node._y, r: NODE_R, class: 'node-circle',
         })
+        if (node.note) {
+            const title = createSVGEl('title', {})
+            title.textContent = node.note
+            circle.appendChild(title)
+        }
         g.appendChild(circle)
 
         const label = node === root
@@ -369,7 +381,7 @@ function renderTree() {
         })
         const inp = document.createElement('input')
         inp.className = 'derive-input'
-        inp.placeholder = "/0'/1/2H"
+        inp.placeholder = ""
         inp.addEventListener('keydown', async e => {
             if (e.key !== 'Enter') return
             const val = inp.value.trim()
