@@ -129,6 +129,7 @@ body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e
   min-height: 20px;
 }
 #info-section:empty { display: none; }
+#info-section .fingerprint { color: #53a8b6; }
 
 #tree-container { overflow: auto; }
 svg text { user-select: none; }
@@ -354,8 +355,8 @@ async function handleInput() {
 
 // ── Info section ──
 
-function updateInfo() {
-  if (!rootKey) { infoEl.textContent = ''; return }
+async function updateInfo() {
+  if (!rootKey) { infoEl.innerHTML = ''; return }
   const k = rootKey
   const lines = []
   lines.push(`type: ${k.is_public_key() ? 'public' : 'private'}`)
@@ -366,12 +367,11 @@ function updateInfo() {
     lines.push(`index: ${idx >= HARDENED ? (idx - HARDENED) + "'" : idx}`)
     lines.push(`parent fingerprint: ${toHex(k.parent_fingerprint)}`)
   }
-  lines.push(`chain code: ${k.c.toString(16).padStart(64, '0')}`)
-  if (!k.is_public_key())
-    lines.push(`private key: ${k.k.toString(16).padStart(64, '0')}`)
-  else
-    lines.push(`public key: ${toHex(k.K.serialize())}`)
-  infoEl.textContent = lines.join('\n')
+  const id = toHex(await k.identifier())
+  const fp = id.slice(0, 8)
+  const rest = id.slice(8)
+  lines.push(`identifier: <span class="fingerprint">${fp}</span>${rest}`)
+  infoEl.innerHTML = lines.join('\n')
 }
 
 // ── Tree layout ──
@@ -417,9 +417,9 @@ function el(tag, attrs) {
   return e
 }
 
-function render() {
+async function render() {
   svg.innerHTML = ''
-  updateInfo()
+  await updateInfo()
   if (!treeRoot) { svg.removeAttribute('width'); svg.removeAttribute('height'); return }
 
   layoutTree()
