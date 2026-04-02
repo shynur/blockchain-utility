@@ -156,11 +156,23 @@ svg text { user-select: none; }
   fill: #53a8b6; font-size: 10px; font-family: 'Courier New', monospace;
   text-anchor: middle; pointer-events: none;
 }
-.path-input {
-  width: 120px; padding: 2px 4px; font-family: 'Courier New', monospace; font-size: 11px;
+.add-btn { fill: #0f3460; stroke: #53a8b6; stroke-width: 1.5; cursor: pointer; }
+.add-btn:hover { fill: #1a3a6e; }
+.add-btn-text {
+  fill: #53a8b6; font-size: 12px; font-family: 'Courier New', monospace;
+  text-anchor: middle; dominant-baseline: central; pointer-events: none;
+}
+
+#path-popup {
+  display: none; position: fixed; z-index: 999;
+  background: #16213e; border: 1px solid #53a8b6; border-radius: 4px;
+  padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+#path-popup input {
+  width: 160px; padding: 4px 6px; font-family: 'Courier New', monospace; font-size: 12px;
   background: #1a1a2e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 3px; outline: none;
 }
-.path-input:focus { border-color: #53a8b6; }
+#path-popup input:focus { border-color: #53a8b6; }
 
 #context-menu {
   display: none; position: fixed; background: #16213e; border: 1px solid #0f3460;
@@ -185,6 +197,7 @@ svg text { user-select: none; }
   <svg id="tree-svg"></svg>
 </div>
 <div id="context-menu"></div>
+<div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
 
 <script type="module">
 import { XKey, XPrv, XPub } from './index.mjs'
@@ -502,31 +515,61 @@ function drawNodes(node, ox) {
     })
   }
 
-  // path input (foreignObject)
-  const fo = el('foreignObject', { x: cx - 60, y: cy - NODE_R - 26, width: 120, height: 22 })
-  const inp = document.createElement('input')
-  inp.type = 'text'
-  inp.className = 'path-input'
-  inp.placeholder = '/path'
-  inp.addEventListener('keydown', async e => {
-    if (e.key !== 'Enter') return
-    const val = inp.value.trim()
-    if (!val || !val.startsWith('/')) return
-    try {
-      await derivePath(node, val)
-      inp.value = ''
-      render()
-    } catch (err) {
-      inp.style.borderColor = '#e74c3c'
-      setTimeout(() => inp.style.borderColor = '', 1500)
-    }
-  })
-  fo.appendChild(inp)
-  svg.appendChild(fo)
+  // + button (right-bottom of node)
+  const ADD_R = 8
+  const addX = cx + NODE_R * 0.7
+  const addY = cy + NODE_R * 0.7
+  const addBtn = el('circle', { cx: addX, cy: addY, r: ADD_R, class: 'add-btn' })
+  addBtn.addEventListener('click', e => { e.stopPropagation(); openPathPopup(node, addBtn) })
+  svg.appendChild(addBtn)
+  const addLbl = el('text', { x: addX, y: addY, class: 'add-btn-text' })
+  addLbl.textContent = '+'
+  svg.appendChild(addLbl)
 
   // recurse
   for (const ch of node.children) drawNodes(ch, ox)
 }
+
+// ── Path popup ──
+
+const pathPopup = document.getElementById('path-popup')
+const pathInput = pathPopup.querySelector('input')
+let pathPopupNode = null
+
+function openPathPopup(node, btnEl) {
+  pathPopupNode = node
+  const rect = btnEl.getBoundingClientRect()
+  pathPopup.style.display = 'block'
+  pathPopup.style.left = (rect.right + 4) + 'px'
+  pathPopup.style.top = (rect.top - 4) + 'px'
+  pathInput.value = ''
+  pathInput.style.borderColor = ''
+  pathInput.focus()
+}
+
+function closePathPopup() {
+  pathPopup.style.display = 'none'
+  pathPopupNode = null
+}
+
+pathInput.addEventListener('keydown', async e => {
+  if (e.key === 'Escape') { closePathPopup(); return }
+  if (e.key !== 'Enter') return
+  const val = pathInput.value.trim()
+  if (!val || !val.startsWith('/')) return
+  try {
+    await derivePath(pathPopupNode, val)
+    closePathPopup()
+    render()
+  } catch (err) {
+    pathInput.style.borderColor = '#e74c3c'
+    setTimeout(() => pathInput.style.borderColor = '', 1500)
+  }
+})
+
+document.addEventListener('mousedown', e => {
+  if (pathPopup.style.display === 'block' && !pathPopup.contains(e.target)) closePathPopup()
+})
 
 // ── Context menu ──
 
