@@ -130,8 +130,17 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 16px; }
 
-#deploy-badge { position: fixed; top: 8px; right: 8px; opacity: 0.5; z-index: 900; transition: opacity 0.2s; }
-#deploy-badge:hover { opacity: 1; }
+#deploy-badge {
+  position: fixed; top: 8px; right: 8px; opacity: 0.5; z-index: 900;
+  overflow: hidden; display: inline-block; border-radius: 3px;
+}
+#deploy-badge img { display: block; height: 16px; }
+#deploy-badge::after {
+  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+  pointer-events: none;
+}
+#deploy-badge:hover::after { left: 150%; transition: left 0.5s ease-in-out; }
 
 #input-section { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
 #seed-input {
