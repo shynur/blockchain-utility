@@ -116,7 +116,7 @@ BIP 32 可视化
 </head>
 <body>
     <div id="input-bar">
-        <label>Seed / Key:</label>
+        <label>种子 / [xt]{pub,prv}:</label>
         <input id="key-input" type="text" placeholder="hex seed, xprv, xpub, tprv, tpub" spellcheck="false" autocomplete="off">
         <span id="input-status"></span>
     </div>
@@ -180,7 +180,11 @@ function makeNode(key, path) {
 
 function parseDerivePath(input) {
     input = input.trim().replace(/\s/g, '')
-    if (input.startsWith('/')) input = input.slice(1)
+    if (!input.startsWith('/'))
+        throw new Error('路径必须以 / 开头')
+    if (input.endsWith('/'))
+        throw new Error('路径不能以 / 结尾')
+    input = input.slice(1)
     if (!input) return []
     return input.split('/').map(seg => {
         const hardened = seg.endsWith("'") || seg.toUpperCase().endsWith('H')
@@ -365,7 +369,7 @@ function renderTree() {
         })
         const inp = document.createElement('input')
         inp.className = 'derive-input'
-        inp.placeholder = "0'/1/2H"
+        inp.placeholder = "/0'/1/2H"
         inp.addEventListener('keydown', async e => {
             if (e.key !== 'Enter') return
             const val = inp.value.trim()
