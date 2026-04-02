@@ -32,7 +32,14 @@
 
 ### 信息栏
 
-根据输入, 显示 (子) 树根节点的信息.
+根据输入, 显示 (子) 树根节点的信息:
+
+- type: `public` 或 `private`
+- network: `mainnet` 或 `testnet`
+- depth
+- index: 仅 depth > 0 时显示, 硬化派生取模后加 `'`
+- parent fingerprint: 仅 depth > 0 时显示
+- identifier: 20 字节, 前 4 字节 (fingerprint) 高亮显示
 
 ### 绘图区
 
