@@ -8,7 +8,7 @@ BIP 32 可视化
 
 有一个输入框, 根据输入自动检测输入的是什么: 16 进制文本, xprv, xpub, tprv, tpub.
 输入会被校验, 16 进制文本需要是偶数字符, 其它的 base58 check 编码的文本也会被校验.
-输入框会响应变更, 每次变更会重新生成整棵 (子) 树.
+输入框会响应合法的变更, 每次变更会重新生成整棵 (子) 树.
 
 如果输入的是 seed, 那么页面上的根节点就是 master extended private key.
 否则, 是相应的扩展子私钥或子公钥.
@@ -30,3 +30,440 @@ BIP 32 可视化
 父节点与子节点只用会用线条连接.
 硬化派生使用虚线, 普通派生使用实线.
 -->
+<html lang='zh-Hans'>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BIP 32</title>
+    <style>
+        pre { white-space: pre-wrap; word-break: break-all; }
+
+        .tree-children { margin-left: 2em; }
+
+        .tree-node-child {
+            border-left: 2px solid #555;
+            padding-left: 1em;
+            margin-top: 0.3em;
+        }
+        .tree-node-child.hardened { border-left-style: dashed; }
+
+        .node-box {
+            display: inline-block;
+            border: 1px solid #999;
+            padding: 0.3em 0.6em;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .node-label { font-weight: bold; font-family: monospace; }
+
+        .node-info {
+            font-family: monospace;
+            font-size: 0.85em;
+            margin-top: 0.2em;
+            color: #333;
+        }
+
+        .derive-form {
+            display: inline-block;
+            margin-left: 0.5em;
+            vertical-align: middle;
+        }
+        .derive-form input {
+            width: 12em;
+            font-family: monospace;
+        }
+
+        .delete-btn {
+            margin-left: 0.3em;
+            cursor: pointer;
+            color: #c00;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+
+        #ctx-menu {
+            display: none;
+            position: fixed;
+            border: 1px solid #999;
+            background: #fff;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            z-index: 100;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+        }
+        #ctx-menu li {
+            padding: 0.4em 1em;
+            cursor: pointer;
+        }
+        #ctx-menu li:hover { background: #eee; }
+        #ctx-menu li.disabled {
+            color: #aaa;
+            cursor: default;
+        }
+        #ctx-menu li.disabled:hover { background: none; }
+    </style>
+</head>
+<body>
+    <h1>BIP 32</h1>
+
+    <fieldset>
+        <legend>输入 Seed (hex) 或 Extended Key (xprv/xpub/tprv/tpub)</legend>
+        <textarea id="input" rows="2" style="width:100%;box-sizing:border-box;resize:none;overflow:hidden;font-family:monospace" placeholder="e.g. 000102030405060708090a0b0c0d0e0f 或 xprv9s21ZrQH143K..."></textarea>
+        <pre id="input-error" style="color:#c00"></pre>
+    </fieldset>
+
+    <div id="tree-root"></div>
+
+    <ul id="ctx-menu">
+        <li id="ctx-export-prv">导出 prv (base58check)</li>
+        <li id="ctx-export-pub">导出 pub (base58check)</li>
+    </ul>
+
+    <script type="module">
+        import { XKey, XPrv, XPub } from './index.mjs'
+
+        // --- Utilities ---
+
+        const hexToBytes = hex =>
+            new Uint8Array(hex.match(/.{2}/g).map(b => parseInt(b, 16)))
+
+        const bytesToHex = bytes =>
+            Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
+
+        const bigintToHex = (n, pad = 64) =>
+            n.toString(16).padStart(pad, '0')
+
+        const HARDENED = 2 ** 31
+
+        function formatIndex(i) {
+            return i >= HARDENED ? `${i - HARDENED}'` : `${i}`
+        }
+
+        function parsePath(path) {
+            path = path.trim().toLowerCase().replace(/\s/g, '')
+            if (path === '') return []
+            if (path.startsWith('m/') || path.startsWith('m\\'))
+                path = path.slice(2)
+            else if (path.startsWith('/'))
+                path = path.slice(1)
+
+            return path.split('/').filter(s => s !== '').map(seg => {
+                const hardened = seg.endsWith("'") || seg.endsWith('h')
+                const num = parseInt(hardened ? seg.slice(0, -1) : seg)
+                if (!Number.isInteger(num) || num < 0 || num >= HARDENED)
+                    throw new Error(`无效的路径段: ${seg}`)
+                return num + (hardened ? HARDENED : 0)
+            })
+        }
+
+        // --- Tree data model ---
+
+        class TreeNode {
+            constructor(key, parent = null) {
+                this.key = key
+                this.parent = parent
+                this.children = new Map()  // index → TreeNode
+                this.displayState = 0  // 0=hidden, 1=c+k, 2=K
+                this.el = null
+            }
+        }
+
+        let root = null
+        let ctxTarget = null  // node for context menu
+
+        // --- Derive path into tree, merging ---
+
+        async function derivePath(node, indices) {
+            let current = node
+            for (const idx of indices) {
+                if (!current.children.has(idx)) {
+                    const childKey = await current.key.CKD(idx)
+                    current.children.set(idx, new TreeNode(childKey, current))
+                }
+                current = current.children.get(idx)
+            }
+            return current
+        }
+
+        // --- Rendering ---
+
+        function serP_hex(key) {
+            // For XPub: key.K has .x and .y
+            // For XPrv: compute public key via .N().K
+            const pub = key.is_public_key() ? key : key.N()
+            const K = pub.K
+            const prefix = K.y % 2n === 0n ? '02' : '03'
+            return prefix + bigintToHex(K.x)
+        }
+
+        function renderNode(node, isRoot) {
+            const wrapper = document.createElement('div')
+
+            if (!isRoot) {
+                wrapper.className = 'tree-node-child'
+                if (node.key.i >= HARDENED) wrapper.classList.add('hardened')
+            }
+
+            const box = document.createElement('div')
+            box.className = 'node-box'
+
+            // Label
+            const label = document.createElement('span')
+            label.className = 'node-label'
+            if (isRoot)
+                label.textContent = node.key.is_public_key() ? 'M' : 'm'
+            else
+                label.textContent = formatIndex(node.key.i)
+            box.appendChild(label)
+
+            // Delete button (not on root)
+            if (!isRoot) {
+                const delBtn = document.createElement('button')
+                delBtn.className = 'delete-btn'
+                delBtn.textContent = '×'
+                delBtn.title = '删除子树'
+                delBtn.addEventListener('click', e => {
+                    e.stopPropagation()
+                    if (node.parent) {
+                        node.parent.children.delete(node.key.i)
+                        renderTree()
+                    }
+                })
+                box.appendChild(delBtn)
+            }
+
+            // Info area (toggled by click)
+            const info = document.createElement('div')
+            info.className = 'node-info'
+            updateInfoDisplay(info, node)
+
+            box.addEventListener('click', e => {
+                if (e.target.closest('.delete-btn') || e.target.closest('.derive-form'))
+                    return
+                node.displayState = (node.displayState + 1) % 3
+                updateInfoDisplay(info, node)
+            })
+
+            // Context menu
+            box.addEventListener('contextmenu', e => {
+                e.preventDefault()
+                e.stopPropagation()
+                showContextMenu(e.clientX, e.clientY, node)
+            })
+
+            box.appendChild(info)
+            wrapper.appendChild(box)
+
+            // Derive form
+            const form = document.createElement('span')
+            form.className = 'derive-form'
+            const input = document.createElement('input')
+            input.placeholder = "e.g. 0'/1/2"
+            const btn = document.createElement('button')
+            btn.textContent = '派生'
+
+            async function doDeriveFromInput() {
+                const val = input.value.trim()
+                if (!val) return
+                try {
+                    const indices = parsePath(val)
+                    if (indices.length === 0) return
+                    await derivePath(node, indices)
+                    input.value = ''
+                    renderTree()
+                } catch (e) {
+                    alert('派生错误: ' + e.message)
+                }
+            }
+
+            btn.addEventListener('click', e => {
+                e.stopPropagation()
+                doDeriveFromInput()
+            })
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    e.stopPropagation()
+                    doDeriveFromInput()
+                }
+            })
+            input.addEventListener('click', e => e.stopPropagation())
+
+            form.appendChild(input)
+            form.appendChild(btn)
+            wrapper.appendChild(form)
+
+            // Children
+            if (node.children.size > 0) {
+                const childrenDiv = document.createElement('div')
+                childrenDiv.className = 'tree-children'
+                const sorted = [...node.children.entries()].sort((a, b) => a[0] - b[0])
+                for (const [, child] of sorted) {
+                    childrenDiv.appendChild(renderNode(child, false))
+                }
+                wrapper.appendChild(childrenDiv)
+            }
+
+            node.el = wrapper
+            return wrapper
+        }
+
+        function updateInfoDisplay(el, node) {
+            if (node.displayState === 0) {
+                el.textContent = ''
+                el.style.display = 'none'
+                return
+            }
+
+            el.style.display = 'block'
+            const key = node.key
+
+            if (node.displayState === 1) {
+                // Show c (chain code) and k (private key if available)
+                let text = 'c: ' + bigintToHex(key.c)
+                if (!key.is_public_key())
+                    text += '\nk: ' + bigintToHex(key.k)
+                else
+                    text += '\n(无私钥)'
+                el.textContent = text
+            } else {
+                // Show K (public key, compressed)
+                el.textContent = 'K: ' + serP_hex(key)
+            }
+        }
+
+        function renderTree() {
+            const container = document.getElementById('tree-root')
+            container.innerHTML = ''
+            if (root) container.appendChild(renderNode(root, true))
+        }
+
+        // --- Context menu ---
+
+        function showContextMenu(x, y, node) {
+            ctxTarget = node
+            const menu = document.getElementById('ctx-menu')
+            menu.style.display = 'block'
+            menu.style.left = x + 'px'
+            menu.style.top = y + 'px'
+
+            const prvItem = document.getElementById('ctx-export-prv')
+            if (node.key.is_public_key()) {
+                prvItem.classList.add('disabled')
+            } else {
+                prvItem.classList.remove('disabled')
+            }
+        }
+
+        function hideContextMenu() {
+            document.getElementById('ctx-menu').style.display = 'none'
+            ctxTarget = null
+        }
+
+        document.addEventListener('click', hideContextMenu)
+        document.addEventListener('contextmenu', e => {
+            if (!e.target.closest('.node-box'))
+                hideContextMenu()
+        })
+
+        document.getElementById('ctx-export-prv').addEventListener('click', async () => {
+            if (!ctxTarget || ctxTarget.key.is_public_key()) return
+            try {
+                const encoded = await ctxTarget.key.serialize()
+                await navigator.clipboard.writeText(encoded)
+                alert(encoded)
+            } catch (e) {
+                alert('导出错误: ' + e.message)
+            }
+            hideContextMenu()
+        })
+
+        document.getElementById('ctx-export-pub').addEventListener('click', async () => {
+            if (!ctxTarget) return
+            try {
+                const pub = ctxTarget.key.is_public_key() ? ctxTarget.key : ctxTarget.key.N()
+                const encoded = await pub.serialize()
+                await navigator.clipboard.writeText(encoded)
+                alert(encoded)
+            } catch (e) {
+                alert('导出错误: ' + e.message)
+            }
+            hideContextMenu()
+        })
+
+        // --- Input handling ---
+
+        const inputEl = document.getElementById('input')
+        const errorEl = document.getElementById('input-error')
+
+        function detectInputType(val) {
+            val = val.trim()
+            if (!val) return null
+
+            for (const prefix of ['xprv', 'xpub', 'tprv', 'tpub']) {
+                if (val.startsWith(prefix))
+                    return 'base58check'
+            }
+
+            if (/^[0-9a-fA-F]+$/.test(val)) {
+                if (val.length % 2 !== 0)
+                    return { error: 'hex 长度必须为偶数' }
+                if (val.length < 32 || val.length > 128)
+                    return { error: `seed 长度须为 16-64 字节 (32-128 hex 字符), 当前 ${val.length} 字符` }
+                return 'hex'
+            }
+
+            return { error: '无法识别的输入格式' }
+        }
+
+        let inputVersion = 0
+
+        inputEl.addEventListener('input', async () => {
+            const version = ++inputVersion
+            const val = inputEl.value.trim()
+            errorEl.textContent = ''
+
+            if (!val) {
+                root = null
+                renderTree()
+                return
+            }
+
+            const type = detectInputType(val)
+            if (!type) return
+            if (type.error) {
+                errorEl.textContent = type.error
+                root = null
+                renderTree()
+                return
+            }
+
+            try {
+                let key
+                if (type === 'hex') {
+                    key = await XPrv.from(hexToBytes(val))
+                } else {
+                    key = await XKey.deserialize(val)
+                }
+                if (version !== inputVersion) return  // stale
+                root = new TreeNode(key)
+                renderTree()
+            } catch (e) {
+                if (version !== inputVersion) return
+                errorEl.textContent = '错误: ' + e.message
+                root = null
+                renderTree()
+            }
+        })
+
+        // Auto-resize textarea
+        inputEl.addEventListener('input', () => {
+            inputEl.style.height = 'auto'
+            inputEl.style.height = inputEl.scrollHeight + 'px'
+        })
+    </script>
+</body>
+</html>
