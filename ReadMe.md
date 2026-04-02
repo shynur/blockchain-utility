@@ -1,13 +1,17 @@
+## 在线测试工具
+
 > [!NOTE]
-> 在线测试工具需要在 <https://shynur.github.io/blockchain-utility> 页面打开使用.
+> 需要在 <https://shynur.github.io/blockchain-utility> 页面打开使用.
 
-## BIP 39
+> [!TIP]
+> 测试工具可离线使用.
 
-[在线测试工具 (可离线使用)](utilities/bip39)
+> [!WARN]
+> 如果要使用该工具生成密钥, 请用浏览器提供的无痕模式, 并关闭任何不信赖的浏览器插件.
 
-## BIP 32
+[助记句生成器 (BIP 39)](utilities/bip39)
 
-[在线测试工具 (可离线使用)](utilities/bip32)
+[HD 密钥树生成 (BIP 32)](utilities/bip32)
 
 ____
 
