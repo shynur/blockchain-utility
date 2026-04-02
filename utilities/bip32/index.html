@@ -442,10 +442,9 @@ function showContextMenu(x, y, node) {
     ctxTarget = node
 
     if (node.key.is_public_key()) {
-        ctxExportPrv.classList.add('disabled')
-        ctxExportPrv.textContent = '导出 prv'
+        ctxExportPrv.style.display = 'none'
     } else {
-        ctxExportPrv.classList.remove('disabled')
+        ctxExportPrv.style.display = ''
         ctxExportPrv.textContent = `导出 ${node.key.version === 'mainnet' ? 'xprv' : 'tprv'}`
     }
 
