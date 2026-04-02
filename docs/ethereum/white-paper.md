@@ -272,7 +272,7 @@ For example, suppose that the contract’s code is:
 
 ```py
 if !self.storage[calldataload(0)]:
-  self.storage[calldataload(0)] = calldataload(32)
+    self.storage[calldataload(0)] = calldataload(32)
 ```
 
 Note that in reality the contract code is written in the low-level EVM code; this example is written in Serpent, one of our high-level languages, for clarity, and can be compiled down to EVM code.
@@ -357,9 +357,9 @@ The basic code for implementing a token system in Serpent looks as follows:
 
 ```py
 def send(to, value):
-  if self.storage[msg.sender] >= value:
-    self.storage[msg.sender] = self.storage[msg.sender] - value
-    self.storage[to] = self.storage[to] + value
+    if self.storage[msg.sender] >= value:
+       self.storage[msg.sender] = self.storage[msg.sender] - value
+       self.storage[to] = self.storage[to] + value
 ```
 
 This is essentially a literal implementation of the “banking system” state transition function described further above in this document.
@@ -403,8 +403,8 @@ Here is the basic contract to provide a Namecoin-like name registration system o
 
 ```py
 def register(name, value):
-  if !self.storage[name]:
-    self.storage[name] = value
+    if !self.storage[name]:
+        self.storage[name] = value
 ```
 
 The contract is very simple; all it is a database inside the Ethereum network that can be added to, but not modified or removed from.
@@ -579,8 +579,12 @@ floating cap: no block can have more operations than
 Specifically:
 
 ```js
-blk.oplimit = floor((blk.parent.oplimit \* (EMAFACTOR - 1) +
-floor(parent.opcount \* BLK\_LIMIT\_FACTOR)) / EMA\_FACTOR)
+blk.oplimit = floor(
+    (
+        blk.parent.oplimit * (EMAFACTOR - 1)
+        + floor(parent.opcount * BLK_LIMIT_FACTOR)
+    ) / EMA_FACTOR
+)
 ```
 
 `BLK_LIMIT_FACTOR` and `EMA_FACTOR` are constants that will be set to 65536 and 1.5 for the time being, but will likely be changed after further analysis.
