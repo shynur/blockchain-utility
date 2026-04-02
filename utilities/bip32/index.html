@@ -452,9 +452,9 @@ function showContextMenu(x, y, node) {
     ctxExportPub.textContent = `导出 ${node.key.version === 'mainnet' ? 'xpub' : 'tpub'}`
 
     if (node === root) {
-        ctxDelete.classList.add('disabled')
+        ctxDelete.style.display = 'none'
     } else {
-        ctxDelete.classList.remove('disabled')
+        ctxDelete.style.display = ''
     }
 
     ctxMenu.style.display = 'block'
