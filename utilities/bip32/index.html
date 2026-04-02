@@ -331,7 +331,7 @@ async function handleInput() {
       render()
     } else if (/^[0-9a-fA-F]*$/.test(raw)) {
       if (raw.length % 2 !== 0) { inputErrorEl.textContent = 'hex 需要偶数字符'; return }
-      if (raw.length < 32 || raw.length > 128) { inputErrorEl.textContent = 'seed: 16-64 字节 (32-128 hex)'; return }
+      if (raw.length < 32 || raw.length > 128) { inputErrorEl.textContent = `seed: 16-64 字节 (32-128 hex), 当前 ${raw.length / 2} 字节`; return }
       inputTypeEl.textContent = 'seed'
       const key = await XPrv.from(hexToBytes(raw))
       rootKey = key
