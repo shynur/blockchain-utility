@@ -1,97 +1,25 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>BIP32</title>
-</head>
-<body>
-<input id="root" placeholder="hex seed / xprv / xpub">
-<div id="tree"></div>
-<script type="module">
-import {XPrv, XKey} from './index.mjs'
+<!--
+- 单文件
+- 无 CSS
 
-const rootInput = document.getElementById('root')
-const treeDiv = document.getElementById('tree')
-let rootKey = null
+有一个输入框, 根据输入自动检测输入的是什么: 16 进制文本, xprv, xpub, tprv, tpub.
+输入会被校验, 16 进制文本需要是偶数字符, 其它的 base58 check 编码的文本也会被校验.
+输入框会响应变更, 每次变更会重新生成整棵 (子) 树.
 
-rootInput.addEventListener('input', async () => {
-  const val = rootInput.value.trim()
-  if (!val) return
+如果输入的是 seed, 那么页面上的根节点就是 master extended private key.
+否则, 是相应的扩展子私钥或子公钥.
 
-  try {
-    if (val.match(/^[0-9a-f]+$/i)) {
-      const seed = new Uint8Array(val.match(/.{2}/g).map(b => parseInt(b, 16)))
-      rootKey = await XPrv.from(seed)
-    } else {
-      rootKey = await XKey.deserialize(val)
-    }
-    render()
-  } catch (e) {
-    console.error(e)
-  }
-})
+对于页面上的节点, 根节点会标注 m/M, 其它节点标注 index.
 
-async function render() {
-  treeDiv.innerHTML = ''
-  if (!rootKey) return
-  await addNode(rootKey, rootKey.is_public_key() ? 'M' : 'm', treeDiv)
-}
+节点有一个输入框用来输入自该节点开始要派生的路径, 输入完并确认后, 一次性全部派生.
+会对该输入进行校验, 格式必须是 `^(/[0-9]+'?)+$`.
+输入多次, 会生成多颗子树.
 
-async function addNode(key, path, parent) {
-  const div = document.createElement('div')
-  div.style.marginLeft = '20px'
+点击节点, 该节点会切换显示 c (chain code) 和 k (私钥) (若可获得).
+否则显示 K (公钥).
 
-  const label = document.createElement('div')
-  label.textContent = path
-  label.style.fontWeight = 'bold'
-  div.appendChild(label)
+节点有删除按钮, 用于删除整棵子树.
 
-  const display = document.createElement('div')
-  display.style.fontFamily = 'monospace'
-  display.style.fontSize = '12px'
-  display.style.cursor = 'pointer'
-  display.textContent = `c: ${key.c.toString(16).padStart(64, '0')}`
-
-  let showChain = true
-  display.addEventListener('click', () => {
-    if (key.is_public_key()) {
-      showChain = !showChain
-      display.textContent = showChain
-        ? `c: ${key.c.toString(16).padStart(64, '0')}`
-        : `K: ${key.K.x.toString(16).padStart(64, '0')}`
-    } else {
-      showChain = !showChain
-      display.textContent = showChain
-        ? `c: ${key.c.toString(16).padStart(64, '0')}`
-        : `k: ${key.k.toString(16).padStart(64, '0')}`
-    }
-  })
-  div.appendChild(display)
-
-  const input = document.createElement('input')
-  input.placeholder = 'path (e.g. /0/1)'
-  input.style.width = '200px'
-  div.appendChild(input)
-
-  const childrenDiv = document.createElement('div')
-  div.appendChild(childrenDiv)
-
-  input.addEventListener('change', async () => {
-    const p = input.value.trim()
-    if (!p) return
-
-    try {
-      const derived = await key.tree(p)
-      childrenDiv.innerHTML = ''
-      const childPath = path + p.replace(/h/gi, "'")
-      await addNode(derived, childPath, childrenDiv)
-    } catch (e) {
-      console.error(e)
-    }
-  })
-
-  parent.appendChild(div)
-}
-</script>
-</body>
-</html>
+右键节点, 会弹出菜单, 可以选择导出 prv 或 pub 的 base58 check 编码.
+-->
