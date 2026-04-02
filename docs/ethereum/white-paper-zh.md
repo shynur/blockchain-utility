@@ -1830,11 +1830,8 @@ Ethereum protocol 所实现的任意状态转移函数概念，为其提供了�
 21. [Peter Todd on Merkle sum trees](https://web.archive.org/web/20140623061815/http://sourceforge.net/p/bitcoin/mailman/message/31709140/)
 
 
-[^1]: A sophisticated reader may notice that in fact a Bitcoin address is the hash of the elliptic curve public key, and not the public key itself.  However, it is in fact perfectly legitimate cryptographic terminology to refer to the pubkey hash as a public key itself.  This is because Bitcoin’s cryptography can be considered to be a custom digital signature algorithm, where the public key consists of the hash of the ECC pubkey, the signature consists of the ECC pubkey concatenated with the ECC signature, and the verification algorithm involves checking the ECC pubkey in the signature against the ECC pubkey hash provided as a public key and then verifying the ECC signature against the ECC pubkey.
-  较为熟悉细节的读者可能会注意到，实际上 Bitcoin address 是椭圆曲线公钥的 hash，而不是公钥本身。不过，在密码学术语中，把 pubkey hash 本身称作公钥也完全合理。这是因为 Bitcoin 的密码学可以被看作一种定制的数字签名算法：其中公钥由 ECC pubkey 的 hash 构成，签名由 ECC pubkey 与 ECC signature 拼接而成，而验证算法则包括检查签名中的 ECC pubkey 是否与作为公钥提供的 ECC pubkey hash 匹配，然后再用该 ECC pubkey 验证 ECC signature。
+[^1]: A sophisticated reader may notice that in fact a Bitcoin address is the hash of the elliptic curve public key, and not the public key itself.  However, it is in fact perfectly legitimate cryptographic terminology to refer to the pubkey hash as a public key itself.  This is because Bitcoin’s cryptography can be considered to be a custom digital signature algorithm, where the public key consists of the hash of the ECC pubkey, the signature consists of the ECC pubkey concatenated with the ECC signature, and the verification algorithm involves checking the ECC pubkey in the signature against the ECC pubkey hash provided as a public key and then verifying the ECC signature against the ECC pubkey.  较为熟悉细节的读者可能会注意到，实际上 Bitcoin address 是椭圆曲线公钥的 hash，而不是公钥本身。不过，在密码学术语中，把 pubkey hash 本身称作公钥也完全合理。这是因为 Bitcoin 的密码学可以被看作一种定制的数字签名算法：其中公钥由 ECC pubkey 的 hash 构成，签名由 ECC pubkey 与 ECC signature 拼接而成，而验证算法则包括检查签名中的 ECC pubkey 是否与作为公钥提供的 ECC pubkey hash 匹配，然后再用该 ECC pubkey 验证 ECC signature。
 
-[^2]: Technically, the median of the 11 previous blocks.
-  更准确地说，是前 11 个 blocks 的中位数。
+[^2]: Technically, the median of the 11 previous blocks.  更准确地说，是前 11 个 blocks 的中位数。
 
-[^3]: Internally, 2 and “CHARLIE” are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.
-  在内部表示上，2 和 “CHARLIE” 都是数字[^3]，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
+[^3]: Internally, 2 and “CHARLIE” are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.  在内部表示上，2 和 “CHARLIE” 都是数字[^3]，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
