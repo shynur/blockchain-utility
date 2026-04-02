@@ -4,7 +4,7 @@
 
 BIP 32 可视化
 
-- 单文件, 仅依赖 ./index.mjs
+- 单文件, script tag 仅允许加载 ./index.mjs module
 
 不需要大标题.
 
@@ -35,3 +35,527 @@ BIP 32 可视化
 硬化派生使用虚线, 普通派生使用实线.
 子节点先按照 index 排序, 如果普通派生和硬化派生的 index 相同, 普通派生在前, 硬化派生在后.
 -->
+<html lang='zh-Hans'>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BIP 32</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: monospace; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+
+        #input-bar {
+            padding: 12px 16px;
+            display: flex; gap: 10px; align-items: center;
+            background: #16213e; border-bottom: 1px solid #0f3460;
+        }
+        #input-bar label { white-space: nowrap; color: #8888aa; }
+        #key-input {
+            flex: 1; padding: 6px 10px;
+            background: #0a0a1a; color: #e0e0e0; border: 1px solid #0f3460;
+            border-radius: 4px; font-family: monospace; font-size: 14px;
+        }
+        #key-input:focus { outline: none; border-color: #e94560; }
+        #input-status { font-size: 12px; color: #8888aa; white-space: nowrap; }
+        #input-status.error { color: #e94560; }
+        #input-status.ok { color: #4ecca3; }
+
+        #tree-container {
+            position: relative;
+            overflow: auto; width: 100%; height: calc(100vh - 45px);
+        }
+        #tree-svg { display: block; }
+
+        .edge { fill: none; stroke: #0f3460; stroke-width: 2; }
+        .edge.hardened { stroke-dasharray: 6 4; }
+
+        .node-circle {
+            fill: #16213e; stroke: #0f3460; stroke-width: 2; cursor: pointer;
+            transition: fill 0.15s;
+        }
+        .node-circle:hover { fill: #1a1a3e; stroke: #e94560; }
+
+        .node-label {
+            fill: #e0e0e0; font-family: monospace; font-size: 13px;
+            text-anchor: middle; dominant-baseline: central;
+            pointer-events: none; user-select: none;
+        }
+
+        .derive-input {
+            background: #0a0a1a; color: #e0e0e0; border: 1px solid #0f3460;
+            border-radius: 3px; font-family: monospace; font-size: 11px;
+            padding: 2px 4px; width: 100px; text-align: center;
+        }
+        .derive-input:focus { outline: none; border-color: #e94560; }
+        .derive-input::placeholder { color: #444466; }
+
+        .node-info {
+            position: absolute;
+            background: #16213e; border: 1px solid #0f3460; border-radius: 4px;
+            padding: 8px 10px; z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            max-width: 500px; pointer-events: none;
+        }
+        .node-info .info-row { margin: 2px 0; font-size: 11px; word-break: break-all; }
+        .node-info .info-label { color: #e94560; }
+        .node-info .info-value { color: #4ecca3; }
+
+        #ctx-menu {
+            display: none; position: fixed;
+            background: #16213e; border: 1px solid #0f3460; border-radius: 4px;
+            min-width: 160px; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #ctx-menu .menu-item {
+            padding: 8px 14px; cursor: pointer; font-size: 13px;
+            border-bottom: 1px solid #0f3460;
+        }
+        #ctx-menu .menu-item:last-child { border-bottom: none; }
+        #ctx-menu .menu-item:hover { background: #1a1a3e; }
+        #ctx-menu .menu-item.disabled { color: #444466; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="input-bar">
+        <label>Seed / Key:</label>
+        <input id="key-input" type="text" placeholder="hex seed, xprv, xpub, tprv, tpub" spellcheck="false" autocomplete="off">
+        <span id="input-status"></span>
+    </div>
+    <div id="tree-container">
+        <svg id="tree-svg"></svg>
+        <div id="info-panels"></div>
+    </div>
+    <div id="ctx-menu">
+        <div class="menu-item" id="ctx-export-prv">导出 prv</div>
+        <div class="menu-item" id="ctx-export-pub">导出 pub</div>
+        <div class="menu-item" id="ctx-delete">删除子树</div>
+    </div>
+
+    <script type="module">
+import { XKey, XPrv, XPub } from './index.mjs'
+
+// ── helpers ──
+
+const toHex = n => {
+    if (typeof n === 'bigint') return n.toString(16).padStart(64, '0')
+    if (n instanceof Uint8Array) return Array.from(n, b => b.toString(16).padStart(2, '0')).join('')
+    return ''
+}
+
+const hexToBytes = hex => {
+    const bytes = new Uint8Array(hex.length / 2)
+    for (let i = 0; i < bytes.length; i++)
+        bytes[i] = parseInt(hex.slice(2 * i, 2 * i + 2), 16)
+    return bytes
+}
+
+function pathToFilename(path, isNeuter) {
+    let name = path.replace(/\//g, '-').replace(/'/g, 'H')
+    if (isNeuter) name += 'N'
+    return name + '.txt'
+}
+
+function formatIndex(childNumber) {
+    if (childNumber >= 2 ** 31)
+        return (childNumber - 2 ** 31) + "'"
+    return String(childNumber)
+}
+
+function sortChildren(children) {
+    return children.slice().sort((a, b) => {
+        const ai = a.key.i, bi = b.key.i
+        const aBase = ai >= 2**31 ? ai - 2**31 : ai
+        const bBase = bi >= 2**31 ? bi - 2**31 : bi
+        if (aBase !== bBase) return aBase - bBase
+        return (ai >= 2**31 ? 1 : 0) - (bi >= 2**31 ? 1 : 0)
+    })
+}
+
+// ── tree data model ──
+
+let root = null
+
+function makeNode(key, path) {
+    return { key, path, children: [], displayState: 0 }
+}
+
+function parseDerivePath(input) {
+    input = input.trim().replace(/\s/g, '')
+    if (input.startsWith('/')) input = input.slice(1)
+    if (!input) return []
+    return input.split('/').map(seg => {
+        const hardened = seg.endsWith("'") || seg.toUpperCase().endsWith('H')
+        const idx = parseInt(hardened ? seg.slice(0, -1) : seg)
+        if (!Number.isInteger(idx) || idx < 0 || idx >= 2**31)
+            throw new Error(`Invalid index: ${seg}`)
+        return { index: idx, hardened }
+    })
+}
+
+async function derivePath(parentKey, segments) {
+    const results = []
+    let current = parentKey
+    for (const seg of segments) {
+        const childNum = seg.index + (seg.hardened ? 2**31 : 0)
+        current = await current.CKD(childNum)
+        results.push({ key: current, childNumber: childNum })
+    }
+    return results
+}
+
+function mergeInto(node, derivedSteps) {
+    let current = node
+    for (const step of derivedSteps) {
+        const existing = current.children.find(c => c.key.i === step.childNumber)
+        if (existing) {
+            current = existing
+        } else {
+            const childPath = current.path + '/' + formatIndex(step.childNumber)
+            const child = makeNode(step.key, childPath)
+            current.children.push(child)
+            current.children = sortChildren(current.children)
+            current = child
+        }
+    }
+}
+
+function findParent(tree, target) {
+    for (const child of tree.children) {
+        if (child === target) return tree
+        const found = findParent(child, target)
+        if (found) return found
+    }
+    return null
+}
+
+// ── layout ──
+
+const NODE_R = 22
+const LEVEL_H = 90
+const NODE_W = 70
+
+function subtreeWidth(node) {
+    if (node.children.length === 0) return NODE_W
+    let w = 0
+    for (const c of node.children) w += subtreeWidth(c)
+    return Math.max(NODE_W, w)
+}
+
+function layoutTree(node, x, y) {
+    node._x = x
+    node._y = y
+    if (node.children.length === 0) return
+    const totalW = subtreeWidth(node)
+    let cx = x - totalW / 2
+    for (const child of node.children) {
+        const cw = subtreeWidth(child)
+        layoutTree(child, cx + cw / 2, y + LEVEL_H)
+        cx += cw
+    }
+}
+
+// ── SVG rendering ──
+
+const svgNS = 'http://www.w3.org/2000/svg'
+const svg = document.getElementById('tree-svg')
+const infoPanels = document.getElementById('info-panels')
+
+function clearSVG() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild)
+    infoPanels.innerHTML = ''
+}
+
+function createSVGEl(tag, attrs) {
+    const el = document.createElementNS(svgNS, tag)
+    for (const [k, v] of Object.entries(attrs))
+        el.setAttribute(k, v)
+    return el
+}
+
+function createInfoPanel(node) {
+    if (node.displayState === 0) return
+
+    const div = document.createElement('div')
+    div.className = 'node-info'
+
+    if (node.displayState === 1) {
+        div.innerHTML =
+            `<div class="info-row"><span class="info-label">c: </span><span class="info-value">${toHex(node.key.c)}</span></div>` +
+            (!node.key.is_public_key()
+                ? `<div class="info-row"><span class="info-label">k: </span><span class="info-value">${toHex(node.key.k)}</span></div>`
+                : '')
+    } else {
+        const pub = node.key.is_public_key() ? node.key : node.key.N()
+        div.innerHTML = `<div class="info-row"><span class="info-label">K: </span><span class="info-value">${toHex(pub.K.serialize())}</span></div>`
+    }
+
+    div.style.left = (node._x + NODE_R + 8) + 'px'
+    div.style.top = (node._y - 10) + 'px'
+    infoPanels.appendChild(div)
+}
+
+function renderTree() {
+    clearSVG()
+    if (!root) return
+
+    layoutTree(root, 0, 40)
+
+    // compute bounding box
+    let minX = Infinity, maxX = -Infinity, maxY = 0
+    function scan(n) {
+        if (n._x - NODE_R - 60 < minX) minX = n._x - NODE_R - 60
+        if (n._x + NODE_R + 60 > maxX) maxX = n._x + NODE_R + 60
+        if (n._y + NODE_R + 30 > maxY) maxY = n._y + NODE_R + 30
+        for (const c of n.children) scan(c)
+    }
+    scan(root)
+
+    const svgW = maxX - minX + 40
+    const svgH = maxY + 20
+    const offsetX = -minX + 20
+
+    svg.setAttribute('width', svgW)
+    svg.setAttribute('height', svgH)
+    svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`)
+
+    function shift(n) {
+        n._x += offsetX
+        for (const c of n.children) shift(c)
+    }
+    shift(root)
+
+    // draw edges (behind nodes)
+    function drawEdges(node) {
+        for (const child of node.children) {
+            const hardened = child.key.i >= 2**31
+            const x1 = node._x, y1 = node._y + NODE_R
+            const x2 = child._x, y2 = child._y - NODE_R
+            const cy1 = y1 + (y2 - y1) * 0.4
+            const cy2 = y1 + (y2 - y1) * 0.6
+            const path = createSVGEl('path', {
+                d: `M ${x1} ${y1} C ${x1} ${cy1}, ${x2} ${cy2}, ${x2} ${y2}`,
+                class: 'edge' + (hardened ? ' hardened' : ''),
+            })
+            svg.appendChild(path)
+            drawEdges(child)
+        }
+    }
+    drawEdges(root)
+
+    // draw nodes
+    function drawNode(node) {
+        const g = createSVGEl('g', {})
+
+        const circle = createSVGEl('circle', {
+            cx: node._x, cy: node._y, r: NODE_R, class: 'node-circle',
+        })
+        g.appendChild(circle)
+
+        const label = node === root
+            ? (node.key.is_public_key() ? 'M' : 'm')
+            : formatIndex(node.key.i)
+        const text = createSVGEl('text', {
+            x: node._x, y: node._y, class: 'node-label',
+        })
+        text.textContent = label
+        g.appendChild(text)
+
+        // derivation input
+        const foInput = createSVGEl('foreignObject', {
+            x: node._x - 52, y: node._y + NODE_R + 4, width: 104, height: 22,
+        })
+        const inp = document.createElement('input')
+        inp.className = 'derive-input'
+        inp.placeholder = "0'/1/2H"
+        inp.addEventListener('keydown', async e => {
+            if (e.key !== 'Enter') return
+            const val = inp.value.trim()
+            if (!val) return
+            inp.disabled = true
+            try {
+                const segments = parseDerivePath(val)
+                if (segments.length === 0) return
+                const steps = await derivePath(node.key, segments)
+                mergeInto(node, steps)
+                renderTree()
+            } catch (err) {
+                inp.style.borderColor = '#e94560'
+                inp.title = err.message
+                inp.disabled = false
+            }
+        })
+        foInput.appendChild(inp)
+        g.appendChild(foInput)
+
+        // click → toggle display state (0 → 1 → 2 → 0)
+        circle.addEventListener('click', () => {
+            node.displayState = (node.displayState + 1) % 3
+            renderTree()
+        })
+
+        // right-click
+        circle.addEventListener('contextmenu', e => {
+            e.preventDefault()
+            showContextMenu(e.clientX, e.clientY, node)
+        })
+        text.addEventListener('contextmenu', e => {
+            e.preventDefault()
+            showContextMenu(e.clientX, e.clientY, node)
+        })
+
+        svg.appendChild(g)
+
+        // info panel (HTML overlay)
+        createInfoPanel(node)
+
+        for (const child of node.children) drawNode(child)
+    }
+    drawNode(root)
+}
+
+// ── context menu ──
+
+const ctxMenu = document.getElementById('ctx-menu')
+const ctxExportPrv = document.getElementById('ctx-export-prv')
+const ctxExportPub = document.getElementById('ctx-export-pub')
+const ctxDelete = document.getElementById('ctx-delete')
+let ctxTarget = null
+
+ctxMenu.addEventListener('click', e => e.stopPropagation())
+
+function showContextMenu(x, y, node) {
+    ctxTarget = node
+
+    if (node.key.is_public_key()) {
+        ctxExportPrv.classList.add('disabled')
+        ctxExportPrv.textContent = '导出 prv'
+    } else {
+        ctxExportPrv.classList.remove('disabled')
+        ctxExportPrv.textContent = `导出 ${node.key.version === 'mainnet' ? 'xprv' : 'tprv'}`
+    }
+
+    ctxExportPub.textContent = `导出 ${node.key.version === 'mainnet' ? 'xpub' : 'tpub'}`
+
+    if (node === root) {
+        ctxDelete.classList.add('disabled')
+    } else {
+        ctxDelete.classList.remove('disabled')
+    }
+
+    ctxMenu.style.display = 'block'
+    ctxMenu.style.left = x + 'px'
+    ctxMenu.style.top = y + 'px'
+
+    const rect = ctxMenu.getBoundingClientRect()
+    if (rect.right > window.innerWidth)
+        ctxMenu.style.left = (x - rect.width) + 'px'
+    if (rect.bottom > window.innerHeight)
+        ctxMenu.style.top = (y - rect.height) + 'px'
+}
+
+function hideContextMenu() {
+    ctxMenu.style.display = 'none'
+    ctxTarget = null
+}
+
+document.addEventListener('click', hideContextMenu)
+
+function downloadFile(filename, content) {
+    const blob = new Blob([content], { type: 'text/plain' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = filename
+    a.click()
+    URL.revokeObjectURL(a.href)
+}
+
+ctxExportPrv.addEventListener('click', async () => {
+    const target = ctxTarget
+    if (!target || target.key.is_public_key()) return
+    const serialized = await target.key.serialize()
+    downloadFile(pathToFilename(target.path, false), serialized)
+    hideContextMenu()
+})
+
+ctxExportPub.addEventListener('click', async () => {
+    const target = ctxTarget
+    if (!target) return
+    const isNeuter = !target.key.is_public_key()
+    const pubKey = isNeuter ? target.key.N() : target.key
+    const serialized = await pubKey.serialize()
+    downloadFile(pathToFilename(target.path, isNeuter), serialized)
+    hideContextMenu()
+})
+
+ctxDelete.addEventListener('click', () => {
+    const target = ctxTarget
+    if (!target || target === root) return
+    const parent = findParent(root, target)
+    if (parent) {
+        parent.children = parent.children.filter(c => c !== target)
+        renderTree()
+    }
+    hideContextMenu()
+})
+
+// ── input handling ──
+
+const keyInput = document.getElementById('key-input')
+const inputStatus = document.getElementById('input-status')
+
+function setStatus(msg, type) {
+    inputStatus.textContent = msg
+    inputStatus.className = type || ''
+}
+
+let inputDebounce = null
+keyInput.addEventListener('input', () => {
+    clearTimeout(inputDebounce)
+    inputDebounce = setTimeout(handleInput, 200)
+})
+
+async function handleInput() {
+    const val = keyInput.value.trim()
+    if (!val) {
+        root = null
+        setStatus('')
+        renderTree()
+        return
+    }
+
+    if (/^[0-9a-fA-F]+$/.test(val)) {
+        if (val.length % 2 !== 0) {
+            setStatus('hex: 需要偶数字符', 'error')
+            return
+        }
+        const bytes = hexToBytes(val)
+        if (bytes.length < 16 || bytes.length > 64) {
+            setStatus(`hex: seed 长度须为 16-64 bytes, 当前 ${bytes.length}`, 'error')
+            return
+        }
+        setStatus('seed (' + bytes.length + ' bytes)', 'ok')
+        try {
+            root = makeNode(await XPrv.from(bytes), 'm')
+            renderTree()
+        } catch (e) {
+            setStatus('seed 错误: ' + e.message, 'error')
+        }
+    } else if (/^[xt]p(rv|ub)/.test(val)) {
+        if (val.length !== 111) {
+            setStatus(`base58check: 需要 111 字符, 当前 ${val.length}`, 'error')
+            return
+        }
+        try {
+            const key = await XKey.deserialize(val)
+            setStatus(val.slice(0, 4), 'ok')
+            root = makeNode(key, key.is_public_key() ? 'M' : 'm')
+            renderTree()
+        } catch (e) {
+            setStatus('反序列化错误: ' + e.message, 'error')
+        }
+    } else {
+        setStatus('无法识别的输入格式', 'error')
+    }
+}
+    </script>
+</body>
+</html>
