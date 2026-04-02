@@ -17,9 +17,9 @@ _尽管这篇论文已有数年历史，我们仍保留其原文，因为它依�
 
 ## A Next-Generation Smart Contract and Decentralized Application Platform
 
-Satoshi Nakamoto’s development of Bitcoin in 2009 has often been hailed as a radical development in money and currency, being the first example of a digital asset which simultaneously has no backing or "[intrinsic value](https://bitcoinmagazine.com/culture/an-exploration-of-intrinsic-value-what-it-is-why-bitcoin-doesnt-have-it-and-why-bitcoin-does-have-it)" and no centralized issuer or controller.
+Satoshi Nakamoto’s development of Bitcoin in 2009 has often been hailed as a radical development in money and currency, being the first example of a digital asset which simultaneously has no backing or “[intrinsic value](https://bitcoinmagazine.com/culture/an-exploration-of-intrinsic-value-what-it-is-why-bitcoin-doesnt-have-it-and-why-bitcoin-does-have-it)” and no centralized issuer or controller.
 
-Satoshi Nakamoto 在 2009 年对 Bitcoin 的开发，常被誉为货币与通货领域的一次激进突破，因为它第一次展示了一种既没有任何背书或"[intrinsic value](https://bitcoinmagazine.com/culture/an-exploration-of-intrinsic-value-what-it-is-why-bitcoin-doesnt-have-it-and-why-bitcoin-does-have-it)"，也没有中心化发行方或控制者的数字资产。
+Satoshi Nakamoto 在 2009 年对 Bitcoin 的开发，常被誉为货币与通货领域的一次激进突破，因为它第一次展示了一种既没有任何背书或“[intrinsic value](https://bitcoinmagazine.com/culture/an-exploration-of-intrinsic-value-what-it-is-why-bitcoin-doesnt-have-it-and-why-bitcoin-does-have-it)”，也没有中心化发行方或控制者的数字资产。
 
 > **Satoshi Nakamoto**<br />
 > Bitcoin 的匿名创造者, 其真实身份至今成谜.
@@ -38,9 +38,9 @@ However, another, arguably more important, part of the Bitcoin experiment is the
 > 这句话在 2013 年写下时非常有前瞻性.
 > 当时大多数人只把 Bitcoin 看作一种数字货币, 而 Vitalik 已经看到了 blockchain 技术在共识机制方面的更广泛潜力.
 
-Commonly cited alternative applications of blockchain technology include using on-blockchain digital assets to represent custom currencies and financial instruments ("[colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit)"), the ownership of an underlying physical device ("[smart property](https://en.bitcoin.it/wiki/Smart_Property)"), non-fungible assets such as domain names ("[Namecoin](http://namecoin.org)"), as well as more complex applications involving having digital assets being directly controlled by a piece of code implementing arbitrary rules ("[smart contracts](http://www.fon.hum.uva.nl/rob/Courses/InformationInSpeech/CDROM/Literature/LOTwinterschool2006/szabo.best.vwh.net/idea.html)") or even blockchain-based "[decentralized autonomous organizations](http://bitcoinmagazine.com/7050/bootstrapping-a-decentralized-autonomous-corporation-part-i/)" (DAOs).
+Commonly cited alternative applications of blockchain technology include using on-blockchain digital assets to represent custom currencies and financial instruments (“[colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit)”), the ownership of an underlying physical device (“[smart property](https://en.bitcoin.it/wiki/Smart_Property)”), non-fungible assets such as domain names (“[Namecoin](http://namecoin.org)”), as well as more complex applications involving having digital assets being directly controlled by a piece of code implementing arbitrary rules (“[smart contracts](http://www.fon.hum.uva.nl/rob/Courses/InformationInSpeech/CDROM/Literature/LOTwinterschool2006/szabo.best.vwh.net/idea.html)”) or even blockchain-based “[decentralized autonomous organizations](http://bitcoinmagazine.com/7050/bootstrapping-a-decentralized-autonomous-corporation-part-i/)” (DAOs).
 
-人们经常提到的 blockchain 技术替代应用，包括使用链上数字资产来表示自定义货币和金融工具（"[colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit)"）、表示某个底层实体设备的所有权（"[smart property](https://en.bitcoin.it/wiki/Smart_Property)"）、表示诸如域名之类的非同质化资产（"[Namecoin](http://namecoin.org)"），以及更复杂的应用，例如让数字资产由一段实现任意规则的代码直接控制（"[smart contracts](http://www.fon.hum.uva.nl/rob/Courses/InformationInSpeech/CDROM/Literature/LOTwinterschool2006/szabo.best.vwh.net/idea.html)"），甚至是基于 blockchain 的"[decentralized autonomous organizations](http://bitcoinmagazine.com/7050/bootstrapping-a-decentralized-autonomous-corporation-part-i/)"（DAOs）。
+人们经常提到的 blockchain 技术替代应用，包括使用链上数字资产来表示自定义货币和金融工具（“[colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit)”）、表示某个底层实体设备的所有权（“[smart property](https://en.bitcoin.it/wiki/Smart_Property)”）、表示诸如域名之类的非同质化资产（“[Namecoin](http://namecoin.org)”），以及更复杂的应用，例如让数字资产由一段实现任意规则的代码直接控制（“[smart contracts](http://www.fon.hum.uva.nl/rob/Courses/InformationInSpeech/CDROM/Literature/LOTwinterschool2006/szabo.best.vwh.net/idea.html)”），甚至是基于 blockchain 的“[decentralized autonomous organizations](http://bitcoinmagazine.com/7050/bootstrapping-a-decentralized-autonomous-corporation-part-i/)”（DAOs）。
 
 > **smart contracts (智能合约)**<br />
 > 这一概念由密码学家 Nick Szabo 在 1990 年代中期提出, 远早于 Bitcoin 的诞生.
@@ -51,9 +51,9 @@ Commonly cited alternative applications of blockchain technology include using o
 > 一种完全由代码规则和成员投票驱动的组织形式, 没有传统的管理层级.
 > 在后来的实践中, DAOs 成为了 DeFi 和 Web3 治理的核心模式之一.
 
-What Ethereum intends to provide is a blockchain with a built-in fully fledged Turing-complete programming language that can be used to create "contracts" that can be used to encode arbitrary state transition functions, allowing users to create any of the systems described above, as well as many others that we have not yet imagined, simply by writing up the logic in a few lines of code.
+What Ethereum intends to provide is a blockchain with a built-in fully fledged Turing-complete programming language that can be used to create “contracts” that can be used to encode arbitrary state transition functions, allowing users to create any of the systems described above, as well as many others that we have not yet imagined, simply by writing up the logic in a few lines of code.
 
-Ethereum 想要提供的是一条内建完整 Turing-complete 编程语言的 blockchain，这种语言可用于创建"contracts"，从而编码任意状态转移函数，使用户只需写出几行逻辑代码，就能构建上述任何一种系统，以及许多我们尚未设想出来的其他系统。
+Ethereum 想要提供的是一条内建完整 Turing-complete 编程语言的 blockchain，这种语言可用于创建“contracts”，从而编码任意状态转移函数，使用户只需写出几行逻辑代码，就能构建上述任何一种系统，以及许多我们尚未设想出来的其他系统。
 
 > **Turing-complete (图灵完备)**<br />
 > 指一个计算系统能够模拟任意图灵机, i.e., 理论上可以执行任何可计算的程序.
@@ -62,7 +62,7 @@ Ethereum 想要提供的是一条内建完整 Turing-complete 编程语言的 bl
 
 > **核心命题**<br />
 > 这段话是整篇白皮书的核心论点: 与其为每种应用各造一条专用链, 不如造一条通用可编程的链.
-> 这正是 Ethereum 被称为"世界计算机"的原因.
+> 这正是 Ethereum 被称为“世界计算机”的原因.
 
 ## Introduction to Bitcoin and Existing Concepts
 
@@ -90,18 +90,18 @@ In 1998, Wei Dai’s [b-money](http://www.weidai.com/bmoney.txt) became the firs
 
 1998 年，Wei Dai 的 [b-money](http://www.weidai.com/bmoney.txt) 首次提出通过求解计算谜题以及去中心化共识来创造货币的思想，但该提案对于去中心化共识究竟如何落地实现，细节仍然相当匮乏。
 
-In 2005, Hal Finney introduced a concept of "[reusable proofs of work](https://nakamotoinstitute.org/finney/rpow/)", a system which uses ideas from b-money together with Adam Back’s computationally difficult Hashcash puzzles to create a concept for a cryptocurrency, but once again fell short of the ideal by relying on trusted computing as a backend.
+In 2005, Hal Finney introduced a concept of “[reusable proofs of work](https://nakamotoinstitute.org/finney/rpow/)”, a system which uses ideas from b-money together with Adam Back’s computationally difficult Hashcash puzzles to create a concept for a cryptocurrency, but once again fell short of the ideal by relying on trusted computing as a backend.
 
-2005 年，Hal Finney 提出了"[reusable proofs of work](https://nakamotoinstitute.org/finney/rpow/)"这一概念。该系统结合了 b-money 的思想以及 Adam Back 提出的计算上较难的 Hashcash 谜题，形成了一种 cryptocurrency 的构想；但它再次因为依赖可信计算作为后端，而未能达到理想中的去中心化目标。
+2005 年，Hal Finney 提出了“[reusable proofs of work](https://nakamotoinstitute.org/finney/rpow/)”这一概念。该系统结合了 b-money 的思想以及 Adam Back 提出的计算上较难的 Hashcash 谜题，形成了一种 cryptocurrency 的构想；但它再次因为依赖可信计算作为后端，而未能达到理想中的去中心化目标。
 
-In 2009, a decentralized currency was for the first time implemented in practice by Satoshi Nakamoto, combining established primitives for managing ownership through public key cryptography with a consensus algorithm for keeping track of who owns coins, known as "proof-of-work".
+In 2009, a decentralized currency was for the first time implemented in practice by Satoshi Nakamoto, combining established primitives for managing ownership through public key cryptography with a consensus algorithm for keeping track of who owns coins, known as “proof-of-work”.
 
-2009 年，Satoshi Nakamoto 首次在实践中实现了一种去中心化货币，将通过公钥密码学管理所有权的成熟原语，与一种用于追踪 coin 归属的共识算法结合起来，这种算法被称为 "proof-of-work"。
+2009 年，Satoshi Nakamoto 首次在实践中实现了一种去中心化货币，将通过公钥密码学管理所有权的成熟原语，与一种用于追踪 coin 归属的共识算法结合起来，这种算法被称为 “proof-of-work”。
 
 > **Bitcoin 的两大创新**<br />
 > Satoshi 并没有发明全新的密码学, 他的天才在于组合:
-> (1) 公钥密码学 → 证明"谁拥有这笔钱";
-> (2) proof-of-work + 最长链规则 → 证明"交易顺序是什么".
+> (1) 公钥密码学 → 证明“谁拥有这笔钱”;
+> (2) proof-of-work + 最长链规则 → 证明“交易顺序是什么”.
 > 前者早已成熟, 后者才是 Bitcoin 的真正突破.
 
 The mechanism behind proof-of-work was a breakthrough in the space because it simultaneously solved two problems.
@@ -114,12 +114,12 @@ First, it provided a simple and moderately effective consensus algorithm, allowi
 
 Second, it provided a mechanism for allowing free entry into the consensus process, solving the political problem of deciding who gets to influence the consensus, while simultaneously preventing sybil attacks.
 
-第二，它提供了一种允许自由进入共识过程的机制，解决了"由谁来影响共识"这一政治问题，同时还能防止 sybil attacks。
+第二，它提供了一种允许自由进入共识过程的机制，解决了“由谁来影响共识”这一政治问题，同时还能防止 sybil attacks。
 
 > **sybil attack (女巫攻击)**<br />
 > 指攻击者创建大量伪造身份来操纵投票或共识.
 > 名称源自一本关于多重人格障碍的书.
-> 在传统的"一人一票"系统中, 只要能免费创建新身份就能作弊.
+> 在传统的“一人一票”系统中, 只要能免费创建新身份就能作弊.
 > proof-of-work 通过要求实际付出计算成本来抵御这种攻击: 创建再多身份也没用, 因为总算力不变.
 
 It does this by substituting a formal barrier to participation, such as the requirement to be registered as a unique entity on a particular list, with an economic barrier - the weight of a single node in the consensus voting process is directly proportional to the computing power that the node brings.
@@ -133,24 +133,24 @@ Since then, an alternative approach has been proposed called _proof-of-stake_, c
 > **proof-of-stake (权益证明)**<br />
 > PoW: 谁算力多, 谁说了算 → 耗电巨大.
 > PoS: 谁 stake (质押) 的币多, 谁说了算 → 节能.
-> 作弊者的 stake 会被 "slash" (罚没), 这就是经济惩罚机制.
+> 作弊者的 stake 会被 “slash” (罚没), 这就是经济惩罚机制.
 
 > **历史与当前差异**<br />
 > 白皮书写作时 (2013), Ethereum 计划使用 PoW.
-> Ethereum 最终于 2022 年 9 月 15 日完成了 "The Merge", 从 PoW 切换到 PoS.
+> Ethereum 最终于 2022 年 9 月 15 日完成了 “The Merge”, 从 PoW 切换到 PoS.
 > 这一转型使 Ethereum 的能源消耗降低了约 99.95%.
 
 ### Bitcoin As A State Transition System
 
 ![Ethereum state transition](https://ethereum.org/content/whitepaper/ethereum-state-transition.png)
 
-From a technical standpoint, the ledger of a cryptocurrency such as Bitcoin can be thought of as a state transition system, where there is a "state" consisting of the ownership status of all existing bitcoins and a "state transition function" that takes a state and a transaction and outputs a new state which is the result.
+From a technical standpoint, the ledger of a cryptocurrency such as Bitcoin can be thought of as a state transition system, where there is a “state” consisting of the ownership status of all existing bitcoins and a “state transition function” that takes a state and a transaction and outputs a new state which is the result.
 
-从技术角度来看，Bitcoin 这样的 cryptocurrency 账本可以被视为一个状态转移系统，其中存在一个"state"，它由所有现存 bitcoin 的所有权状态组成；同时还存在一个"state transition function"，它接收某个 state 和一笔 transaction，并输出作为结果的新 state。
+从技术角度来看，Bitcoin 这样的 cryptocurrency 账本可以被视为一个状态转移系统，其中存在一个“state”，它由所有现存 bitcoin 的所有权状态组成；同时还存在一个“state transition function”，它接收某个 state 和一笔 transaction，并输出作为结果的新 state。
 
 > **状态转移系统 (state transition system)**<br />
 > 这是理解整篇白皮书最关键的抽象.
-> 把 blockchain 看作 `状态 + 交易 → 新状态` 的函数式模型, 而不是"一堆交易记录".
+> 把 blockchain 看作 `状态 + 交易 → 新状态` 的函数式模型, 而不是“一堆交易记录”.
 > 这一抽象使得 Ethereum 的通用计算成为可能: 只要重新定义 state 和 transition function, 就能实现任意应用.
 
 In a standard banking system, for example, the state is a balance sheet, a transaction is a request to move $X from A to B, and the state transition function reduces the value in A’s account by $X and increases the value in B’s account by $X.
@@ -185,14 +185,14 @@ But:
 APPLY({ Alice: $50, Bob: $50 }, "send $70 from Alice to Bob") = ERROR
 ```
 
-The "state" in Bitcoin is the collection of all coins (technically, "unspent transaction outputs" or UTXO) that have been minted and not yet spent, with each UTXO having a denomination and an owner (defined by a 20-byte address which is essentially a cryptographic public key[^1]).
+The “state” in Bitcoin is the collection of all coins (technically, “unspent transaction outputs” or UTXO) that have been minted and not yet spent, with each UTXO having a denomination and an owner (defined by a 20-byte address which is essentially a cryptographic public key[^1]).
 
-Bitcoin 中的"state"是所有已被铸造但尚未花费的 coin 的集合（技术上称为 "unspent transaction outputs" 或 UTXO）；每个 UTXO 都具有面额和所有者（由一个 20-byte 地址定义，本质上相当于一个密码学公钥[^1]）。
+Bitcoin 中的“state”是所有已被铸造但尚未花费的 coin 的集合（技术上称为 “unspent transaction outputs” 或 UTXO）；每个 UTXO 都具有面额和所有者（由一个 20-byte 地址定义，本质上相当于一个密码学公钥[^1]）。
 
 > **UTXO (未花费交易输出)**<br />
-> Bitcoin 不像银行那样给每个账户维护"余额"; 相反, 它追踪的是一堆散落的"找零".
-> 你的"余额"实际上是所有属于你的 UTXO 面额之和.
-> 举例: 你有 3 个 UTXO, 分别值 0.5, 1.2, 0.3 BTC, 那么你的"余额"就是 2.0 BTC.
+> Bitcoin 不像银行那样给每个账户维护“余额”; 相反, 它追踪的是一堆散落的“找零”.
+> 你的“余额”实际上是所有属于你的 UTXO 面额之和.
+> 举例: 你有 3 个 UTXO, 分别值 0.5, 1.2, 0.3 BTC, 那么你的“余额”就是 2.0 BTC.
 > 每次花钱都必须整体消耗某些 UTXO 并创建新的 UTXO (包括找零).
 
 A transaction contains one or more inputs, with each input containing a reference to an existing UTXO and a cryptographic signature produced by the private key associated with the owner’s address, and one or more outputs, with each output containing a new UTXO to be added to the state.
@@ -219,7 +219,7 @@ The first half of the first step prevents transaction senders from spending coin
 第一步的前半部分防止 transaction 发送者花费并不存在的 coin，第一步的后半部分防止 transaction 发送者花费他人的 coin，而第二步则强制维持价值守恒。
 
 > **价值守恒与 transaction fee**<br />
-> 注意条件是 "inputs 总额 < outputs 总额 则报错", 而不是 "不相等则报错".
+> 注意条件是 “inputs 总额 < outputs 总额 则报错”, 而不是 “不相等则报错”.
 > 这意味着 inputs 总额可以 *大于* outputs 总额, 差额就是矿工的 transaction fee.
 > 这是 Bitcoin fee 机制的精妙之处: fee 不需要显式声明, 而是隐含在差额中.
 
@@ -243,9 +243,9 @@ She then creates a transaction with those three inputs and two outputs.
 
 然后，她会用这三个 input 和两个 output 创建一笔 transaction。
 
-The first output will be 11.7 BTC with Bob’s address as its owner, and the second output will be the remaining 0.3 BTC "change", with the owner being Alice herself.
+The first output will be 11.7 BTC with Bob’s address as its owner, and the second output will be the remaining 0.3 BTC “change”, with the owner being Alice herself.
 
-第一个 output 是 11.7 BTC，所有者设为 Bob 的地址；第二个 output 则是剩余的 0.3 BTC"找零"，所有者是 Alice 自己。
+第一个 output 是 11.7 BTC，所有者设为 Bob 的地址；第二个 output 则是剩余的 0.3 BTC“找零”，所有者是 Alice 自己。
 
 ### Mining
 
@@ -259,22 +259,22 @@ However, with Bitcoin we are trying to build a decentralized currency system, so
 
 但在 Bitcoin 中，我们试图构建的是一个去中心化货币系统，因此必须将状态交易系统与共识系统结合起来，以确保所有人都能就 transaction 的顺序达成一致。
 
-Bitcoin’s decentralized consensus process requires nodes in the network to continuously attempt to produce packages of transactions called "blocks".
+Bitcoin’s decentralized consensus process requires nodes in the network to continuously attempt to produce packages of transactions called “blocks”.
 
-Bitcoin 的去中心化共识过程要求网络中的节点不断尝试生成称为 "blocks" 的交易打包结果。
+Bitcoin 的去中心化共识过程要求网络中的节点不断尝试生成称为 “blocks” 的交易打包结果。
 
 The network is intended to produce roughly one block every ten minutes, with each block containing a timestamp, a nonce, a reference to (i.e., hash of) the previous block and a list of all of the transactions that have taken place since the previous block.
 
 该网络的设计目标是大约每十分钟产生一个 block，每个 block 都包含时间戳、nonce、对前一个 block 的引用（即其 hash），以及自前一个 block 以来发生的所有 transaction 列表。
 
 > **nonce**<br />
-> "number used once" 的缩写.
+> “number used once” 的缩写.
 > miners 不断修改 nonce 的值来尝试不同的 block hash, 直到找到满足难度目标的值.
 > 这就是 mining 的本质: 一场大规模的暴力试错.
 
-Over time, this creates a persistent, ever-growing, "blockchain" that constantly updates to represent the latest state of the Bitcoin ledger.
+Over time, this creates a persistent, ever-growing, “blockchain” that constantly updates to represent the latest state of the Bitcoin ledger.
 
-随着时间推移，这会形成一条持续存在且不断增长的 "blockchain"，它持续更新，以表示 Bitcoin 账本的最新状态。
+随着时间推移，这会形成一条持续存在且不断增长的 “blockchain”，它持续更新，以表示 Bitcoin 账本的最新状态。
 
 The algorithm for checking if a block is valid, expressed in this paradigm, is as follows:
 
@@ -311,17 +311,17 @@ Additionally, note that the order in which the miner includes transactions into 
 
 此外，miner 将 transaction 纳入 block 的顺序也很重要；如果一个 block 中有两笔 transaction A 和 B，且 B 花费了 A 创建的 UTXO，那么只有在 A 先于 B 出现时，该 block 才是有效的，否则无效。
 
-The one validity condition present in the above list that is not found in other systems is the requirement for "proof-of-work".
+The one validity condition present in the above list that is not found in other systems is the requirement for “proof-of-work”.
 
-上述有效性条件列表中，有一项是其他系统里没有的，那就是对 "proof-of-work" 的要求。
+上述有效性条件列表中，有一项是其他系统里没有的，那就是对 “proof-of-work” 的要求。
 
 The precise condition is that the double-SHA256 hash of every block, treated as a 256-bit number, must be less than a dynamically adjusted target, which as of the time of this writing is approximately 2<sup>187</sup>.
 
 其精确条件是：将每个 block 的 double-SHA256 hash 视为一个 256-bit 数，该数必须小于一个动态调整的目标值；在本文写作时，这个目标值大约是 2<sup>187</sup>。
 
-The purpose of this is to make block creation computationally "hard", thereby preventing sybil attackers from remaking the entire blockchain in their favor.
+The purpose of this is to make block creation computationally “hard”, thereby preventing sybil attackers from remaking the entire blockchain in their favor.
 
-这样做的目的是让 block 的创建在计算上足够"困难"，从而阻止 sybil 攻击者为了自身利益重造整条 blockchain。
+这样做的目的是让 block 的创建在计算上足够“困难”，从而阻止 sybil 攻击者为了自身利益重造整条 blockchain。
 
 Because SHA256 is designed to be a completely unpredictable pseudo-random function, the only way to create a valid block is simply trial and error, repeatedly incrementing the nonce and seeing if the new hash matches.
 
@@ -346,9 +346,9 @@ In order to compensate miners for this computational work, the miner of every bl
 > 50 BTC (2009) → 25 (2012) → 12.5 (2016) → 6.25 (2020) → 3.125 (2024).
 > 总量约 2100 万枚, 预计在 2140 年左右全部发行完毕.
 
-Additionally, if any transaction has a higher total denomination in its inputs than in its outputs, the difference also goes to the miner as a "transaction fee".
+Additionally, if any transaction has a higher total denomination in its inputs than in its outputs, the difference also goes to the miner as a “transaction fee”.
 
-此外，如果某笔 transaction 的 inputs 总面额高于其 outputs 总面额，这一差额也会作为 "transaction fee" 归 miner 所有。
+此外，如果某笔 transaction 的 inputs 总面额高于其 outputs 总面额，这一差额也会作为 “transaction fee” 归 miner 所有。
 
 Incidentally, this is also the only mechanism by which BTC are issued; the genesis state contained no coins at all.
 
@@ -356,7 +356,7 @@ Incidentally, this is also the only mechanism by which BTC are issued; the genes
 
 > **genesis block (创世块)**<br />
 > Bitcoin 的创世块于 2009 年 1 月 3 日由 Satoshi Nakamoto 挖出.
-> 其 coinbase 交易中嵌入了一句著名的话: "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks".
+> 其 coinbase 交易中嵌入了一句著名的话: “The Times 03/Jan/2009 Chancellor on brink of second bailout for banks”.
 > 这是当天《泰晤士报》的头条, 暗示了 Bitcoin 诞生的动机: 对传统金融体系的不信任.
 
 In order to better understand the purpose of mining, let us examine what happens in the event of a malicious attacker.
@@ -384,9 +384,9 @@ Once step (1) has taken place, after a few minutes some miner will include the t
 
 当步骤 (1) 发生之后，几分钟内就会有某个 miner 将这笔 transaction 放入某个 block，比如编号为 270000 的 block。
 
-After about one hour, five more blocks will have been added to the chain after that block, with each of those blocks indirectly pointing to the transaction and thus "confirming" it.
+After about one hour, five more blocks will have been added to the chain after that block, with each of those blocks indirectly pointing to the transaction and thus “confirming” it.
 
-大约一小时后，该 block 之后的链上又会增加五个 block，而这些 block 都会间接指向那笔 transaction，从而对其进行"确认"。
+大约一小时后，该 block 之后的链上又会增加五个 block，而这些 block 都会间接指向那笔 transaction，从而对其进行“确认”。
 
 At this point, the merchant will accept the payment as finalized and deliver the product; since we are assuming this is a digital good, delivery is instant.
 
@@ -400,25 +400,25 @@ If the attacker simply releases it into the wild, the transaction will not be pr
 
 如果攻击者只是把它直接广播出去，这笔 transaction 不会被处理；miners 会尝试执行 `APPLY(S, TX)`，并发现 `TX` 消耗了一个已经不在当前 state 中的 UTXO。
 
-So instead, the attacker creates a "fork" of the blockchain, starting by mining another version of block 270000 pointing to the same block 269999 as a parent but with the new transaction in place of the old one.
+So instead, the attacker creates a “fork” of the blockchain, starting by mining another version of block 270000 pointing to the same block 269999 as a parent but with the new transaction in place of the old one.
 
-因此，攻击者会改为创建一条 blockchain 的"fork"：先挖出另一个版本的 270000 号 block，它同样指向 269999 号 block 作为父块，但用新的 transaction 替换掉旧的 transaction。
+因此，攻击者会改为创建一条 blockchain 的“fork”：先挖出另一个版本的 270000 号 block，它同样指向 269999 号 block 作为父块，但用新的 transaction 替换掉旧的 transaction。
 
 Because the block data is different, this requires redoing the proof-of-work.
 
 由于 block 数据发生了变化，这就需要重新执行 proof-of-work。
 
-Furthermore, the attacker’s new version of block 270000 has a different hash, so the original blocks 270001 to 270005 do not "point" to it; thus, the original chain and the attacker’s new chain are completely separate.
+Furthermore, the attacker’s new version of block 270000 has a different hash, so the original blocks 270001 to 270005 do not “point” to it; thus, the original chain and the attacker’s new chain are completely separate.
 
-此外，攻击者的新版本 270000 号 block 具有不同的 hash，因此原来的 270001 到 270005 号 block 都不会"指向"它；于是，原链与攻击者的新链就完全分离了。
+此外，攻击者的新版本 270000 号 block 具有不同的 hash，因此原来的 270001 到 270005 号 block 都不会“指向”它；于是，原链与攻击者的新链就完全分离了。
 
 The rule is that in a fork the longest blockchain is taken to be the truth, and so legitimate miners will work on the 270005 chain while the attacker alone is working on the 270000 chain.
 
 规则是，在 fork 出现时，最长的 blockchain 会被视为真实链，因此合法 miners 会继续在 270005 这条链上工作，而攻击者则独自在 270000 那条链上挖矿。
 
-In order for the attacker to make his blockchain the longest, he would need to have more computational power than the rest of the network combined in order to catch up (hence, "51% attack").
+In order for the attacker to make his blockchain the longest, he would need to have more computational power than the rest of the network combined in order to catch up (hence, “51% attack”).
 
-若攻击者想让自己的 blockchain 成为最长链，他就必须拥有超过网络其余所有参与者总和的计算能力，才能追赶上来（这也就是所谓的 "51% attack"）。
+若攻击者想让自己的 blockchain 成为最长链，他就必须拥有超过网络其余所有参与者总和的计算能力，才能追赶上来（这也就是所谓的 “51% attack”）。
 
 > **51% attack (51% 攻击)**<br />
 > 准确地说, 攻击者不需要恰好 51%, 只要超过其余所有人的总和即可.
@@ -446,13 +446,13 @@ An important scalability feature of Bitcoin is that the block is stored in a mul
 
 Bitcoin 的一个重要可扩展性特征，是 block 以多层数据结构的形式存储。
 
-The "hash" of a block is actually only the hash of the block header, a roughly 200-byte piece of data that contains the timestamp, nonce, previous block hash and the root hash of a data structure called the Merkle tree storing all transactions in the block.
+The “hash” of a block is actually only the hash of the block header, a roughly 200-byte piece of data that contains the timestamp, nonce, previous block hash and the root hash of a data structure called the Merkle tree storing all transactions in the block.
 
-一个 block 的"hash"实际上只是其 block header 的 hash。这个大约 200-byte 的数据片段包含时间戳、nonce、前一个 block 的 hash，以及一个名为 Merkle tree 的数据结构的根 hash，而该数据结构存储了 block 中的全部 transaction。
+一个 block 的“hash”实际上只是其 block header 的 hash。这个大约 200-byte 的数据片段包含时间戳、nonce、前一个 block 的 hash，以及一个名为 Merkle tree 的数据结构的根 hash，而该数据结构存储了 block 中的全部 transaction。
 
-A Merkle tree is a type of binary tree, composed of a set of nodes with a large number of leaf nodes at the bottom of the tree containing the underlying data, a set of intermediate nodes where each node is the hash of its two children, and finally a single root node, also formed from the hash of its two children, representing the "top" of the tree.
+A Merkle tree is a type of binary tree, composed of a set of nodes with a large number of leaf nodes at the bottom of the tree containing the underlying data, a set of intermediate nodes where each node is the hash of its two children, and finally a single root node, also formed from the hash of its two children, representing the “top” of the tree.
 
-Merkle tree 是一种二叉树，由一组节点构成：树的底部有大量叶子节点保存底层数据，中间有一组中间节点，每个节点都是其两个子节点的 hash，最后是单个根节点，它同样由其两个子节点的 hash 构成，代表整棵树的"顶部"。
+Merkle tree 是一种二叉树，由一组节点构成：树的底部有大量叶子节点保存底层数据，中间有一组中间节点，每个节点都是其两个子节点的 hash，最后是单个根节点，它同样由其两个子节点的 hash 构成，代表整棵树的“顶部”。
 
 > **Merkle tree 举例**<br />
 > 假设 block 中有 4 笔交易 T1, T2, T3, T4:
@@ -474,17 +474,17 @@ The Merkle tree protocol is arguably essential to long-term sustainability.
 
 可以说，Merkle tree 协议对于长期可持续性至关重要。
 
-A "full node" in the Bitcoin network, one that stores and processes the entirety of every block, takes up about 15 GB of disk space in the Bitcoin network as of April 2014, and is growing by over a gigabyte per month.
+A “full node” in the Bitcoin network, one that stores and processes the entirety of every block, takes up about 15 GB of disk space in the Bitcoin network as of April 2014, and is growing by over a gigabyte per month.
 
-在 Bitcoin 网络中，一个"full node"需要存储并处理每一个 block 的全部内容；截至 2014 年 4 月，这大约需要 15 GB 的磁盘空间，并且每个月还会增长超过 1 GB。
+在 Bitcoin 网络中，一个“full node”需要存储并处理每一个 block 的全部内容；截至 2014 年 4 月，这大约需要 15 GB 的磁盘空间，并且每个月还会增长超过 1 GB。
 
 Currently, this is viable for some desktop computers and not phones, and later on in the future only businesses and hobbyists will be able to participate.
 
 目前，这对一部分桌面电脑来说仍然可行，但对手机并不可行；再往后，恐怕只有企业和爱好者才能继续参与。
 
-A protocol known as "simplified payment verification" (SPV) allows for another class of nodes to exist, called "light nodes", which download the block headers, verify the proof-of-work on the block headers, and then download only the "branches" associated with transactions that are relevant to them.
+A protocol known as “simplified payment verification” (SPV) allows for another class of nodes to exist, called “light nodes”, which download the block headers, verify the proof-of-work on the block headers, and then download only the “branches” associated with transactions that are relevant to them.
 
-一种称为 "simplified payment verification"（SPV）的协议，使另一类节点成为可能，即"light nodes"。它们只下载 block headers，验证这些 block headers 上的 proof-of-work，然后只下载与自己相关 transaction 对应的那些"branches"。
+一种称为 “simplified payment verification”（SPV）的协议，使另一类节点成为可能，即“light nodes”。它们只下载 block headers，验证这些 block headers 上的 proof-of-work，然后只下载与自己相关 transaction 对应的那些“branches”。
 
 This allows light nodes to determine with a strong guarantee of security what the status of any Bitcoin transaction, and their current balance, is while downloading only a very small portion of the entire blockchain.
 
@@ -501,9 +501,9 @@ The idea of taking the underlying blockchain idea and applying it to other conce
 
 将底层 blockchain 思想应用到其他概念上的做法，同样有着悠久的历史。
 
-In 2005, Nick Szabo came out with the concept of "[secure property titles with owner authority](https://nakamotoinstitute.org/library/secure-property-titles/)", a document describing how "new advances in replicated database technology" will allow for a blockchain-based system for storing a registry of who owns what land, creating an elaborate framework including concepts such as homesteading, adverse possession and Georgian land tax.
+In 2005, Nick Szabo came out with the concept of “[secure property titles with owner authority](https://nakamotoinstitute.org/library/secure-property-titles/)”, a document describing how “new advances in replicated database technology” will allow for a blockchain-based system for storing a registry of who owns what land, creating an elaborate framework including concepts such as homesteading, adverse possession and Georgian land tax.
 
-2005 年，Nick Szabo 提出了"[secure property titles with owner authority](https://nakamotoinstitute.org/library/secure-property-titles/)"这一概念。在该文中，他描述了"复制数据库技术的新进展"将如何使基于 blockchain 的土地所有权登记系统成为可能，并构建了一个包含 homesteading、adverse possession 和 Georgian land tax 等概念的精细框架。
+2005 年，Nick Szabo 提出了“[secure property titles with owner authority](https://nakamotoinstitute.org/library/secure-property-titles/)”这一概念。在该文中，他描述了“复制数据库技术的新进展”将如何使基于 blockchain 的土地所有权登记系统成为可能，并构建了一个包含 homesteading、adverse possession 和 Georgian land tax 等概念的精细框架。
 
 However, there was unfortunately no effective replicated database system available at the time, and so the protocol was never implemented in practice.
 
@@ -513,10 +513,10 @@ After 2009, however, once Bitcoin’s decentralized consensus was developed a nu
 
 但在 2009 年之后，随着 Bitcoin 的去中心化共识机制被开发出来，大量替代性应用便迅速开始涌现。
 
-- **Namecoin** - created in 2010, [Namecoin](https://namecoin.org/) is best described as a decentralized name registration database.  In decentralized protocols like Tor, Bitcoin and BitMessage, there needs to be some way of identifying accounts so that other people can interact with them, but in all existing solutions the only kind of identifier available is a pseudo-random hash like `1LW79wp5ZBqaHW1jL5TCiBCrhQYtHagUWy`.  Ideally, one would like to be able to have an account with a name like "george".  However, the problem is that if one person can create an account named "george" then someone else can use the same process to register "george" for themselves as well and impersonate them.  The only solution is a first-to-file paradigm, where the first registerer succeeds and the second fails - a problem perfectly suited for the Bitcoin consensus protocol.  Namecoin is the oldest, and most successful, implementation of a name registration system using such an idea.
-  **Namecoin** - 创建于 2010 年，[Namecoin](https://namecoin.org/) 最适合被描述为一个去中心化的名称注册数据库。在 Tor、Bitcoin 和 BitMessage 这类去中心化协议中，必须有某种方式来标识账户，以便其他人能够与之交互；但在现有方案中，唯一可用的标识符通常只是类似 `1LW79wp5ZBqaHW1jL5TCiBCrhQYtHagUWy` 这样的伪随机 hash。理想情况下，人们希望能够拥有一个名为"george"的账户。然而问题在于，如果一个人可以创建名为"george"的账户，那么另一个人也可以用同样的流程为自己注册"george"，并冒充前者。唯一的解决方式是采用先到先得的范式，即第一个注册者成功、第二个失败，而这正是 Bitcoin 共识协议非常适合处理的问题。Namecoin 是使用这一思想构建的最早、也最成功的名称注册系统实现。
-- **Colored coins** - the purpose of [colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit) is to serve as a protocol to allow people to create their own digital currencies - or, in the important trivial case of a currency with one unit, digital tokens, on the Bitcoin blockchain.  In the colored coins protocol, one "issues" a new currency by publicly assigning a color to a specific Bitcoin UTXO, and the protocol recursively defines the color of other UTXO to be the same as the color of the inputs that the transaction creating them spent (some special rules apply in the case of mixed-color inputs).  This allows users to maintain wallets containing only UTXO of a specific color and send them around much like regular bitcoins, backtracking through the blockchain to determine the color of any UTXO that they receive.
-  **Colored coins** - [colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit) 的目的是作为一种协议，使人们能够在 Bitcoin blockchain 上创建自己的数字货币，或者在一个重要而简单的特例中，创建单位为 1 的数字 token。 在 colored coins 协议中，人们通过公开地给某个特定 Bitcoin UTXO 赋予一种颜色来"发行"新货币，而协议会递归地将其他 UTXO 的颜色定义为创建它们的 transaction 所花费 inputs 的颜色（在输入颜色混合的情况下会有一些特殊规则）。这使得用户可以维护只包含某种特定颜色 UTXO 的钱包，并像转移普通 bitcoin 一样转移它们，同时通过回溯 blockchain 来确定自己收到的任意 UTXO 的颜色。
+- **Namecoin** - created in 2010, [Namecoin](https://namecoin.org/) is best described as a decentralized name registration database.  In decentralized protocols like Tor, Bitcoin and BitMessage, there needs to be some way of identifying accounts so that other people can interact with them, but in all existing solutions the only kind of identifier available is a pseudo-random hash like `1LW79wp5ZBqaHW1jL5TCiBCrhQYtHagUWy`.  Ideally, one would like to be able to have an account with a name like “george”.  However, the problem is that if one person can create an account named “george” then someone else can use the same process to register “george” for themselves as well and impersonate them.  The only solution is a first-to-file paradigm, where the first registerer succeeds and the second fails - a problem perfectly suited for the Bitcoin consensus protocol.  Namecoin is the oldest, and most successful, implementation of a name registration system using such an idea.
+  **Namecoin** - 创建于 2010 年，[Namecoin](https://namecoin.org/) 最适合被描述为一个去中心化的名称注册数据库。在 Tor、Bitcoin 和 BitMessage 这类去中心化协议中，必须有某种方式来标识账户，以便其他人能够与之交互；但在现有方案中，唯一可用的标识符通常只是类似 `1LW79wp5ZBqaHW1jL5TCiBCrhQYtHagUWy` 这样的伪随机 hash。理想情况下，人们希望能够拥有一个名为“george”的账户。然而问题在于，如果一个人可以创建名为“george”的账户，那么另一个人也可以用同样的流程为自己注册“george”，并冒充前者。唯一的解决方式是采用先到先得的范式，即第一个注册者成功、第二个失败，而这正是 Bitcoin 共识协议非常适合处理的问题。Namecoin 是使用这一思想构建的最早、也最成功的名称注册系统实现。
+- **Colored coins** - the purpose of [colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit) is to serve as a protocol to allow people to create their own digital currencies - or, in the important trivial case of a currency with one unit, digital tokens, on the Bitcoin blockchain.  In the colored coins protocol, one “issues” a new currency by publicly assigning a color to a specific Bitcoin UTXO, and the protocol recursively defines the color of other UTXO to be the same as the color of the inputs that the transaction creating them spent (some special rules apply in the case of mixed-color inputs).  This allows users to maintain wallets containing only UTXO of a specific color and send them around much like regular bitcoins, backtracking through the blockchain to determine the color of any UTXO that they receive.
+  **Colored coins** - [colored coins](https://docs.google.com/a/buterin.com/document/d/1AnkP_cVZTCMLIzw4DvsW6M8Q2JC0lIzrTLuoWu2z1BE/edit) 的目的是作为一种协议，使人们能够在 Bitcoin blockchain 上创建自己的数字货币，或者在一个重要而简单的特例中，创建单位为 1 的数字 token。 在 colored coins 协议中，人们通过公开地给某个特定 Bitcoin UTXO 赋予一种颜色来“发行”新货币，而协议会递归地将其他 UTXO 的颜色定义为创建它们的 transaction 所花费 inputs 的颜色（在输入颜色混合的情况下会有一些特殊规则）。这使得用户可以维护只包含某种特定颜色 UTXO 的钱包，并像转移普通 bitcoin 一样转移它们，同时通过回溯 blockchain 来确定自己收到的任意 UTXO 的颜色。
 - **Metacoins** - the idea behind a metacoin is to have a protocol that lives on top of Bitcoin, using Bitcoin transactions to store metacoin transactions but having a different state transition function, `APPLY'`.  Because the metacoin protocol cannot prevent invalid metacoin transactions from appearing in the Bitcoin blockchain, a rule is added that if `APPLY'(S, TX)` returns an error, the protocol defaults to `APPLY'(S, TX) = S`.  This provides an easy mechanism for creating an arbitrary cryptocurrency protocol, potentially with advanced features that cannot be implemented inside of Bitcoin itself, but with a very low development cost since the complexities of mining and networking are already handled by the Bitcoin protocol.  Metacoins have been used to implement some classes of financial contracts, name registration and decentralized exchange.
   **Metacoins** - metacoin 背后的想法，是构建一个运行在 Bitcoin 之上的协议：它使用 Bitcoin transactions 来存储 metacoin transactions，但拥有不同的状态转移函数 `APPLY'`。由于 metacoin 协议无法阻止无效的 metacoin transaction 出现在 Bitcoin blockchain 中，因此增加了一条规则：如果 `APPLY'(S, TX)` 返回错误，则协议默认 `APPLY'(S, TX) = S`。这为创建任意 cryptocurrency 协议提供了一种简单机制，并且还可能支持一些无法直接在 Bitcoin 内部实现的高级特性；同时其开发成本很低，因为 mining 和 networking 的复杂性已经由 Bitcoin 协议处理。Metacoins 已被用于实现某些类型的金融合约、名称注册和去中心化交易。
 
@@ -544,7 +544,7 @@ The Bitcoin-based approach, on the other hand, has the flaw that it does not inh
 
 SPV works for Bitcoin because it can use blockchain depth as a proxy for validity; at some point, once the ancestors of a transaction go far enough back, it is safe to say that they were legitimately part of the state.
 
-SPV 之所以适用于 Bitcoin，是因为它可以把 blockchain 的深度当作有效性的代理指标；当某笔 transaction 的祖先足够"深"时，就可以安全地认为它们确实是 state 的合法组成部分。
+SPV 之所以适用于 Bitcoin，是因为它可以把 blockchain 的深度当作有效性的代理指标；当某笔 transaction 的祖先足够“深”时，就可以安全地认为它们确实是 state 的合法组成部分。
 
 Blockchain-based meta-protocols, on the other hand, cannot force the blockchain not to include transactions that are not valid within the context of their own protocols.
 
@@ -554,15 +554,15 @@ Hence, a fully secure SPV meta-protocol implementation would need to backward sc
 
 因此，一个完全安全的 SPV meta-protocol 实现，必须一路向后扫描直到 Bitcoin blockchain 的起点，才能判断某些 transactions 是否有效。
 
-Currently, all "light" implementations of Bitcoin-based meta-protocols rely on a trusted server to provide the data, arguably a highly suboptimal result especially when one of the primary purposes of a cryptocurrency is to eliminate the need for trust.
+Currently, all “light” implementations of Bitcoin-based meta-protocols rely on a trusted server to provide the data, arguably a highly suboptimal result especially when one of the primary purposes of a cryptocurrency is to eliminate the need for trust.
 
-目前，所有 Bitcoin-based meta-protocol 的"light"实现都依赖可信服务器来提供数据；考虑到 cryptocurrency 的主要目标之一正是消除信任需求，这显然是一个相当不理想的结果。
+目前，所有 Bitcoin-based meta-protocol 的“light”实现都依赖可信服务器来提供数据；考虑到 cryptocurrency 的主要目标之一正是消除信任需求，这显然是一个相当不理想的结果。
 
 ### Scripting
 
-Even without any extensions, the Bitcoin protocol actually does facilitate a weak version of a concept of "smart contracts".
+Even without any extensions, the Bitcoin protocol actually does facilitate a weak version of a concept of “smart contracts”.
 
-即便完全不做扩展，Bitcoin 协议实际上也支持一种较弱版本的"smart contracts"概念。
+即便完全不做扩展，Bitcoin 协议实际上也支持一种较弱版本的“smart contracts”概念。
 
 UTXO in Bitcoin can be owned not just by a public key, but also by a more complicated script expressed in a simple stack-based programming language.
 
@@ -578,21 +578,21 @@ Indeed, even the basic public key ownership mechanism is implemented via a scrip
 
 > **Bitcoin Script 的运作**<br />
 > 最常见的脚本类型是 P2PKH (Pay-to-Public-Key-Hash).
-> 锁定脚本 (放在 UTXO 中): "谁能提供与这个 hash 匹配的公钥和有效签名, 谁就能花这笔钱."
-> 解锁脚本 (放在花费交易中): "这是我的公钥和签名."
+> 锁定脚本 (放在 UTXO 中): “谁能提供与这个 hash 匹配的公钥和有效签名, 谁就能花这笔钱.”
+> 解锁脚本 (放在花费交易中): “这是我的公钥和签名.”
 > 验证时把两段脚本拼在一起, 在栈上执行, 如果最终结果为 true 则合法.
 
 Other, more complicated, scripts exist for various additional use cases.
 
 此外，还存在更复杂的脚本，用于支持各种额外场景。
 
-For example, one can construct a script that requires signatures from two out of a given three private keys to validate ("multisig"), a setup useful for corporate accounts, secure savings accounts and some merchant escrow situations.
+For example, one can construct a script that requires signatures from two out of a given three private keys to validate (“multisig”), a setup useful for corporate accounts, secure savings accounts and some merchant escrow situations.
 
-例如，可以构造一个脚本，要求给定三个私钥中的任意两个签名才能通过验证（"multisig"）；这种设置对企业账户、安全储蓄账户以及某些商家托管场景都很有用。
+例如，可以构造一个脚本，要求给定三个私钥中的任意两个签名才能通过验证（“multisig”）；这种设置对企业账户、安全储蓄账户以及某些商家托管场景都很有用。
 
-Scripts can also be used to pay bounties for solutions to computational problems, and one can even construct a script that says something like "this Bitcoin UTXO is yours if you can provide an SPV proof that you sent a Dogecoin transaction of this denomination to me", essentially allowing decentralized cross-cryptocurrency exchange.
+Scripts can also be used to pay bounties for solutions to computational problems, and one can even construct a script that says something like “this Bitcoin UTXO is yours if you can provide an SPV proof that you sent a Dogecoin transaction of this denomination to me”, essentially allowing decentralized cross-cryptocurrency exchange.
 
-脚本还可以用于为计算问题的解答支付赏金，甚至可以构造出类似"如果你能提供一个 SPV 证明，证明你向我发送了一笔该面额的 Dogecoin transaction，那么这个 Bitcoin UTXO 就归你所有"这样的脚本，本质上实现去中心化的跨 cryptocurrency 交换。
+脚本还可以用于为计算问题的解答支付赏金，甚至可以构造出类似“如果你能提供一个 SPV 证明，证明你向我发送了一笔该面额的 Dogecoin transaction，那么这个 Bitcoin UTXO 就归你所有”这样的脚本，本质上实现去中心化的跨 cryptocurrency 交换。
 
 However, the scripting language as implemented in Bitcoin has several important limitations:
 
@@ -602,8 +602,8 @@ However, the scripting language as implemented in Bitcoin has several important 
   **Lack of Turing-completeness** - 也就是说，尽管 Bitcoin scripting language 支持相当大一部分计算能力，但它远远不能支持一切。缺失的主要类别是循环。这样设计是为了避免在 transaction 验证期间出现无限循环；从理论上说，这对脚本程序员而言并非不可逾越，因为任何循环都可以通过带有 if 语句的底层代码多次重复来模拟，但这会导致脚本在空间上极其低效。例如，实现一种替代的椭圆曲线签名算法，可能需要把 256 次重复乘法轮次逐个写进代码中。
 - **Value-blindness** - there is no way for a UTXO script to provide fine-grained control over the amount that can be withdrawn.  For example, one powerful use case of an oracle contract would be a hedging contract, where A and B put in $1000 worth of BTC and after 30 days the script sends $1000 worth of BTC to A and the rest to B.  This would require an oracle to determine the value of 1 BTC in USD, but even then it is a massive improvement in terms of trust and infrastructure requirement over the fully centralized solutions that are available now.  However, because UTXO are all-or-nothing, the only way to achieve this is through the very inefficient hack of having many UTXO of varying denominations (e.g., one UTXO of 2<sup>k</sup> for every k up to 30) and having the oracle pick which UTXO to send to A and which to B.
   **Value-blindness** - UTXO 脚本无法对可提取的金额进行细粒度控制。例如，oracle contract 的一个强大用例可以是对冲合约：A 和 B 各自投入价值 $1000 的 BTC，30 天后脚本向 A 发送价值 $1000 的 BTC，其余部分发送给 B。这需要一个 oracle 来确定 1 BTC 相对于 USD 的价值，但即便如此，相比当前可用的完全中心化方案，它在信任和基础设施要求方面仍然是巨大进步。然而，由于 UTXO 只能整体花费，唯一的实现方式是使用一种非常低效的变通办法：预先准备许多不同面额的 UTXO（例如，对每个不超过 30 的 k，都有一个 2<sup>k</sup> 面额的 UTXO），再让 oracle 选择哪些 UTXO 发送给 A、哪些发送给 B。
-- **Lack of state** - UTXO can either be spent or unspent; there is no opportunity for multi-stage contracts or scripts which keep any other internal state beyond that.  This makes it hard to make multi-stage options contracts, decentralized exchange offers or two-stage cryptographic commitment protocols (necessary for secure computational bounties).  It also means that UTXO can only be used to build simple, one-off contracts and not more complex "stateful" contracts such as decentralized organizations, and makes meta-protocols difficult to implement.  Binary state combined with value-blindness also mean that another important application, withdrawal limits, is impossible.
-  **Lack of state** - UTXO 要么已花费，要么未花费；除此之外，它没有机会保存任何内部状态，因此无法自然支持多阶段合约或多阶段脚本。这使得构造多阶段期权合约、去中心化交易报价或两阶段密码学承诺协议（安全计算赏金所必需）都变得困难。它还意味着 UTXO 只能用于构建简单的一次性合约，而不能用于更复杂的"stateful"合约，例如去中心化组织，也让 meta-protocol 难以实现。二元状态再加上 value-blindness，也使得另一个重要应用场景，即提现限额，无法实现。
+- **Lack of state** - UTXO can either be spent or unspent; there is no opportunity for multi-stage contracts or scripts which keep any other internal state beyond that.  This makes it hard to make multi-stage options contracts, decentralized exchange offers or two-stage cryptographic commitment protocols (necessary for secure computational bounties).  It also means that UTXO can only be used to build simple, one-off contracts and not more complex “stateful” contracts such as decentralized organizations, and makes meta-protocols difficult to implement.  Binary state combined with value-blindness also mean that another important application, withdrawal limits, is impossible.
+  **Lack of state** - UTXO 要么已花费，要么未花费；除此之外，它没有机会保存任何内部状态，因此无法自然支持多阶段合约或多阶段脚本。这使得构造多阶段期权合约、去中心化交易报价或两阶段密码学承诺协议（安全计算赏金所必需）都变得困难。它还意味着 UTXO 只能用于构建简单的一次性合约，而不能用于更复杂的“stateful”合约，例如去中心化组织，也让 meta-protocol 难以实现。二元状态再加上 value-blindness，也使得另一个重要应用场景，即提现限额，无法实现。
 - **Blockchain-blindness** - UTXO are blind to blockchain data such as the nonce, the timestamp and previous block hash.  This severely limits applications in gambling, and several other categories, by depriving the scripting language of a potentially valuable source of randomness.
   **Blockchain-blindness** - UTXO 对诸如 nonce、timestamp 和前一个 block hash 等 blockchain 数据毫无感知。这使 scripting language 失去了一种潜在很有价值的随机性来源，从而严重限制了赌博以及其他若干类别应用。
 
@@ -632,7 +632,7 @@ With Ethereum, we intend to build an alternative framework that provides even la
 通过 Ethereum，我们打算构建一种替代性框架，它在开发便利性上带来更大提升，同时具备更强的 light client 属性，并且允许各类应用共享同一经济环境和 blockchain 安全性。
 
 > **共享安全性 (shared security)**<br />
-> 这是 Ethereum 相比"每个应用建自己的链"的关键优势.
+> 这是 Ethereum 相比“每个应用建自己的链”的关键优势.
 > 所有运行在 Ethereum 上的应用都共享整个网络的安全性, 无需各自冷启动.
 > 这一思想后来成为 Layer 2 和 rollup 生态的理论基础.
 
@@ -655,19 +655,19 @@ A bare-bones version of Namecoin can be written in two lines of code, and other 
 
 一个最简版本的 Namecoin 只需两行代码即可写出，而货币、信誉系统等其他协议也可以在不到二十行代码内构建出来。
 
-Smart contracts, cryptographic "boxes" that contain value and only unlock it if certain conditions are met, can also be built on top of the platform, with vastly more power than that offered by Bitcoin scripting because of the added powers of Turing-completeness, value-awareness, blockchain-awareness and state.
+Smart contracts, cryptographic “boxes” that contain value and only unlock it if certain conditions are met, can also be built on top of the platform, with vastly more power than that offered by Bitcoin scripting because of the added powers of Turing-completeness, value-awareness, blockchain-awareness and state.
 
-smart contracts 也可以构建在这一平台之上。它们是装有价值、并且只在满足特定条件时才会解锁的密码学"盒子"；由于 Ethereum 额外具备 Turing-completeness、value-awareness、blockchain-awareness 和 state 等能力，它们相比 Bitcoin scripting 所能提供的功能要强大得多。
+smart contracts 也可以构建在这一平台之上。它们是装有价值、并且只在满足特定条件时才会解锁的密码学“盒子”；由于 Ethereum 额外具备 Turing-completeness、value-awareness、blockchain-awareness 和 state 等能力，它们相比 Bitcoin scripting 所能提供的功能要强大得多。
 
 ### Ethereum Accounts
 
-In Ethereum, the state is made up of objects called "accounts", with each account having a 20-byte address and state transitions being direct transfers of value and information between accounts.
+In Ethereum, the state is made up of objects called “accounts”, with each account having a 20-byte address and state transitions being direct transfers of value and information between accounts.
 
-在 Ethereum 中，state 由称为 "accounts" 的对象构成，每个 account 都有一个 20-byte 地址，而状态转移则表现为 accounts 之间价值和信息的直接转移。
+在 Ethereum 中，state 由称为 “accounts” 的对象构成，每个 account 都有一个 20-byte 地址，而状态转移则表现为 accounts 之间价值和信息的直接转移。
 
 > **account model vs UTXO model**<br />
 > 这是 Ethereum 与 Bitcoin 最根本的架构差异之一.
-> Bitcoin (UTXO): 没有"账户"概念, state 是一堆散落的 UTXO. 每次交易都消耗旧 UTXO、产生新 UTXO.
+> Bitcoin (UTXO): 没有“账户”概念, state 是一堆散落的 UTXO. 每次交易都消耗旧 UTXO、产生新 UTXO.
 > Ethereum (Account): 明确维护每个账户的余额和状态. 转账直接修改余额, 更接近传统银行系统的心智模型.
 > Account model 更直观, 也更容易支持 smart contract 的复杂状态管理, 但需要额外机制防止 replay attack (因此有 nonce).
 
@@ -684,9 +684,9 @@ An Ethereum account contains four fields:
 - The account’s **storage** (empty by default)
   该 account 的 **storage**（默认为空）。
 
-"Ether" is the main internal crypto-fuel of Ethereum, and is used to pay transaction fees.
+“Ether” is the main internal crypto-fuel of Ethereum, and is used to pay transaction fees.
 
-"Ether" 是 Ethereum 的主要内部 crypto-fuel，用于支付 transaction fees。
+“Ether” 是 Ethereum 的主要内部 crypto-fuel，用于支付 transaction fees。
 
 In general, there are two types of accounts: **externally owned accounts**, controlled by private keys, and **contract accounts**, controlled by their contract code.
 
@@ -695,27 +695,27 @@ In general, there are two types of accounts: **externally owned accounts**, cont
 > **EOA vs Contract Account**<br />
 > EOA (Externally Owned Account): 由真人 (或软件) 通过私钥控制, 可以主动发起交易.
 > Contract Account: 没有私钥, 只能被动响应. 一旦收到 message 或 transaction, 就自动执行预设代码.
-> 一个关键区别: 只有 EOA 能发起 transaction (即"第一推动力"). Contract 之间虽然可以互相调用, 但整条调用链的起点必须是 EOA.
+> 一个关键区别: 只有 EOA 能发起 transaction (即“第一推动力”). Contract 之间虽然可以互相调用, 但整条调用链的起点必须是 EOA.
 
 An externally owned account has no code, and one can send messages from an externally owned account by creating and signing a transaction; in a contract account, every time the contract account receives a message its code activates, allowing it to read and write to internal storage and send other messages or create contracts in turn.
 
 externally owned account 不包含代码，人们可以通过创建并签名一笔 transaction，从 externally owned account 发送 messages；而对于 contract account，每当它收到一条 message，其代码就会被激活，从而读取和写入内部 storage，并继续发送其他 messages 或创建 contracts。
 
-Note that "contracts" in Ethereum should not be seen as something that should be "fulfilled" or "complied with"; rather, they are more like "autonomous agents" that live inside of the Ethereum execution environment, always executing a specific piece of code when "poked" by a message or transaction, and having direct control over their own ether balance and their own key/value store to keep track of persistent variables.
+Note that “contracts” in Ethereum should not be seen as something that should be “fulfilled” or “complied with”; rather, they are more like “autonomous agents” that live inside of the Ethereum execution environment, always executing a specific piece of code when “poked” by a message or transaction, and having direct control over their own ether balance and their own key/value store to keep track of persistent variables.
 
-需要注意的是，Ethereum 中的 "contracts" 不应被视为某种需要"履行"或"遵守"的东西；更准确地说，它们更像是生活在 Ethereum 执行环境内部的"autonomous agents"，每当被 message 或 transaction "触发"时，就执行一段特定代码，并且直接控制自己的 ether balance 以及自己的键值存储，以记录持久变量。
+需要注意的是，Ethereum 中的 “contracts” 不应被视为某种需要“履行”或“遵守”的东西；更准确地说，它们更像是生活在 Ethereum 执行环境内部的“autonomous agents”，每当被 message 或 transaction “触发”时，就执行一段特定代码，并且直接控制自己的 ether balance 以及自己的键值存储，以记录持久变量。
 
 > **contract 不是法律合同**<br />
 > 这一点非常重要.
-> "smart contract" 这个名字容易产生误导: 它既不"智能", 也不是法律意义上的"合同".
+> “smart contract” 这个名字容易产生误导: 它既不“智能”, 也不是法律意义上的“合同”.
 > 它只是一段自动执行的代码, 类似于自动贩卖机或 ATM 的程序.
 > 一旦部署, 代码就不可更改 (除非预先设计了升级机制), 且任何人都可以调用.
 
 ### Messages and Transactions
 
-The term "transaction" is used in Ethereum to refer to the signed data package that stores a message to be sent from an externally owned account.
+The term “transaction” is used in Ethereum to refer to the signed data package that stores a message to be sent from an externally owned account.
 
-在 Ethereum 中，"transaction" 一词指的是一种已签名的数据包，它保存着一条将从 externally owned account 发送出去的 message。
+在 Ethereum 中，“transaction” 一词指的是一种已签名的数据包，它保存着一条将从 externally owned account 发送出去的 message。
 
 Transactions contain:
 
@@ -738,9 +738,9 @@ The first three are standard fields expected in any cryptocurrency.
 
 前三项是任何 cryptocurrency 中都会出现的标准字段。
 
-The data field has no function by default, but the virtual machine has an opcode using which a contract can access the data; as an example use case, if a contract is functioning as an on-blockchain domain registration service, then it may wish to interpret the data being passed to it as containing two "fields", the first field being a domain to register and the second field being the IP address to register it to.
+The data field has no function by default, but the virtual machine has an opcode using which a contract can access the data; as an example use case, if a contract is functioning as an on-blockchain domain registration service, then it may wish to interpret the data being passed to it as containing two “fields”, the first field being a domain to register and the second field being the IP address to register it to.
 
-data field 默认没有任何功能，但 virtual machine 提供了一个 opcode，使 contract 可以访问这些数据；举个例子，如果某个 contract 作为链上域名注册服务运行，那么它可能希望把传入的数据解释为包含两个"fields"：第一个 field 是要注册的域名，第二个 field 是要绑定的 IP 地址。
+data field 默认没有任何功能，但 virtual machine 提供了一个 opcode，使 contract 可以访问这些数据；举个例子，如果某个 contract 作为链上域名注册服务运行，那么它可能希望把传入的数据解释为包含两个“fields”：第一个 field 是要注册的域名，第二个 field 是要绑定的 IP 地址。
 
 The contract would read these values from the message data and appropriately place them in storage.
 
@@ -754,12 +754,12 @@ In order to prevent accidental or hostile infinite loops or other computational 
 
 为了防止代码中出现意外或恶意的无限循环，或者其他计算资源浪费，每笔 transaction 都必须设定其代码执行最多可使用多少计算步骤。
 
-The fundamental unit of computation is "gas"; usually, a computational step costs 1 gas, but some operations cost higher amounts of gas because they are more computationally expensive, or increase the amount of data that must be stored as part of the state.
+The fundamental unit of computation is “gas”; usually, a computational step costs 1 gas, but some operations cost higher amounts of gas because they are more computationally expensive, or increase the amount of data that must be stored as part of the state.
 
-计算的基本单位是 "gas"；通常一次计算步骤消耗 1 gas，但某些操作会消耗更多 gas，因为它们在计算上更昂贵，或者会增加必须作为 state 一部分被存储的数据量。
+计算的基本单位是 “gas”；通常一次计算步骤消耗 1 gas，但某些操作会消耗更多 gas，因为它们在计算上更昂贵，或者会增加必须作为 state 一部分被存储的数据量。
 
 > **gas (燃料)**<br />
-> gas 是 Ethereum 最精妙的设计之一, 它解耦了"计算成本"和"ETH 价格".
+> gas 是 Ethereum 最精妙的设计之一, 它解耦了“计算成本”和“ETH 价格”.
 > gas 用量由操作类型决定 (e.g., 加法 3 gas, 存储写入 20000 gas), 与 ETH 价格无关.
 > 用户通过 gas price 出价, 矿工优先打包出价高的交易 — 这是一个公开竞价市场.
 
@@ -779,9 +779,9 @@ The intent of the fee system is to require an attacker to pay proportionately fo
 
 ### Messages
 
-Contracts have the ability to send "messages" to other contracts.
+Contracts have the ability to send “messages” to other contracts.
 
-contracts 具备向其他 contracts 发送 "messages" 的能力。
+contracts 具备向其他 contracts 发送 “messages” 的能力。
 
 Messages are virtual objects that are never serialized and exist only in the Ethereum execution environment.
 
@@ -809,7 +809,7 @@ Essentially, a message is like a transaction, except it is produced by a contrac
 > **transaction vs message**<br />
 > Transaction: 由 EOA 发起, 有签名, 要花 gas, 会被记录在 blockchain 上.
 > Message (又称 internal transaction): 由 contract 代码发起, 没有签名, 不单独记录在链上, 但共享父 transaction 的 gas 配额.
-> 在 block explorer (如 Etherscan) 中, messages 显示在 "Internal Transactions" 标签下.
+> 在 block explorer (如 Etherscan) 中, messages 显示在 “Internal Transactions” 标签下.
 
 A message is produced when a contract currently executing code executes the `CALL` opcode, which produces and executes a message.
 
@@ -894,15 +894,15 @@ Note that messages work equivalently to transactions in terms of reverts: if a m
 
 需要注意，在回滚行为上，messages 与 transactions 的工作方式是等价的：如果一条 message 的执行耗尽了 gas，那么这条 message 的执行以及由它触发的所有其他执行都会回滚，但父级执行本身不必回滚。
 
-This means that it is "safe" for a contract to call another contract, as if A calls B with G gas then A’s execution is guaranteed to lose at most G gas.
+This means that it is “safe” for a contract to call another contract, as if A calls B with G gas then A’s execution is guaranteed to lose at most G gas.
 
-这意味着 contract 调用另一个 contract 在这种意义上是"安全"的：如果 A 用 G gas 调用 B，那么 A 的执行最多只会损失 G gas。
+这意味着 contract 调用另一个 contract 在这种意义上是“安全”的：如果 A 用 G gas 调用 B，那么 A 的执行最多只会损失 G gas。
 
 > **gas 限制保证调用安全**<br />
 > 这是一个重要的隔离机制.
 > 调用者可以通过限制分配给被调用 contract 的 gas, 来防止被调用方消耗过多资源.
 > 但要注意: gas 限制只保护计算资源, 不保护状态一致性.
-> 2016 年 The DAO 攻击就利用了 "重入漏洞" (reentrancy) 在 gas 充足的情况下窃取资金.
+> 2016 年 The DAO 攻击就利用了 “重入漏洞” (reentrancy) 在 gas 充足的情况下窃取资金.
 
 Finally, note that there is an opcode, `CREATE`, that creates a contract; its execution mechanics are generally similar to `CALL`, with the exception that the output of the execution determines the code of a newly created contract.
 
@@ -910,9 +910,9 @@ Finally, note that there is an opcode, `CREATE`, that creates a contract; its ex
 
 ### Code Execution
 
-The code in Ethereum contracts is written in a low-level, stack-based bytecode language, referred to as "Ethereum virtual machine code" or "EVM code".
+The code in Ethereum contracts is written in a low-level, stack-based bytecode language, referred to as “Ethereum virtual machine code” or “EVM code”.
 
-Ethereum contracts 中的代码是用一种低层级、基于栈的 bytecode 语言编写的，这种语言被称为 "Ethereum virtual machine code" 或 "EVM code"。
+Ethereum contracts 中的代码是用一种低层级、基于栈的 bytecode 语言编写的，这种语言被称为 “Ethereum virtual machine code” 或 “EVM code”。
 
 The code consists of a series of bytes, where each byte represents an operation.
 
@@ -985,7 +985,7 @@ The main difference between Ethereum and Bitcoin with regard to the blockchain a
 > **与 Bitcoin 的关键差异: 存储 state**<br />
 > Bitcoin block 只记录交易列表, 要知道当前状态必须从创世块开始 replay 所有交易.
 > Ethereum block 额外包含 state root (状态树的根 hash), 因此新加入的节点不必重放全部历史.
-> 这使得 Ethereum 可以支持"state pruning": 只保留最近的 state 即可验证新 block.
+> 这使得 Ethereum 可以支持“state pruning”: 只保留最近的 state 即可验证新 block.
 
 Aside from that, two other values, the block number and the difficulty, are also stored in the block.
 
@@ -1024,9 +1024,9 @@ Thus, in general, between two adjacent blocks the vast majority of the tree shou
 
 因此，一般来说，相邻两个 blocks 之间，树的绝大部分都应当是相同的，所以这些数据可以只存储一次，并通过指针（即子树的 hashes）被引用两次。
 
-A special kind of tree known as a "Patricia tree" is used to accomplish this, including a modification to the Merkle tree concept that allows for nodes to be inserted and deleted, and not just changed, efficiently.
+A special kind of tree known as a “Patricia tree” is used to accomplish this, including a modification to the Merkle tree concept that allows for nodes to be inserted and deleted, and not just changed, efficiently.
 
-为实现这一点，系统使用了一种称为 "Patricia tree" 的特殊树结构，并对 Merkle tree 概念做了修改，使节点不仅能够被高效修改，还能被高效插入和删除。
+为实现这一点，系统使用了一种称为 “Patricia tree” 的特殊树结构，并对 Merkle tree 概念做了修改，使节点不仅能够被高效修改，还能被高效插入和删除。
 
 > **Merkle Patricia Trie (MPT)**<br />
 > 这是 Ethereum 最核心的数据结构之一, 结合了:
@@ -1039,18 +1039,18 @@ Additionally, because all of the state information is part of the last block, th
 
 此外，由于所有 state 信息都属于最后一个 block 的一部分，因此没有必要存储完整的 blockchain 历史；如果这种策略可以应用到 Bitcoin 上，理论上可以带来 5-20 倍的空间节省。
 
-A commonly asked question is "where" contract code is executed, in terms of physical hardware.
+A commonly asked question is “where” contract code is executed, in terms of physical hardware.
 
-一个经常被问到的问题是：从物理硬件角度看，contract code 究竟是"在哪里"执行的？
+一个经常被问到的问题是：从物理硬件角度看，contract code 究竟是“在哪里”执行的？
 
 This has a simple answer: the process of executing contract code is part of the definition of the state transition function, which is part of the block validation algorithm, so if a transaction is added into block `B` the code execution spawned by that transaction will be executed by all nodes, now and in the future, that download and validate block `B`.
 
 答案很简单：执行 contract code 的过程，是状态转移函数定义的一部分，而状态转移函数又是 block 验证算法的一部分；因此，如果某笔 transaction 被加入到 block `B` 中，那么由该 transaction 触发的代码执行，都会被所有现在及未来下载并验证 block `B` 的节点执行。
 
-> **"代码在哪里执行?"**<br />
+> **“代码在哪里执行?”**<br />
 > 答案是: 在 *每一个* 验证节点上都会执行一遍. 这就是去中心化的代价.
 > 这也解释了为什么 gas 如此重要: 你写的每一行代码, 全世界成千上万台机器都要执行一次.
-> 正因如此, blockchain 不适合做大规模计算或存储, 它更适合做"仲裁"和"共识".
+> 正因如此, blockchain 不适合做大规模计算或存储, 它更适合做“仲裁”和“共识”.
 
 ## Applications
 
@@ -1108,9 +1108,9 @@ def send(to, value):
        self.storage[to] = self.storage[to] + value
 ```
 
-This is essentially a literal implementation of the "banking system" state transition function described further above in this document.
+This is essentially a literal implementation of the “banking system” state transition function described further above in this document.
 
-这本质上就是对本文前面描述的"banking system"状态转移函数的一种字面实现。
+这本质上就是对本文前面描述的“banking system”状态转移函数的一种字面实现。
 
 > **现实实现: ERC-20**<br />
 > 白皮书中这段 Serpent 代码就是后来 ERC-20 token 标准的雏形.
@@ -1134,15 +1134,15 @@ The way this would be implemented is that the contract would maintain an ether b
 
 实现方式是，contract 维护一个 ether balance，用来把用于支付 fees 的 ether 退还给发送者；而这个 balance 则通过收取内部货币单位作为费用，并在一个持续运行的拍卖中转售这些单位来补充。
 
-Users would thus need to "activate" their accounts with ether, but once the ether is there it would be reusable because the contract would refund it each time.
+Users would thus need to “activate” their accounts with ether, but once the ether is there it would be reusable because the contract would refund it each time.
 
-因此，用户需要先用 ether"激活"自己的 accounts；但一旦放入 ether，由于 contract 每次都会退还，这些 ether 便可以重复使用。
+因此，用户需要先用 ether“激活”自己的 accounts；但一旦放入 ether，由于 contract 每次都会退还，这些 ether 便可以重复使用。
 
 ### Financial derivatives and Stable-Value Currencies
 
-Financial derivatives are the most common application of a "smart contract", and one of the simplest to implement in code.
+Financial derivatives are the most common application of a “smart contract”, and one of the simplest to implement in code.
 
-金融衍生品是 "smart contract" 最常见的应用之一，也是最容易用代码实现的应用之一。
+金融衍生品是 “smart contract” 最常见的应用之一，也是最容易用代码实现的应用之一。
 
 The main challenge in implementing financial contracts is that the majority of them require reference to an external price ticker; for example, a very desirable application is a smart contract that hedges against the volatility of ether (or another cryptocurrency) with respect to the US dollar, but doing this requires the contract to know what the value of ETH/USD is.
 
@@ -1150,18 +1150,18 @@ The main challenge in implementing financial contracts is that the majority of t
 
 > **oracle 问题 (预言机问题)**<br />
 > blockchain 是一个封闭的确定性系统, 它 *无法* 主动获取链外数据 (e.g., 价格, 天气, 比赛结果).
-> oracle 就是把链外数据"喂"进链上的桥梁.
+> oracle 就是把链外数据“喂”进链上的桥梁.
 > 但这里有一个信任问题: 如果 oracle 提供的数据是假的, smart contract 也会做出错误决策.
-> 这被称为 "oracle problem", 是 blockchain 应用的核心挑战之一.
+> 这被称为 “oracle problem”, 是 blockchain 应用的核心挑战之一.
 
 > **现实实现: Chainlink**<br />
 > Chainlink 是目前最广泛使用的去中心化 oracle 网络.
 > 它汇聚多个独立数据源, 通过经济激励和声誉系统来保证数据质量.
 > 几乎所有 DeFi 协议都依赖 Chainlink 或类似 oracle 来获取价格数据.
 
-The simplest way to do this is through a "data feed" contract maintained by a specific party (e.g., NASDAQ) designed so that that party has the ability to update the contract as needed, and providing an interface that allows other contracts to send a message to that contract and get back a response that provides the price.
+The simplest way to do this is through a “data feed” contract maintained by a specific party (e.g., NASDAQ) designed so that that party has the ability to update the contract as needed, and providing an interface that allows other contracts to send a message to that contract and get back a response that provides the price.
 
-最简单的做法，是使用由特定一方（例如 NASDAQ）维护的 "data feed" contract，并将其设计为该方能够按需更新 contract，同时提供一个接口，让其他 contracts 可以向它发送 message，并得到包含价格的响应。
+最简单的做法，是使用由特定一方（例如 NASDAQ）维护的 “data feed” contract，并将其设计为该方能够按需更新 contract，同时提供一个接口，让其他 contracts 可以向它发送 message，并得到包含价格的响应。
 
 Given that critical ingredient, the hedging contract would look as follows:
 
@@ -1173,8 +1173,8 @@ Given that critical ingredient, the hedging contract would look as follows:
    等待 B 方存入 1000 ether。
 3. Record the USD value of 1000 ether, calculated by querying the data feed contract, in storage, say this is $x.
    通过查询 data feed contract 计算出 1000 ether 的 USD 价值，并将其记录到 storage 中，假设该值为 $x。
-4. After 30 days, allow A or B to "reactivate" the contract in order to send $x worth of ether (calculated by querying the data feed contract again to get the new price) to A and the rest to B.
-   30 天后，允许 A 或 B "reactivate" 该 contract，以便将价值 $x 的 ether（通过再次查询 data feed contract 获得新价格后计算）发送给 A，剩余部分发送给 B。
+4. After 30 days, allow A or B to “reactivate” the contract in order to send $x worth of ether (calculated by querying the data feed contract again to get the new price) to A and the rest to B.
+   30 天后，允许 A 或 B “reactivate” 该 contract，以便将价值 $x 的 ether（通过再次查询 data feed contract 获得新价格后计算）发送给 A，剩余部分发送给 B。
 
 Such a contract would have significant potential in crypto-commerce.
 
@@ -1192,9 +1192,9 @@ The issuer then promises to provide one unit of the underlying asset to anyone w
 
 发行方随后承诺：任何人只要把一个单位的这种 crypto-asset 返还给他们，就能换回一个单位的底层资产。
 
-This mechanism allows any non-cryptographic asset to be "uplifted" into a cryptographic asset, provided that the issuer can be trusted.
+This mechanism allows any non-cryptographic asset to be “uplifted” into a cryptographic asset, provided that the issuer can be trusted.
 
-这种机制允许任何非加密资产在发行方可信的前提下被"提升"为一种加密资产。
+这种机制允许任何非加密资产在发行方可信的前提下被“提升”为一种加密资产。
 
 In practice, however, issuers are not always trustworthy, and in some cases the banking infrastructure is too weak, or too hostile, for such services to exist.
 
@@ -1229,9 +1229,9 @@ The earliest alternative cryptocurrency of all, [Namecoin](http://namecoin.org/)
 
 所有替代 cryptocurrency 中最早的一种，[Namecoin](http://namecoin.org/)，曾试图使用类似 Bitcoin 的 blockchain 来提供名称注册系统，使用户能够把自己的名字连同其他数据一起注册到公共数据库中。
 
-The major cited use case is for a [DNS](https://wikipedia.org/wiki/Domain_Name_System) system, mapping domain names like "bitcoin.org" (or, in Namecoin’s case, "bitcoin.bit") to an IP address.
+The major cited use case is for a [DNS](https://wikipedia.org/wiki/Domain_Name_System) system, mapping domain names like “bitcoin.org” (or, in Namecoin’s case, “bitcoin.bit”) to an IP address.
 
-最常被提及的用例，是作为一种 [DNS](https://wikipedia.org/wiki/Domain_Name_System) 系统，把类似 "bitcoin.org"（或在 Namecoin 中的 "bitcoin.bit"）这样的域名映射到某个 IP 地址。
+最常被提及的用例，是作为一种 [DNS](https://wikipedia.org/wiki/Domain_Name_System) 系统，把类似 “bitcoin.org”（或在 Namecoin 中的 “bitcoin.bit”）这样的域名映射到某个 IP 地址。
 
 Other use cases include email authentication and potentially more advanced reputation systems.
 
@@ -1255,9 +1255,9 @@ Anyone can register a name with some value, and that registration then sticks fo
 
 任何人都可以用某个值注册一个名称，而这项注册将永久保留下来。
 
-A more sophisticated name registration contract will also have a "function clause" allowing other contracts to query it, as well as a mechanism for the "owner" (i.e., the first registerer) of a name to change the data or transfer ownership.
+A more sophisticated name registration contract will also have a “function clause” allowing other contracts to query it, as well as a mechanism for the “owner” (i.e., the first registerer) of a name to change the data or transfer ownership.
 
-更复杂的名称注册 contract 还会带有一个 "function clause"，允许其他 contracts 查询它，并提供一种机制，让某个名称的"owner"（也就是第一个注册者）能够修改数据或转移所有权。
+更复杂的名称注册 contract 还会带有一个 “function clause”，允许其他 contracts 查询它，并提供一种机制，让某个名称的“owner”（也就是第一个注册者）能够修改数据或转移所有权。
 
 One can even add reputation and web-of-trust functionality on top.
 
@@ -1274,17 +1274,17 @@ Over the past few years, there have emerged a number of popular online file stor
 
 过去几年里，出现了许多流行的在线文件存储创业公司，其中最著名的是 Dropbox；它们试图让用户上传自己硬盘的备份，由服务商代为存储，并以月费形式向用户提供访问能力。
 
-However, at this point the file storage market is at times relatively inefficient; a cursory look at various existing solutions shows that, particularly at the "uncanny valley" 20-200 GB level at which neither free quotas nor enterprise-level discounts kick in, monthly prices for mainstream file storage costs are such that you are paying for more than the cost of the entire hard drive in a single month.
+However, at this point the file storage market is at times relatively inefficient; a cursory look at various existing solutions shows that, particularly at the “uncanny valley” 20-200 GB level at which neither free quotas nor enterprise-level discounts kick in, monthly prices for mainstream file storage costs are such that you are paying for more than the cost of the entire hard drive in a single month.
 
-然而，目前的文件存储市场有时相对低效；粗略看一眼各种现有方案就会发现，尤其是在 20-200 GB 这个既拿不到免费额度、也享受不到企业级折扣的"uncanny valley"区间，主流文件存储的月费高到你在一个月里付的钱就超过了整块硬盘本身的成本。
+然而，目前的文件存储市场有时相对低效；粗略看一眼各种现有方案就会发现，尤其是在 20-200 GB 这个既拿不到免费额度、也享受不到企业级折扣的“uncanny valley”区间，主流文件存储的月费高到你在一个月里付的钱就超过了整块硬盘本身的成本。
 
 Ethereum contracts can allow for the development of a decentralized file storage ecosystem, where individual users can earn small quantities of money by renting out their own hard drives and unused space can be used to further drive down the costs of file storage.
 
 Ethereum contracts 可以促成去中心化文件存储生态的发展，在这个生态中，个人用户可以通过出租自己的硬盘赚取少量收入，而那些闲置空间则可以被利用起来，进一步压低文件存储成本。
 
-The key underpinning piece of such a device would be what we have termed the "decentralized Dropbox contract".
+The key underpinning piece of such a device would be what we have termed the “decentralized Dropbox contract”.
 
-这种装置的关键基础组件，是我们称之为 "decentralized Dropbox contract" 的东西。
+这种装置的关键基础组件，是我们称之为 “decentralized Dropbox contract” 的东西。
 
 This contract works as follows.
 
@@ -1308,10 +1308,10 @@ An important feature of the protocol is that, although it may seem like one is t
 
 If a contract is still paying out money, that provides a cryptographic proof that someone out there is still storing the file.
 
-如果某个 contract 仍在持续支付报酬，那就为"仍有人在存储该文件"提供了密码学证明。
+如果某个 contract 仍在持续支付报酬，那就为“仍有人在存储该文件”提供了密码学证明。
 
 > **现实实现: IPFS / Filecoin / Arweave**<br />
-> 白皮书中的"decentralized Dropbox"后来衍生出多个项目:
+> 白皮书中的“decentralized Dropbox”后来衍生出多个项目:
 > IPFS: 去中心化的文件寻址和分发协议 (不含激励层).
 > Filecoin: 在 IPFS 基础上增加了经济激励, 类似白皮书所述的付费存储模型.
 > Arweave: 采用一次付费、永久存储的模式.
@@ -1319,9 +1319,9 @@ If a contract is still paying out money, that provides a cryptographic proof tha
 
 ### Decentralized Autonomous Organizations
 
-The general concept of a "decentralized autonomous organization" is that of a virtual entity that has a certain set of members or shareholders which, perhaps with a 67% majority, have the right to spend the entity’s funds and modify its code.
+The general concept of a “decentralized autonomous organization” is that of a virtual entity that has a certain set of members or shareholders which, perhaps with a 67% majority, have the right to spend the entity’s funds and modify its code.
 
-"decentralized autonomous organization" 的一般概念，是指一种虚拟实体，它拥有一组成员或股东；这些人可能只要达到 67% 多数，就有权支配该实体的资金并修改其代码。
+“decentralized autonomous organization” 的一般概念，是指一种虚拟实体，它拥有一组成员或股东；这些人可能只要达到 67% 多数，就有权支配该实体的资金并修改其代码。
 
 The members would collectively decide on how the organization should allocate its funds.
 
@@ -1337,19 +1337,19 @@ This essentially replicates the legal trappings of a traditional company or nonp
 
 > **The DAO 事件 (2016)**<br />
 > 白皮书中对 DAO 的描述在 2016 年以一种戏剧性方式进入公众视野.
-> "The DAO" 是第一个大型 DAO 项目, 通过众筹融资约 1.5 亿美元.
+> “The DAO” 是第一个大型 DAO 项目, 通过众筹融资约 1.5 亿美元.
 > 然而, 其 smart contract 存在 reentrancy (重入) 漏洞, 攻击者利用该漏洞盗走了约 360 万 ETH.
 > 这导致了 Ethereum 社区的一次激烈争论, 最终以硬分叉回滚交易收场.
 > 拒绝回滚的一方继续运行原链, 形成了 Ethereum Classic (ETC).
 > 这一事件深刻塑造了此后 smart contract 安全审计的行业实践.
 
-So far much of the talk around DAOs has been around the "capitalist" model of a "decentralized autonomous corporation" (DAC) with dividend-receiving shareholders and tradable shares; an alternative, perhaps described as a "decentralized autonomous community", would have all members have an equal share in the decision making and require 67% of existing members to agree to add or remove a member.
+So far much of the talk around DAOs has been around the “capitalist” model of a “decentralized autonomous corporation” (DAC) with dividend-receiving shareholders and tradable shares; an alternative, perhaps described as a “decentralized autonomous community”, would have all members have an equal share in the decision making and require 67% of existing members to agree to add or remove a member.
 
-到目前为止，围绕 DAOs 的很多讨论都集中在"资本主义"模型的 "decentralized autonomous corporation"（DAC）上，也就是拥有可交易股份和可分红股东的模式；另一种可称作 "decentralized autonomous community" 的替代方案，则让所有成员在决策中拥有平等份额，并要求现有成员中 67% 同意才能新增或移除某位成员。
+到目前为止，围绕 DAOs 的很多讨论都集中在“资本主义”模型的 “decentralized autonomous corporation”（DAC）上，也就是拥有可交易股份和可分红股东的模式；另一种可称作 “decentralized autonomous community” 的替代方案，则让所有成员在决策中拥有平等份额，并要求现有成员中 67% 同意才能新增或移除某位成员。
 
 The requirement that one person can only have one membership would then need to be enforced collectively by the group.
 
-而"一人只能拥有一个成员资格"的要求，则需要由整个群体共同执行。
+而“一人只能拥有一个成员资格”的要求，则需要由整个群体共同执行。
 
 A general outline for how to code a DAO is as follows.
 
@@ -1394,9 +1394,9 @@ A more sophisticated skeleton would also have built-in voting ability for featur
 
 更复杂的骨架还会内建投票能力，以支持发送 transaction、添加成员和移除成员等功能，甚至还可能支持 [Liquid Democracy](https://wikipedia.org/wiki/Liquid_democracy) 风格的投票委托（也就是说，任何人都可以指定他人代替自己投票，而且这种委托是可传递的，所以如果 A 委托给 B，B 又委托给 C，那么 C 就决定了 A 的投票）。
 
-This design would allow the DAO to grow organically as a decentralized community, allowing people to eventually delegate the task of filtering out who is a member to specialists, although unlike in the "current system" specialists can easily pop in and out of existence over time as individual community members change their alignments.
+This design would allow the DAO to grow organically as a decentralized community, allowing people to eventually delegate the task of filtering out who is a member to specialists, although unlike in the “current system” specialists can easily pop in and out of existence over time as individual community members change their alignments.
 
-这种设计将使 DAO 能够像一个去中心化社区那样有机生长，允许人们最终把"筛选谁是成员"的任务委托给专门人士；不过，与"现行系统"不同的是，随着社区成员立场的变化，这些专门人士也可以很容易地随时间出现或退出。
+这种设计将使 DAO 能够像一个去中心化社区那样有机生长，允许人们最终把“筛选谁是成员”的任务委托给专门人士；不过，与“现行系统”不同的是，随着社区成员立场的变化，这些专门人士也可以很容易地随时间出现或退出。
 
 > **Liquid Democracy (流动民主)**<br />
 > 介于直接民主和代议民主之间的一种模式.
@@ -1412,9 +1412,9 @@ A complete skeleton would involve asset management functionality, the ability to
 
 一个完整的骨架需要包含资产管理功能、提出买卖股份要约的能力，以及接受要约的能力（最好在 contract 内部带有撮合机制）。
 
-Delegation would also exist Liquid Democracy-style, generalizing the concept of a "board of directors".
+Delegation would also exist Liquid Democracy-style, generalizing the concept of a “board of directors”.
 
-委托机制同样可以采用 Liquid Democracy 风格，从而推广"board of directors"的概念。
+委托机制同样可以采用 Liquid Democracy 风格，从而推广“board of directors”的概念。
 
 ### Further Applications
 
@@ -1449,7 +1449,7 @@ If Bob turns out to be malicious, then she can turn off his ability to withdraw.
 
 > **savings wallet 的现实意义**<br />
 > 这个例子展示了 smart contract 相比 multisig 的灵活性: 不同的密钥可以有不同的权限和额度限制.
-> 在现实中, 类似的设计被称为 "social recovery wallet", 代表项目如 Argent.
+> 在现实中, 类似的设计被称为 “social recovery wallet”, 代表项目如 Argent.
 > Vitalik 本人也多次倡导这种钱包设计, 认为它比传统的单一私钥模型更安全实用.
 
 #### Crop insurance
@@ -1468,9 +1468,9 @@ This can be expanded to natural disaster insurance generally.
 
 #### A decentralized data feed
 
-For financial contracts for difference, it may actually be possible to decentralize the data feed via a protocol called "[SchellingCoin](https://blog.ethereum.org/2014/03/28/schellingcoin-a-minimal-trust-universal-data-feed)".
+For financial contracts for difference, it may actually be possible to decentralize the data feed via a protocol called “[SchellingCoin](https://blog.ethereum.org/2014/03/28/schellingcoin-a-minimal-trust-universal-data-feed)”.
 
-对于金融差价合约而言，实际上可能可以通过一种名为 "[SchellingCoin](https://blog.ethereum.org/2014/03/28/schellingcoin-a-minimal-trust-universal-data-feed)" 的协议来实现 data feed 的去中心化。
+对于金融差价合约而言，实际上可能可以通过一种名为 “[SchellingCoin](https://blog.ethereum.org/2014/03/28/schellingcoin-a-minimal-trust-universal-data-feed)” 的协议来实现 data feed 的去中心化。
 
 SchellingCoin basically works as follows: N parties all put into the system the value of a given datum (e.g., the ETH/USD price), the values are sorted, and everyone between the 25th and 75th percentile gets one token as a reward.
 
@@ -1481,9 +1481,9 @@ Everyone has the incentive to provide the answer that everyone else will provide
 每个人都有动机给出他们认为其他人也会给出的答案，而大量参与者唯一现实中能共同达成一致的数值，就是那个显而易见的默认答案：真相。
 
 > **Schelling point (谢林点)**<br />
-> SchellingCoin 的名字来源于博弈论中的 "Schelling focal point" 概念.
-> 当人们无法沟通但需要协调时, 会不约而同地选择最"显然"的答案.
-> 例如: "在纽约随机约见面, 你会去哪?" — 大多数人会选中央车站的大钟下方.
+> SchellingCoin 的名字来源于博弈论中的 “Schelling focal point” 概念.
+> 当人们无法沟通但需要协调时, 会不约而同地选择最“显然”的答案.
+> 例如: “在纽约随机约见面, 你会去哪?” — 大多数人会选中央车站的大钟下方.
 > SchellingCoin 利用这一点: 诚实报告真实数据就是大多数人自然会做的事.
 
 This creates a decentralized protocol that can theoretically provide any number of values, including the ETH/USD price, the temperature in Berlin or even the result of a particular hard computation.
@@ -1546,7 +1546,7 @@ Provided an oracle or SchellingCoin, prediction markets are also easy to impleme
 > **现实实现: 预测市场**<br />
 > Augur (2018) 是 Ethereum 上最早一批、也最知名的去中心化预测市场之一, 但因用户体验复杂而未获广泛采用.
 > Polymarket (基于 Polygon) 在 2024 年美国大选期间引起广泛关注, 成为最知名的链上预测市场.
-> **futarchy**: 经济学家 Robin Hanson 提出的治理模型 — "用预测市场来选择政策, 用投票来定义目标".
+> **futarchy**: 经济学家 Robin Hanson 提出的治理模型 — “用预测市场来选择政策, 用投票来定义目标”.
 
 #### Onchain decentralized marketplaces
 
@@ -1558,14 +1558,14 @@ Using the identity and reputation system as a base.
 
 ### Modified GHOST Implementation
 
-The "Greedy Heaviest Observed Subtree" (GHOST) protocol is an innovation first introduced by Yonatan Sompolinsky and Aviv Zohar in [December 2013](https://eprint.iacr.org/2013/881.pdf).
+The “Greedy Heaviest Observed Subtree” (GHOST) protocol is an innovation first introduced by Yonatan Sompolinsky and Aviv Zohar in [December 2013](https://eprint.iacr.org/2013/881.pdf).
 
-"Greedy Heaviest Observed Subtree"（GHOST）协议，是 Yonatan Sompolinsky 和 Aviv Zohar 在 [2013 年 12 月](https://eprint.iacr.org/2013/881.pdf) 首次提出的一项创新。
+“Greedy Heaviest Observed Subtree”（GHOST）协议，是 Yonatan Sompolinsky 和 Aviv Zohar 在 [2013 年 12 月](https://eprint.iacr.org/2013/881.pdf) 首次提出的一项创新。
 
 > **GHOST 章节导语**<br />
 > GHOST 是 Ethereum 与 Bitcoin 在共识层面的一个重要差异.
 > Bitcoin 的 10 分钟出块间隔可以容忍网络延迟, 但 Ethereum 想要更快的出块 (约 12-15 秒).
-> 出块越快, 同时出现多个有效 block 的概率越高, 造成大量"废块".
+> 出块越快, 同时出现多个有效 block 的概率越高, 造成大量“废块”.
 > GHOST 协议的目标就是解决这个问题: 让废块也能为网络安全做贡献.
 
 The motivation behind GHOST is that blockchains with fast confirmation times currently suffer from reduced security due to a high stale rate - because blocks take a certain time to propagate through the network, if miner A mines a block and then miner B happens to mine another block before miner A’s block propagates to B, miner B’s block will end up wasted and will not contribute to network security.
@@ -1584,9 +1584,9 @@ With these two effects combined, blockchains which produce blocks quickly are ve
 
 这两个效应叠加后，快速出块的 blockchains 很可能会导致某一个 mining pool 掌握足够高比例的网络 hashpower，从而事实上控制整个 mining 过程。
 
-As described by Sompolinsky and Zohar, GHOST solves the first issue of network security loss by including stale blocks in the calculation of which chain is the "longest"; that is to say, not just the parent and further ancestors of a block, but also the stale descendants of the block’s ancestor (in Ethereum jargon, "uncles") are added to the calculation of which block has the largest total proof-of-work backing it.
+As described by Sompolinsky and Zohar, GHOST solves the first issue of network security loss by including stale blocks in the calculation of which chain is the “longest”; that is to say, not just the parent and further ancestors of a block, but also the stale descendants of the block’s ancestor (in Ethereum jargon, “uncles”) are added to the calculation of which block has the largest total proof-of-work backing it.
 
-按照 Sompolinsky 和 Zohar 的描述，GHOST 通过把 stale blocks 纳入"哪条链是最长链"的计算，来解决网络安全损失的第一个问题；也就是说，不仅一个 block 的父块及更早祖先会被计算在内，该 block 祖先的 stale descendants（在 Ethereum 术语中称为 "uncles"）也会被纳入"哪个 block 获得最多总 proof-of-work 支持"的计算中。
+按照 Sompolinsky 和 Zohar 的描述，GHOST 通过把 stale blocks 纳入“哪条链是最长链”的计算，来解决网络安全损失的第一个问题；也就是说，不仅一个 block 的父块及更早祖先会被计算在内，该 block 祖先的 stale descendants（在 Ethereum 术语中称为 “uncles”）也会被纳入“哪个 block 获得最多总 proof-of-work 支持”的计算中。
 
 > **uncle block (叔块)**<br />
 > 当两个 miner 几乎同时挖出有效 block 时, 往往只有一个会进入主链, 另一个会变成 stale block.
@@ -1638,7 +1638,7 @@ This limited version of GHOST, with uncles includable only up to 7 generations, 
 
 First, unlimited GHOST would include too many complications into the calculation of which uncles for a given block are valid.
 
-第一，无限制的 GHOST 会让"给定某个 block 时，哪些 uncles 有效"的计算变得过于复杂。
+第一，无限制的 GHOST 会让“给定某个 block 时，哪些 uncles 有效”的计算变得过于复杂。
 
 Second, unlimited GHOST with compensation as used in Ethereum removes the incentive for a miner to mine on the main chain and not the chain of a public attacker.
 
@@ -1654,9 +1654,9 @@ The default approach, used in Bitcoin, is to have purely voluntary fees, relying
 
 Bitcoin 所采用的默认方式，是完全自愿的 fees 模型：依赖 miners 充当守门人，并动态设定最低费用。
 
-This approach has been received very favorably in the Bitcoin community particularly because it is "market-based", allowing supply and demand between miners and transaction senders determine the price.
+This approach has been received very favorably in the Bitcoin community particularly because it is “market-based”, allowing supply and demand between miners and transaction senders determine the price.
 
-这一做法在 Bitcoin 社区中得到了非常积极的评价，尤其是因为它是"market-based"的，允许 miners 与 transaction senders 之间的供需关系决定价格。
+这一做法在 Bitcoin 社区中得到了非常积极的评价，尤其是因为它是“market-based”的，允许 miners 与 transaction senders 之间的供需关系决定价格。
 
 The problem with this line of reasoning is, however, that transaction processing is not a market; although it is intuitively attractive to construe transaction processing as a service that the miner is offering to the sender, in reality every transaction that a miner includes will need to be processed by every node in the network, so the vast majority of the cost of transaction processing is borne by third parties and not the miner that is making the decision of whether or not to include it.
 
@@ -1668,13 +1668,13 @@ Hence, tragedy-of-the-commons problems are very likely to occur.
 
 > **tragedy of the commons (公地悲剧)**<br />
 > 经典经济学概念: 当资源是共享的而成本由个体承担时, 每个人都有过度使用的动机.
-> 此处的"公地"是网络的计算和带宽资源.
+> 此处的“公地”是网络的计算和带宽资源.
 > miner 纳入一笔交易只考虑自己的收益 (fee), 却不考虑全网其他节点的验证成本.
 > 解决方案就是下文的 gas limit 机制: 用协议层面的硬限制来防止单个 block 消耗过多资源.
 
 However, as it turns out this flaw in the market-based mechanism, when given a particular inaccurate simplifying assumption, magically cancels itself out.
 
-然而，有趣的是，只要引入一个特定但并不准确的简化假设，这种 market-based 机制中的缺陷会"神奇地"自行抵消。
+然而，有趣的是，只要引入一个特定但并不准确的简化假设，这种 market-based 机制中的缺陷会“神奇地”自行抵消。
 
 The argument is as follows.
 
@@ -1724,7 +1724,7 @@ However, there are several important deviations from those assumptions in realit
 3. The mining power distribution may end up radically inegalitarian in practice.
    在实践中，挖矿算力分布可能会变得极度不平等。
 4. Speculators, political enemies and crazies whose utility function includes causing harm to the network do exist, and they can cleverly set up contracts where their cost is much lower than the cost paid by other verifying nodes.
-   确实存在投机者、政治敌人以及那些把"损害网络"纳入自身效用函数的疯子，而他们可以巧妙设置 contracts，使自己的成本远低于其他验证节点所承担的成本。
+   确实存在投机者、政治敌人以及那些把“损害网络”纳入自身效用函数的疯子，而他们可以巧妙设置 contracts，使自己的成本远低于其他验证节点所承担的成本。
 
 (1) provides a tendency for the miner to include fewer transactions, and
 (2) increases `NC`; hence, these two effects at least partially
@@ -1898,13 +1898,13 @@ For convenience and to avoid future argument (see the current mBTC/uBTC/satoshi 
 > szabo 和 finney 在实践中几乎从未被使用.
 > 命名致敬了密码学和数字货币的先驱: Wei Dai (b-money), Nick Szabo (smart contracts), Hal Finney (RPOW, Bitcoin 早期参与者).
 
-This should be taken as an expanded version of the concept of "dollars" and "cents" or "BTC" and "satoshi".
+This should be taken as an expanded version of the concept of “dollars” and “cents” or “BTC” and “satoshi”.
 
-这可以被视为"dollars / cents"或"BTC / satoshi"概念的扩展版本。
+这可以被视为“dollars / cents”或“BTC / satoshi”概念的扩展版本。
 
-In the near future, we expect "ether" to be used for ordinary transactions, "finney" for microtransactions and "szabo" and "wei" for technical discussions around fees and protocol implementation; the remaining denominations may become useful later and should not be included in clients at this point.
+In the near future, we expect “ether” to be used for ordinary transactions, “finney” for microtransactions and “szabo” and “wei” for technical discussions around fees and protocol implementation; the remaining denominations may become useful later and should not be included in clients at this point.
 
-在不久的将来，我们预计"ether"将用于普通 transactions，"finney"用于 microtransactions，而 "szabo" 和 "wei" 将用于围绕 fees 与协议实现的技术讨论；其余面额未来或许会变得有用，但此时不应纳入 clients。
+在不久的将来，我们预计“ether”将用于普通 transactions，“finney”用于 microtransactions，而 “szabo” 和 “wei” 将用于围绕 fees 与协议实现的技术讨论；其余面额未来或许会变得有用，但此时不应纳入 clients。
 
 The issuance model will be as follows:
 
@@ -1966,33 +1966,33 @@ Hence, this situation is _exactly equivalent_ to the endowment, but with one imp
 
 因此，这种情况与 endowment _完全等价_，但有一个重要差别：组织持有的将完全是 BTC，因此它没有激励去支持 ether 单位的价值。
 
-The permanent linear supply growth model reduces the risk of what some see as excessive wealth concentration in Bitcoin, and gives individuals living in present and future eras a fair chance to acquire currency units, while at the same time retaining a strong incentive to obtain and hold ether because the "supply growth rate" as a percentage still tends to zero over time.
+The permanent linear supply growth model reduces the risk of what some see as excessive wealth concentration in Bitcoin, and gives individuals living in present and future eras a fair chance to acquire currency units, while at the same time retaining a strong incentive to obtain and hold ether because the “supply growth rate” as a percentage still tends to zero over time.
 
-永久线性供给增长模型降低了某些人所认为的 Bitcoin 过度财富集中风险，并让生活在当下和未来时代的个体都能公平地获得货币单位；与此同时，由于按百分比计算的"supply growth rate"仍会随时间趋近于零，因此获取并持有 ether 的激励依然很强。
+永久线性供给增长模型降低了某些人所认为的 Bitcoin 过度财富集中风险，并让生活在当下和未来时代的个体都能公平地获得货币单位；与此同时，由于按百分比计算的“supply growth rate”仍会随时间趋近于零，因此获取并持有 ether 的激励依然很强。
 
 > **线性发行 vs 指数衰减**<br />
 > Bitcoin: 总量固定 2100 万, 每 4 年减半 → 发行量指数衰减, 最终归零.
 > Ethereum (白皮书设想): 每年固定增发 → 发行量恒定, 但 *增长率* 趋近于零 (因为分母不断增大).
-> 实际效果: 两种模型在长期都趋于低通胀, 但线性模型避免了"早期参与者过度获利"的问题.
+> 实际效果: 两种模型在长期都趋于低通胀, 但线性模型避免了“早期参与者过度获利”的问题.
 > 当前现实: EIP-1559 的 burn 机制加上 PoS 的低发行量, 使 ETH 在高活跃期实际上是通缩的.
 
 We also theorize that because coins are always lost over time due to carelessness, death, etc, and coin loss can be modeled as a percentage of the total supply per year, that the total currency supply in circulation will in fact eventually stabilize at a value equal to the annual issuance divided by the loss rate (e.g., at a loss rate of 1%, once the supply reaches 26X then 0.26X will be mined and 0.26X lost every year, creating an equilibrium).
 
-我们还提出一种理论：由于 coins 会随着时间因疏忽、死亡等原因持续丢失，而 coin 的丢失可以建模为总供给按年损失的一个百分比，因此流通中的货币总供给实际上最终会稳定在"年发行量除以损失率"的数值上（例如，当损失率为 1% 时，一旦总供给达到 26X，那么每年会新增挖出 0.26X，同时也损失 0.26X，从而形成平衡）。
+我们还提出一种理论：由于 coins 会随着时间因疏忽、死亡等原因持续丢失，而 coin 的丢失可以建模为总供给按年损失的一个百分比，因此流通中的货币总供给实际上最终会稳定在“年发行量除以损失率”的数值上（例如，当损失率为 1% 时，一旦总供给达到 26X，那么每年会新增挖出 0.26X，同时也损失 0.26X，从而形成平衡）。
 
 Note that in the future, it is likely that Ethereum will switch to a proof-of-stake model for security, reducing the issuance requirement to somewhere between zero and 0.05X per year.
 
 需要注意的是，未来 Ethereum 很可能会切换到 proof-of-stake 安全模型，从而把发行需求降低到每年介于零和 0.05X 之间。
 
 > **The Merge: 已经实现**<br />
-> 白皮书中说"未来很可能会切换到 PoS" — 这在 2022 年 9 月 15 日已经完成.
+> 白皮书中说“未来很可能会切换到 PoS” — 这在 2022 年 9 月 15 日已经完成.
 > 从最初设想到最终实现, 这一过渡花了近 9 年.
-> 延迟的原因: PoS 的安全性设计极其复杂, 需要解决 "nothing at stake", "long-range attack" 等诸多难题.
+> 延迟的原因: PoS 的安全性设计极其复杂, 需要解决 “nothing at stake”, “long-range attack” 等诸多难题.
 > Ethereum 最终采用的是 Casper FFG + LMD-GHOST 混合共识, 验证者需质押 32 ETH.
 
-In the event that the Ethereum organization loses funding or for any other reason disappears, we leave open a "social contract": anyone has the right to create a future candidate version of Ethereum, with the only condition being that the quantity of ether must be at most equal to `60102216 * (1.198 + 0.26 * n)` where `n` is the number of years after the genesis block.
+In the event that the Ethereum organization loses funding or for any other reason disappears, we leave open a “social contract”: anyone has the right to create a future candidate version of Ethereum, with the only condition being that the quantity of ether must be at most equal to `60102216 * (1.198 + 0.26 * n)` where `n` is the number of years after the genesis block.
 
-如果 Ethereum organization 失去资金来源，或因其他任何原因消失，我们会保留一个"social contract"：任何人都有权创建未来的 Ethereum 候选版本，唯一条件是 ether 的数量最多只能等于 `60102216 * (1.198 + 0.26 * n)`，其中 `n` 是 genesis block 之后经过的年数。
+如果 Ethereum organization 失去资金来源，或因其他任何原因消失，我们会保留一个“social contract”：任何人都有权创建未来的 Ethereum 候选版本，唯一条件是 ether 的数量最多只能等于 `60102216 * (1.198 + 0.26 * n)`，其中 `n` 是 genesis block 之后经过的年数。
 
 Creators are free to crowd-sell or otherwise assign some or all of the difference between the PoS-driven supply expansion and the maximum allowable supply expansion to pay for development.
 
@@ -2043,7 +2043,7 @@ This has two important benefits.
 
 First, Ethereum contracts can include any kind of computation, so an Ethereum ASIC would essentially be an ASIC for general computation - i.e., a better CPU.
 
-第一，Ethereum contracts 可以包含任何类型的计算，因此 Ethereum ASIC 本质上会是"通用计算 ASIC"，也就是一种更强的 CPU。
+第一，Ethereum contracts 可以包含任何类型的计算，因此 Ethereum ASIC 本质上会是“通用计算 ASIC”，也就是一种更强的 CPU。
 
 Second, mining requires access to the entire blockchain, forcing miners to store the entire blockchain and at least be capable of verifying every transaction.
 
@@ -2057,9 +2057,9 @@ This model is untested, and there may be difficulties along the way in avoiding 
 
 这一模型尚未经过验证，而且在将 contract execution 用作 mining algorithm 时，可能会遇到难以避免某些巧妙优化的问题。
 
-However, one notably interesting feature of this algorithm is that it allows anyone to "poison the well", by introducing a large number of contracts into the blockchain specifically designed to stymie certain ASICs.
+However, one notably interesting feature of this algorithm is that it allows anyone to “poison the well”, by introducing a large number of contracts into the blockchain specifically designed to stymie certain ASICs.
 
-不过，这一算法有一个非常有趣的特点：它允许任何人通过向 blockchain 中引入大量专门用于阻碍某些 ASICs 的 contracts，来"poison the well"。
+不过，这一算法有一个非常有趣的特点：它允许任何人通过向 blockchain 中引入大量专门用于阻碍某些 ASICs 的 contracts，来“poison the well”。
 
 The economic incentives exist for ASIC manufacturers to use such a trick to attack each other.
 
@@ -2097,12 +2097,12 @@ Ethereum is likely to suffer a similar growth pattern, worsened by the fact that
 Ethereum 很可能会经历类似的增长模式，而且由于 Ethereum blockchain 之上会承载许多应用，而不仅仅像 Bitcoin 那样只承载货币，这种增长还会更严重；不过另一方面，Ethereum full nodes 只需要存储 state，而不是整个 blockchain history，这又会在一定程度上缓解问题。
 
 > **可扩展性: blockchain 的核心挑战**<br />
-> 这是著名的 "blockchain trilemma" (区块链三难困境) 的体现:
+> 这是著名的 “blockchain trilemma” (区块链三难困境) 的体现:
 > 去中心化 / 安全性 / 可扩展性 — 三者最多只能同时满足两个.
 > 白皮书写作时, 这个问题还没有成熟的解决方案.
 
 > **现实演进: L2 和 Rollups**<br />
-> Ethereum 目前的扩容路线已从"链上扩容"转向"以 Rollup 为中心"的 L2 方案:
+> Ethereum 目前的扩容路线已从“链上扩容”转向“以 Rollup 为中心”的 L2 方案:
 > (1) Optimistic Rollups (e.g., Optimism, Arbitrum): 乐观假设交易有效, 出错时通过 fraud proof 挑战.
 > (2) ZK Rollups (e.g., zkSync, StarkNet): 通过零知识证明在数学上保证正确性.
 > 两者都在链下批量执行交易, 只把压缩后的结果提交到 Ethereum 主链, 从而大幅降低成本.
@@ -2156,9 +2156,9 @@ Since `S[0]` is known to be correct, there must be some first state `S[i]` that 
 
 由于 `S[0]` 已知是正确的，那么必然存在某个第一个错误的 state `S[i]`，并且其前一个 state `S[i-1]` 是正确的。
 
-The verifying node would provide the index `i`, along with a "proof of invalidity" consisting of the subset of Patricia tree nodes needing to process `APPLY(S[i-1], TX[i]) -> S[i]`.
+The verifying node would provide the index `i`, along with a “proof of invalidity” consisting of the subset of Patricia tree nodes needing to process `APPLY(S[i-1], TX[i]) -> S[i]`.
 
-verifying node 会给出索引 `i`，同时附上一份"proof of invalidity"，它由处理 `APPLY(S[i-1], TX[i]) -> S[i]` 所需的 Patricia tree 节点子集构成。
+verifying node 会给出索引 `i`，同时附上一份“proof of invalidity”，它由处理 `APPLY(S[i-1], TX[i]) -> S[i]` 所需的 Patricia tree 节点子集构成。
 
 Nodes would be able to use those nodes to run that part of the computation, and see that the `S[i]` generated does not match the `S[i]` provided.
 
@@ -2168,9 +2168,9 @@ Another, more sophisticated, attack would involve the malicious miners publishin
 
 另一种更复杂的攻击，则是恶意 miners 发布不完整的 blocks，使得判定这些 blocks 是否有效所需的完整信息根本不存在。
 
-The solution to this is a challenge-response protocol: verification nodes issue "challenges" in the form of target transaction indices, and upon receiving a node a light node treats the block as untrusted until another node, whether the miner or another verifier, provides a subset of Patricia nodes as a proof of validity.
+The solution to this is a challenge-response protocol: verification nodes issue “challenges” in the form of target transaction indices, and upon receiving a node a light node treats the block as untrusted until another node, whether the miner or another verifier, provides a subset of Patricia nodes as a proof of validity.
 
-对此的解决方案是一种 challenge-response protocol：verification nodes 以目标 transaction 索引的形式发出"challenges"，而 light node 在收到某个 block 后，会把它视为不可信，直到另一个节点，不论是 miner 还是其他 verifier，提供一组 Patricia nodes 子集作为有效性证明。
+对此的解决方案是一种 challenge-response protocol：verification nodes 以目标 transaction 索引的形式发出“challenges”，而 light node 在收到某个 block 后，会把它视为不可信，直到另一个节点，不论是 miner 还是其他 verifier，提供一组 Patricia nodes 子集作为有效性证明。
 
 > **fraud proof 与 validity proof**<br />
 > 白皮书此处描述的 challenge-response 机制, 就是后来 fraud proof (欺诈证明) 的雏形.
@@ -2185,9 +2185,9 @@ The Ethereum protocol was originally conceived as an upgraded version of a crypt
 
 Ethereum protocol 最初被构想为 cryptocurrency 的升级版，通过一种高度泛化的编程语言提供链上 escrow、提现限额、金融合约、赌博市场等高级特性。
 
-The Ethereum protocol would not "support" any of the applications directly, but the existence of a Turing-complete programming language means that arbitrary contracts can theoretically be created for any transaction type or application.
+The Ethereum protocol would not “support” any of the applications directly, but the existence of a Turing-complete programming language means that arbitrary contracts can theoretically be created for any transaction type or application.
 
-Ethereum protocol 并不会直接"支持"这些应用中的任何一种，但由于存在 Turing-complete 编程语言，理论上就可以为任何 transaction 类型或应用创建任意 contracts。
+Ethereum protocol 并不会直接“支持”这些应用中的任何一种，但由于存在 Turing-complete 编程语言，理论上就可以为任何 transaction 类型或应用创建任意 contracts。
 
 What is more interesting about Ethereum, however, is that the Ethereum protocol moves far beyond just currency.
 
@@ -2244,4 +2244,4 @@ Ethereum protocol 所实现的任意状态转移函数概念，为其提供了�
 
 [^2]: Technically, the median of the 11 previous blocks.  更准确地说，是前 11 个 blocks 的中位数。
 
-[^3]: Internally, 2 and "CHARLIE" are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.  在内部表示上，2 和 "CHARLIE" 都是数字[^3]，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
+[^3]: Internally, 2 and “CHARLIE” are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.  在内部表示上，2 和 “CHARLIE” 都是数字[^3]，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
