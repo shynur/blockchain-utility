@@ -40,7 +40,7 @@ If A’s account has less than $X in the first place, the state transition funct
 Hence, one can formally define:
 
 ```
-APPLY(S,TX) -> S' or ERROR
+APPLY(S, TX) -> S' or ERROR
 ```
 
 In the banking system defined above:
@@ -58,7 +58,7 @@ APPLY({ Alice: $50, Bob: $50 }, "send $70 from Alice to Bob") = ERROR
 The “state” in Bitcoin is the collection of all coins (technically, “unspent transaction outputs” or UTXO) that have been minted and not yet spent, with each UTXO having a denomination and an owner (defined by a 20-byte address which is essentially a cryptographic public key[^1]).
 A transaction contains one or more inputs, with each input containing a reference to an existing UTXO and a cryptographic signature produced by the private key associated with the owner’s address, and one or more outputs, with each output containing a new UTXO to be added to the state.
 
-The state transition function `APPLY(S,TX) -> S'` can be defined roughly as follows:
+The state transition function `APPLY(S, TX) -> S'` can be defined roughly as follows:
 
 - For each input in `TX`:
   - If the referenced UTXO is not in `S`, return an error.
@@ -90,7 +90,7 @@ The algorithm for checking if a block is valid, expressed in this paradigm, is a
 2. Check that the timestamp of the block is greater than that of the previous block[^2] and less than 2 hours into the future
 3. Check that the proof-of-work on the block is valid.
 4. Let `S[0]` be the state at the end of the previous block.
-5. Suppose `TX` is the block’s transaction list with `n` transactions.  For all `i` in `0...n-1`, set `S[i+1] = APPLY(S[i],TX[i])` If any application returns an error, exit and return false.
+5. Suppose `TX` is the block’s transaction list with `n` transactions.  For all `i` in `0...n-1`, set `S[i+1] = APPLY(S[i], TX[i])` If any application returns an error, exit and return false.
 6. Return true, and register `S[n]` as the state at the end of this block.
 
 Essentially, each transaction in the block must provide a valid state transition from what was the canonical state before the transaction was executed to some new state.
@@ -120,7 +120,7 @@ Once step (1) has taken place, after a few minutes some miner will include the t
 After about one hour, five more blocks will have been added to the chain after that block, with each of those blocks indirectly pointing to the transaction and thus “confirming” it.
 At this point, the merchant will accept the payment as finalized and deliver the product; since we are assuming this is a digital good, delivery is instant.
 Now, the attacker creates another transaction sending the 100 BTC to himself.
-If the attacker simply releases it into the wild, the transaction will not be processed; miners will attempt to run `APPLY(S,TX)` and notice that `TX` consumes a UTXO which is no longer in the state.
+If the attacker simply releases it into the wild, the transaction will not be processed; miners will attempt to run `APPLY(S, TX)` and notice that `TX` consumes a UTXO which is no longer in the state.
 So instead, the attacker creates a “fork” of the blockchain, starting by mining another version of block 270000 pointing to the same block 269999 as a parent but with the new transaction in place of the old one.
 Because the block data is different, this requires redoing the proof-of-work.
 Furthermore, the attacker’s new version of block 270000 has a different hash, so the original blocks 270001 to 270005 do not “point” to it; thus, the original chain and the attacker’s new chain are completely separate.
@@ -259,7 +259,7 @@ For example, if an external actor A sends a transaction to B with 1000 gas, and 
 
 ![Ether state transition](https://ethereum.org/content/whitepaper/ether-state-transition.png)
 
-The Ethereum state transition function, `APPLY(S,TX) -> S'` can be defined as follows:
+The Ethereum state transition function, `APPLY(S, TX) -> S'` can be defined as follows:
 
 1. Check if the transaction is well-formed (i.e., has the right number of values), the signature is valid, and the nonce matches the nonce in the sender’s account.  If not, return an error.
 2. Calculate the transaction fee as `STARTGAS * GASPRICE`, and determine the sending address from the signature.  Subtract the fee from the sender’s account balance and increment the sender’s nonce.  If there is not enough balance to spend, return an error.
