@@ -173,9 +173,12 @@ svg text { user-select: none; }
   fill: #8a8a8a; font-size: 11px; font-family: 'Courier New', monospace;
   text-anchor: middle; pointer-events: none;
 }
-.node-info-text {
-  fill: #53a8b6; font-size: 10px; font-family: 'Courier New', monospace;
-  text-anchor: middle; pointer-events: none;
+#node-info {
+  display: none; position: fixed; z-index: 998;
+  background: #16213e; border: 1px solid #0f3460; border-radius: 4px;
+  padding: 6px 10px; font-size: 10px; color: #53a8b6;
+  font-family: 'Courier New', monospace; white-space: pre;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 .add-btn { fill: #0f3460; stroke: #53a8b6; stroke-width: 1.5; cursor: pointer; }
 .add-btn:hover { fill: #1a3a6e; }
@@ -221,6 +224,7 @@ svg text { user-select: none; }
 <div id="tree-container">
   <svg id="tree-svg"></svg>
 </div>
+<div id="node-info"></div>
 <div id="context-menu"></div>
 <div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
 
@@ -239,6 +243,7 @@ const SIDE_PAD = 80    // side padding
 let rootKey = null
 let isMaster = false
 let treeRoot = null
+let activeInfoNode = null
 
 class TreeNode {
   constructor(key, parent) {
@@ -442,11 +447,6 @@ function layoutTree() {
 
 function treeBounds(node) {
   let minX = node.x, maxX = node.x, maxY = node.y
-  if (node.infoState > 0) {
-    const textHalfW = 210  // ~69 chars * 6px / 2
-    minX = Math.min(minX, node.x - textHalfW)
-    maxX = Math.max(maxX, node.x + textHalfW)
-  }
   for (const ch of node.children) {
     const b = treeBounds(ch)
     if (b.minX < minX) minX = b.minX
@@ -469,6 +469,7 @@ function el(tag, attrs) {
 
 async function render() {
   svg.innerHTML = ''
+  hideNodeInfo()
   await updateInfo()
   if (!treeRoot) { svg.removeAttribute('width'); svg.removeAttribute('height'); return }
 
@@ -507,10 +508,7 @@ function drawNodes(node, ox) {
 
   // circle
   const circle = el('circle', { cx, cy, r: NODE_R, class: 'node-circle' })
-  circle.addEventListener('click', () => {
-    node.infoState = (node.infoState + 1) % 3
-    render()
-  })
+  circle.addEventListener('click', () => showNodeInfo(node, circle))
   circle.addEventListener('contextmenu', e => { e.preventDefault(); showContextMenu(e, node) })
   svg.appendChild(circle)
 
@@ -524,25 +522,6 @@ function drawNodes(node, ox) {
     const ann = el('text', { x: cx, y: cy + NODE_R + 14, class: 'node-annotation' })
     ann.textContent = node.annotation
     svg.appendChild(ann)
-  }
-
-  // info text (c+k or K)
-  if (node.infoState > 0) {
-    const infoY = cy + NODE_R + (node.annotation ? 28 : 14)
-    const key = node.key
-    const lines = []
-    if (node.infoState === 1) {
-      lines.push('c: ' + key.c.toString(16).padStart(64, '0'))
-      if (!key.is_public_key()) lines.push('k: ' + key.k.toString(16).padStart(64, '0'))
-    } else {
-      const pub = key.is_public_key() ? key : key.N()
-      lines.push('K: ' + toHex(pub.K.serialize()))
-    }
-    lines.forEach((line, i) => {
-      const t = el('text', { x: cx, y: infoY + i * 13, class: 'node-info-text' })
-      t.textContent = line
-      svg.appendChild(t)
-    })
   }
 
   // + button (right-bottom of node)
@@ -559,6 +538,53 @@ function drawNodes(node, ox) {
   // recurse
   for (const ch of node.children) drawNodes(ch, ox)
 }
+
+// ── Node info popup ──
+
+const nodeInfoEl = document.getElementById('node-info')
+
+function showNodeInfo(node, circleEl) {
+  if (activeInfoNode === node) {
+    node.infoState = (node.infoState + 1) % 3
+  } else {
+    if (activeInfoNode) activeInfoNode.infoState = 0
+    activeInfoNode = node
+    node.infoState = 1
+  }
+  if (node.infoState === 0) {
+    activeInfoNode = null
+    nodeInfoEl.style.display = 'none'
+    return
+  }
+
+  const key = node.key
+  const lines = []
+  if (node.infoState === 1) {
+    lines.push('c: ' + key.c.toString(16).padStart(64, '0'))
+    if (!key.is_public_key()) lines.push('k: ' + key.k.toString(16).padStart(64, '0'))
+  } else {
+    const pub = key.is_public_key() ? key : key.N()
+    lines.push('K: ' + toHex(pub.K.serialize()))
+  }
+  nodeInfoEl.textContent = lines.join('\n')
+
+  nodeInfoEl.style.display = 'block'
+  const rect = circleEl.getBoundingClientRect()
+  const gap = node.annotation ? 28 : 6
+  const pw = nodeInfoEl.offsetWidth
+  let left = rect.left + rect.width / 2 - pw / 2
+  left = Math.max(4, Math.min(left, window.innerWidth - pw - 4))
+  nodeInfoEl.style.left = left + 'px'
+  nodeInfoEl.style.top = (rect.bottom + gap) + 'px'
+}
+
+function hideNodeInfo() {
+  if (activeInfoNode) activeInfoNode.infoState = 0
+  activeInfoNode = null
+  nodeInfoEl.style.display = 'none'
+}
+
+document.getElementById('tree-container').addEventListener('scroll', hideNodeInfo)
 
 // ── Path popup ──
 
