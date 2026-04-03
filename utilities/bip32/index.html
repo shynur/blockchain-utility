@@ -127,8 +127,27 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 <head>
 <meta charset="utf-8">
 <style>
+:root {
+  --bg: #f5f5f5; --fg: #2a2a2a;
+  --panel-bg: #ffffff; --panel-border: #c0c0c0;
+  --accent: #0e7082; --accent-hover: #d0eef3;
+  --node-fill: #d0eef3; --node-stroke: #0e7082;
+  --annotation: #666; --error: #c0392b;
+  --shadow: rgba(0,0,0,0.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a2e; --fg: #e0e0e0;
+    --panel-bg: #16213e; --panel-border: #0f3460;
+    --accent: #53a8b6; --accent-hover: #1a3a6e;
+    --node-fill: #0f3460; --node-stroke: #53a8b6;
+    --annotation: #8a8a8a; --error: #e74c3c;
+    --shadow: rgba(0,0,0,0.5);
+  }
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; padding: 16px; }
+body { font-family: 'Courier New', monospace; background: var(--bg); color: var(--fg); min-height: 100vh; padding: 16px; }
 
 #deploy-badge {
   position: fixed; top: 4px; right: 4px; opacity: 0.5; z-index: 900;
@@ -145,68 +164,68 @@ body { font-family: 'Courier New', monospace; background: #1a1a2e; color: #e0e0e
 #input-section { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
 #seed-input {
   flex: 1; padding: 8px 12px; font-family: inherit; font-size: 14px;
-  background: #16213e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 4px; outline: none;
+  background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 4px; outline: none;
 }
-#seed-input:focus { border-color: #53a8b6; }
-#input-type { font-size: 12px; color: #53a8b6; min-width: 50px; text-align: right; }
-#input-error { font-size: 12px; color: #e74c3c; min-height: 18px; margin-bottom: 4px; }
+#seed-input:focus { border-color: var(--accent); }
+#input-type { font-size: 12px; color: var(--accent); min-width: 50px; text-align: right; }
+#input-error { font-size: 12px; color: var(--error); min-height: 18px; margin-bottom: 4px; }
 
 #info-section {
-  background: #16213e; border: 1px solid #0f3460; border-radius: 4px; padding: 10px 14px;
+  background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px 14px;
   margin-bottom: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
   min-height: 20px;
 }
 #info-section:empty { display: none; }
-#info-section .fingerprint { color: #53a8b6; }
+#info-section .fingerprint { color: var(--accent); }
 
 #tree-container { overflow: auto; }
 svg text { user-select: none; }
-.edge-line { fill: none; stroke: #53a8b6; stroke-width: 1.5; }
+.edge-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .edge-hardened { stroke-dasharray: 6 4; }
-.node-circle { fill: #0f3460; stroke: #53a8b6; stroke-width: 2; cursor: pointer; }
-.node-circle:hover { fill: #1a3a6e; }
+.node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2; cursor: pointer; }
+.node-circle:hover { fill: var(--accent-hover); }
 .node-label {
-  fill: #e0e0e0; font-size: 13px; font-family: 'Courier New', monospace;
+  fill: var(--fg); font-size: 13px; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 .node-annotation {
-  fill: #8a8a8a; font-size: 11px; font-family: 'Courier New', monospace;
+  fill: var(--annotation); font-size: 11px; font-family: 'Courier New', monospace;
   text-anchor: middle; pointer-events: none;
 }
 #node-info {
   display: none; position: fixed; z-index: 998;
-  background: #16213e; border: 1px solid #0f3460; border-radius: 4px;
-  padding: 6px 10px; font-size: 10px; color: #53a8b6;
+  background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px;
+  padding: 6px 10px; font-size: 10px; color: var(--accent);
   font-family: 'Courier New', monospace; white-space: pre;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px var(--shadow);
 }
-.add-btn { fill: #0f3460; stroke: #53a8b6; stroke-width: 1.5; cursor: pointer; }
-.add-btn:hover { fill: #1a3a6e; }
+.add-btn { fill: var(--node-fill); stroke: var(--accent); stroke-width: 1.5; cursor: pointer; }
+.add-btn:hover { fill: var(--accent-hover); }
 .add-btn-text {
-  fill: #53a8b6; font-size: 12px; font-family: 'Courier New', monospace;
+  fill: var(--accent); font-size: 12px; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 
 #path-popup {
   display: none; position: fixed; z-index: 999;
-  background: #16213e; border: 1px solid #53a8b6; border-radius: 4px;
-  padding: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  background: var(--panel-bg); border: 1px solid var(--accent); border-radius: 4px;
+  padding: 6px; box-shadow: 0 4px 12px var(--shadow);
 }
 #path-popup input {
   width: 160px; padding: 4px 6px; font-family: 'Courier New', monospace; font-size: 12px;
-  background: #1a1a2e; border: 1px solid #0f3460; color: #e0e0e0; border-radius: 3px; outline: none;
+  background: var(--bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 3px; outline: none;
 }
-#path-popup input:focus { border-color: #53a8b6; }
+#path-popup input:focus { border-color: var(--accent); }
 
 #context-menu {
-  display: none; position: fixed; background: #16213e; border: 1px solid #0f3460;
+  display: none; position: fixed; background: var(--panel-bg); border: 1px solid var(--panel-border);
   border-radius: 4px; padding: 4px 0; z-index: 1000; min-width: 140px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 12px var(--shadow);
 }
 #context-menu .menu-item {
-  padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Courier New', monospace;
+  padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Courier New', monospace; color: var(--fg);
 }
-#context-menu .menu-item:hover { background: #0f3460; }
+#context-menu .menu-item:hover { background: var(--node-fill); }
 </style>
 </head>
 <body>
