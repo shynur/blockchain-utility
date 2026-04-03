@@ -323,9 +323,7 @@ function parseAnnotations(pathStr) {
 function parseIndices(pathStr) {
   const cleaned = pathStr.toLowerCase().replace(/\s/g, '')
   if (!cleaned.startsWith('/')) return null
-  const raw = cleaned.replace(/\/+$/, '')  // trim trailing slashes
-  if (raw === '') return null
-  const parts = raw.slice(1).split('/')
+  const parts = cleaned.slice(1).split('/')
   return parts.map(p => {
     const hardened = p.endsWith("'") || p.endsWith('h')
     const num = parseInt(p) || 0
