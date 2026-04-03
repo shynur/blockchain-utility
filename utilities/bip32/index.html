@@ -442,6 +442,11 @@ function layoutTree() {
 
 function treeBounds(node) {
   let minX = node.x, maxX = node.x, maxY = node.y
+  if (node.infoState > 0) {
+    const textHalfW = 210  // ~69 chars * 6px / 2
+    minX = Math.min(minX, node.x - textHalfW)
+    maxX = Math.max(maxX, node.x + textHalfW)
+  }
   for (const ch of node.children) {
     const b = treeBounds(ch)
     if (b.minX < minX) minX = b.minX
