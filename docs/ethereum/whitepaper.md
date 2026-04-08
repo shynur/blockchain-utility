@@ -276,7 +276,7 @@ if !self.storage[calldataload(0)]:
 ```
 
 Note that in reality the contract code is written in the low-level EVM code; this example is written in Serpent, one of our high-level languages, for clarity, and can be compiled down to EVM code.
-Suppose that the contract’s storage starts off empty, and a transaction is sent with 10 ether value, 2000 gas, 0.001 ether gasprice, and 64 bytes of data, with bytes 0-31 representing the number `2` and bytes 32-63 representing the string `CHARLIE`.
+Suppose that the contract’s storage starts off empty, and a transaction is sent with 10 ether value, 2000 gas, 0.001 ether gasprice, and 64 bytes of data, with bytes 0-31 representing the number `2` and bytes 32-63 representing the string `CHARLIE`[^3].
 The process for the state transition function in this case is as follows:
 
 1. Check that the transaction is valid and well formed.
@@ -766,4 +766,4 @@ The concept of an arbitrary state transition function as implemented by the Ethe
 
 [^2]: Technically, the median of the 11 previous blocks.
 
-[^3]: Internally, 2 and “CHARLIE” are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.
+[^3]: Internally, 2 and “CHARLIE” are both numbers, with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.

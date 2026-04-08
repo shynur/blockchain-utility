@@ -667,9 +667,9 @@ Note that in reality the contract code is written in the low-level EVM code; thi
 
 需要注意，现实中的 contract code 是用底层 EVM code 编写的；这里为了说明清晰，使用了我们的高级语言之一 Serpent 来写这个例子，它可以被编译为 EVM code。
 
-Suppose that the contract’s storage starts off empty, and a transaction is sent with 10 ether value, 2000 gas, 0.001 ether gasprice, and 64 bytes of data, with bytes 0-31 representing the number `2` and bytes 32-63 representing the string `CHARLIE`.
+Suppose that the contract’s storage starts off empty, and a transaction is sent with 10 ether value, 2000 gas, 0.001 ether gasprice, and 64 bytes of data, with bytes 0-31 representing the number `2` and bytes 32-63 representing the string `CHARLIE`[^3].
 
-假设该 contract 的 storage 初始为空，并且收到一笔带有 10 ether value、2000 gas、0.001 ether gasprice 以及 64 bytes data 的 transaction，其中 bytes 0-31 表示数字 `2`，bytes 32-63 表示字符串 `CHARLIE`。
+假设该 contract 的 storage 初始为空，并且收到一笔带有 10 ether value、2000 gas、0.001 ether gasprice 以及 64 bytes data 的 transaction，其中 bytes 0-31 表示数字 `2`，bytes 32-63 表示字符串 `CHARLIE`[^3]。
 
 The process for the state transition function in this case is as follows:
 
@@ -1834,4 +1834,4 @@ Ethereum protocol 所实现的任意状态转移函数概念，为其提供了�
 
 [^2]: Technically, the median of the 11 previous blocks.  更准确地说，是前 11 个 blocks 的中位数。
 
-[^3]: Internally, 2 and “CHARLIE” are both numbers[^3], with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.  在内部表示上，2 和 “CHARLIE” 都是数字[^3]，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
+[^3]: Internally, 2 and “CHARLIE” are both numbers, with the latter being in big-endian base 256 representation.  Numbers can be at least 0 and at most 2<sup>256</sup>-1.  在内部表示上，2 和 “CHARLIE” 都是数字，其中后者采用 big-endian 的 256 进制表示。数字的最小值可以是 0，最大值可以是 2<sup>256</sup>-1。
