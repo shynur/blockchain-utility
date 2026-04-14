@@ -128,21 +128,21 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 <meta charset="utf-8">
 <style>
 :root {
-  --bg: #f0f0f0; --fg: #1a1a1a;
-  --panel-bg: #ffffff; --panel-border: #b0b0b0;
-  --accent: #0a6070; --accent-hover: #b8e0e8;
-  --node-fill: #c0e4ec; --node-stroke: #0a6070;
-  --annotation: #555; --error: #c0392b;
+  --bg: #eef0f2; --fg: #1a1a1a;
+  --panel-bg: #ffffff; --panel-border: #a0a0a0;
+  --accent: #0a6070; --accent-hover: #d4f0f6;
+  --node-fill: #d6eef4; --node-stroke: #08505e;
+  --annotation: #444; --error: #c0392b;
   --shadow: rgba(0,0,0,0.15);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141422; --fg: #e8e8e8;
-    --panel-bg: #1e2a48; --panel-border: #3a5080;
-    --accent: #6cc4d4; --accent-hover: #2a4878;
-    --node-fill: #1c3a68; --node-stroke: #6cc4d4;
-    --annotation: #9a9aaa; --error: #f06050;
-    --shadow: rgba(0,0,0,0.6);
+    --bg: #0e1220; --fg: #f0f0f0;
+    --panel-bg: #1a2640; --panel-border: #3e5a90;
+    --accent: #7cd4e4; --accent-hover: #3a5a90;
+    --node-fill: #28486e; --node-stroke: #7cd4e4;
+    --annotation: #b8b8d0; --error: #f06050;
+    --shadow: rgba(0,0,0,0.7);
   }
 }
 
@@ -153,7 +153,7 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
   position: fixed; top: 4px; right: 4px; opacity: 0.5; z-index: 900;
   overflow: hidden; display: inline-block; border-radius: 3px;
 }
-#deploy-badge img { display: block; height: 8px; }
+#deploy-badge img { display: block; height: 14px; }
 #deploy-badge::after {
   content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
   background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
