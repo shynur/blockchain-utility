@@ -282,7 +282,7 @@ class TreeNode {
     return this.isHardened ? (this.index - HARDENED) + "'" : String(this.index)
   }
   get label() {
-    if (!this.parent) return this.key.is_public_key() ? 'M' : 'm'
+    if (!this.parent && isMaster) return this.key.is_public_key() ? 'M' : 'm'
     return this.displayIndex
   }
 
