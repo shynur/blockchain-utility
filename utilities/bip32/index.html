@@ -40,7 +40,7 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 
 - type: `public` 或 `private`
 - network: `mainnet` 或 `testnet`
-- depth
+- depth: 仅非 seed 输入时显示
 - index: 仅 depth > 0 时显示, 硬化派生取模后加 `'`
 - parent fingerprint: 仅 depth > 0 时显示
 - identifier: 20 字节, 前 4 字节 (fingerprint) 高亮显示
@@ -428,7 +428,7 @@ async function updateInfo() {
   const lines = []
   lines.push(`type: ${k.is_public_key() ? 'public' : 'private'}`)
   lines.push(`network: ${k.version}`)
-  lines.push(`depth: ${k.depth}`)
+  if (inputTypeEl.textContent !== 'seed') lines.push(`depth: ${k.depth}`)
   if (k.depth > 0) {
     const idx = k.i
     lines.push(`index: ${idx >= HARDENED ? (idx - HARDENED) + "'" : idx}`)
