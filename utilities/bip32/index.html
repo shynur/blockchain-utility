@@ -601,13 +601,17 @@ function hideNodeInfo() {
   nodeInfoEl.style.display = 'none'
 }
 
-document.getElementById('tree-container').addEventListener('scroll', hideNodeInfo)
+document.getElementById('tree-container').addEventListener('scroll', () => {
+  hideNodeInfo()
+  if (pathPopup.style.display === 'block') positionPathPopup()
+})
 
 // ── Path popup ──
 
 const pathPopup = document.getElementById('path-popup')
 const pathInput = pathPopup.querySelector('input')
 let pathPopupNode = null
+let pathPopupBtnEl = null
 const drafts = new WeakMap()
 
 function openPathPopup(node, btnEl) {
@@ -620,10 +624,9 @@ function openPathPopup(node, btnEl) {
   // save draft of previous node if switching
   if (pathPopupNode && pathPopupNode !== node) drafts.set(pathPopupNode, pathInput.value)
   pathPopupNode = node
-  const rect = btnEl.getBoundingClientRect()
+  pathPopupBtnEl = btnEl
   pathPopup.style.display = 'block'
-  pathPopup.style.left = (rect.right + 4) + 'px'
-  pathPopup.style.top = (rect.top - 4) + 'px'
+  positionPathPopup()
   pathInput.value = drafts.get(node) || ''
   pathInput.style.borderColor = ''
   pathInput.focus()
@@ -634,6 +637,14 @@ function closePathPopup(clearDraft) {
   if (pathPopupNode && clearDraft) drafts.delete(pathPopupNode)
   pathPopup.style.display = 'none'
   pathPopupNode = null
+  pathPopupBtnEl = null
+}
+
+function positionPathPopup() {
+  if (!pathPopupBtnEl) return
+  const rect = pathPopupBtnEl.getBoundingClientRect()
+  pathPopup.style.left = (rect.right + 4) + 'px'
+  pathPopup.style.top = (rect.top - 4) + 'px'
 }
 
 pathInput.addEventListener('keydown', async e => {
