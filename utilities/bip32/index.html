@@ -130,8 +130,8 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 :root {
   --bg: #eef0f2; --fg: #1a1a1a;
   --panel-bg: #ffffff; --panel-border: #a0a0a0;
-  --accent: #0a6070; --accent-hover: #d4f0f6;
-  --node-fill: #b8dce8; --node-stroke: #1a6878;
+  --accent: #08505c; --accent-hover: #d4f0f6;
+  --node-fill: #b8dce8; --node-stroke: #0a4a56;
   --annotation: #444; --error: #c0392b;
   --shadow: rgba(0,0,0,0.15);
 }
@@ -139,8 +139,8 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
   :root {
     --bg: #0e1220; --fg: #f0f0f0;
     --panel-bg: #1a2640; --panel-border: #3e5a90;
-    --accent: #7cd4e4; --accent-hover: #3a5a90;
-    --node-fill: #2e5480; --node-stroke: #90e0ec;
+    --accent: #96e8f4; --accent-hover: #3a5a90;
+    --node-fill: #2e5480; --node-stroke: #a8f0ff;
     --annotation: #b8b8d0; --error: #f06050;
     --shadow: rgba(0,0,0,0.7);
   }
@@ -182,7 +182,7 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
 svg text { user-select: none; }
 .edge-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .edge-hardened { stroke-dasharray: 6 4; }
-.node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2; cursor: pointer; }
+.node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2.5; cursor: pointer; }
 .node-circle:hover { fill: var(--accent-hover); }
 .node-label {
   fill: var(--fg); font-size: 13px; font-family: 'Courier New', monospace;
@@ -199,10 +199,10 @@ svg text { user-select: none; }
   font-family: 'Courier New', monospace; white-space: pre;
   box-shadow: 0 4px 12px var(--shadow);
 }
-.add-btn { fill: var(--node-fill); stroke: var(--accent); stroke-width: 1.5; cursor: pointer; }
+.add-btn { fill: var(--node-fill); stroke: var(--accent); stroke-width: 2; cursor: pointer; }
 .add-btn:hover { fill: var(--accent-hover); }
 .add-btn-text {
-  fill: var(--accent); font-size: 12px; font-family: 'Courier New', monospace;
+  fill: var(--accent); font-size: 14px; font-weight: bold; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 
