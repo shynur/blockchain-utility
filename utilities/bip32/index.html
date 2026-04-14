@@ -263,6 +263,7 @@ let rootKey = null
 let isMaster = false
 let treeRoot = null
 let activeInfoNode = null
+let lastOx = 0
 
 class TreeNode {
   constructor(key, parent) {
@@ -324,6 +325,12 @@ function hexToBytes(hex) {
 }
 
 // ── Annotation parsing (spec steps 1-9) ──
+
+function isInTree(node) {
+  let n = node
+  while (n.parent) n = n.parent
+  return n === treeRoot
+}
 
 function parseAnnotations(pathStr) {
   const groups = pathStr.match(/\/[^/]*/g) || []
@@ -493,6 +500,7 @@ async function render() {
   layoutTree()
   const b = treeBounds(treeRoot)
   const ox = -b.minX + SIDE_PAD
+  lastOx = ox
   const w = b.maxX - b.minX + SIDE_PAD * 2
   const h = b.maxY + TOP_PAD + 80
   svg.setAttribute('width', w)
@@ -503,6 +511,17 @@ async function render() {
   drawEdges(treeRoot, ox)
   // nodes on top
   drawNodes(treeRoot, ox)
+
+  // reposition path popup if open
+  if (pathPopupNode && pathPopup.style.display === 'block') {
+    if (!isInTree(pathPopupNode)) {
+      closePathPopup(true)
+    } else {
+      pathPopupSvgX = pathPopupNode.x + ox + NODE_R * 0.7
+      pathPopupSvgY = pathPopupNode.y + NODE_R * 0.7
+      positionPathPopup()
+    }
+  }
 }
 
 function drawEdges(node, ox) {
