@@ -178,7 +178,7 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
 #info-section:empty { display: none; }
 #info-section .fingerprint { color: var(--accent); }
 
-#tree-container { overflow: auto; }
+#tree-container { overflow: auto; position: relative; }
 svg text { user-select: none; }
 .edge-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .edge-hardened { stroke-dasharray: 6 4; }
@@ -207,7 +207,7 @@ svg text { user-select: none; }
 }
 
 #path-popup {
-  display: none; position: fixed; z-index: 999;
+  display: none; position: absolute; z-index: 999;
   background: var(--panel-bg); border: 1px solid var(--accent); border-radius: 4px;
   padding: 6px; box-shadow: 0 4px 12px var(--shadow);
 }
@@ -242,10 +242,10 @@ svg text { user-select: none; }
 <div id="info-section"></div>
 <div id="tree-container">
   <svg id="tree-svg"></svg>
+  <div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
 </div>
 <div id="node-info"></div>
 <div id="context-menu"></div>
-<div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
 
 <script type="module">
 import { XKey, XPrv, XPub } from './index.mjs'
@@ -546,7 +546,7 @@ function drawNodes(node, ox) {
   const addX = cx + NODE_R * 0.7
   const addY = cy + NODE_R * 0.7
   const addBtn = el('circle', { cx: addX, cy: addY, r: ADD_R, class: 'add-btn' })
-  addBtn.addEventListener('click', e => { e.stopPropagation(); openPathPopup(node, addBtn) })
+  addBtn.addEventListener('click', e => { e.stopPropagation(); openPathPopup(node, addX, addY) })
   svg.appendChild(addBtn)
   const addLbl = el('text', { x: addX, y: addY, class: 'add-btn-text' })
   addLbl.textContent = '+'
@@ -603,7 +603,6 @@ function hideNodeInfo() {
 
 document.getElementById('tree-container').addEventListener('scroll', () => {
   hideNodeInfo()
-  if (pathPopup.style.display === 'block') positionPathPopup()
 })
 
 // ── Path popup ──
@@ -611,10 +610,11 @@ document.getElementById('tree-container').addEventListener('scroll', () => {
 const pathPopup = document.getElementById('path-popup')
 const pathInput = pathPopup.querySelector('input')
 let pathPopupNode = null
-let pathPopupBtnEl = null
+let pathPopupSvgX = 0
+let pathPopupSvgY = 0
 const drafts = new WeakMap()
 
-function openPathPopup(node, btnEl) {
+function openPathPopup(node, svgX, svgY) {
   // toggle: if already open for this node, save draft and close
   if (pathPopupNode === node && pathPopup.style.display === 'block') {
     drafts.set(node, pathInput.value)
@@ -624,7 +624,8 @@ function openPathPopup(node, btnEl) {
   // save draft of previous node if switching
   if (pathPopupNode && pathPopupNode !== node) drafts.set(pathPopupNode, pathInput.value)
   pathPopupNode = node
-  pathPopupBtnEl = btnEl
+  pathPopupSvgX = svgX
+  pathPopupSvgY = svgY
   pathPopup.style.display = 'block'
   positionPathPopup()
   pathInput.value = drafts.get(node) || ''
@@ -637,14 +638,12 @@ function closePathPopup(clearDraft) {
   if (pathPopupNode && clearDraft) drafts.delete(pathPopupNode)
   pathPopup.style.display = 'none'
   pathPopupNode = null
-  pathPopupBtnEl = null
 }
 
 function positionPathPopup() {
-  if (!pathPopupBtnEl) return
-  const rect = pathPopupBtnEl.getBoundingClientRect()
-  pathPopup.style.left = (rect.right + 4) + 'px'
-  pathPopup.style.top = (rect.top - 4) + 'px'
+  const ADD_R = 8
+  pathPopup.style.left = (pathPopupSvgX + ADD_R + 4) + 'px'
+  pathPopup.style.top = (pathPopupSvgY - 4) + 'px'
 }
 
 pathInput.addEventListener('keydown', async e => {
