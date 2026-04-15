@@ -386,6 +386,18 @@ const inputTypeEl = document.getElementById('input-type')
 const inputErrorEl = document.getElementById('input-error')
 const infoEl = document.getElementById('info-section')
 
+const VALID_CHAR = /[^0-9a-km-zA-HJ-NP-Z]/g
+seedInput.addEventListener('input', () => {
+  const s = seedInput.selectionStart
+  const v = seedInput.value
+  const f = v.replace(VALID_CHAR, '')
+  if (f !== v) {
+    const beforeCursor = v.slice(0, s).replace(VALID_CHAR, '')
+    seedInput.value = f
+    seedInput.selectionStart = seedInput.selectionEnd = beforeCursor.length
+  }
+})
+
 let inputTimer = null
 seedInput.addEventListener('input', () => {
   clearTimeout(inputTimer)
