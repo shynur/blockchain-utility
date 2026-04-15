@@ -788,10 +788,10 @@ function buildFilename(node, type) {
   const path = node.pathFromRoot()
   const segs = []
 
-  if (type === 'prv') {
-    segs.push('m')
-  } else if (isMaster) {
-    segs.push('M')
+  if (isMaster) {
+    segs.push(type === 'prv' ? 'm' : 'M')
+  } else {
+    segs.push(path[0].fileSegment())
   }
 
   for (let i = 1; i < path.length; i++) segs.push(path[i].fileSegment())
