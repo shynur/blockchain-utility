@@ -185,10 +185,10 @@ svg text { user-select: none; -webkit-user-select: none; }
 svg { -webkit-touch-callout: none; }
 .edge-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .edge-hardened { stroke-dasharray: 6 4; }
-.node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2.5; cursor: pointer; }
+.node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 3; cursor: pointer; }
 .node-circle:hover { fill: var(--accent-hover); }
 .node-label {
-  fill: var(--fg); font-size: 22px; font-family: 'Courier New', monospace;
+  fill: var(--fg); font-size: 26px; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 .node-annotation {
@@ -205,7 +205,7 @@ svg { -webkit-touch-callout: none; }
 .add-btn { fill: var(--node-fill); stroke: var(--accent); stroke-width: 2; cursor: pointer; }
 .add-btn:hover { fill: var(--accent-hover); }
 .add-btn-text {
-  fill: var(--accent); font-size: 24px; font-weight: bold; font-family: 'Courier New', monospace;
+  fill: var(--accent); font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 
@@ -264,14 +264,14 @@ svg { -webkit-touch-callout: none; }
 import { XKey, XPrv, XPub } from './index.mjs'
 
 const HARDENED = 2 ** 31
-let NODE_R = 20
-let H_GAP = 80
-let V_GAP = 90
+let NODE_R = 28
+let H_GAP = 90
+let V_GAP = 100
 const TOP_PAD = 40
 const SIDE_PAD = 80
 
 const isMobile = matchMedia('(max-width: 600px)').matches
-if (isMobile) { NODE_R = 24; H_GAP = 90; V_GAP = 100 }
+if (isMobile) { NODE_R = 32; H_GAP = 100; V_GAP = 110 }
 
 // ── State ──
 
@@ -633,7 +633,7 @@ function drawNodes(node, ox) {
   }
 
   // + button (right-bottom of node)
-  const ADD_R = isMobile ? 12 : 8
+  const ADD_R = isMobile ? 14 : 11
   const addX = cx + NODE_R * 0.7
   const addY = cy + NODE_R * 0.7
   const addBtn = el('circle', { cx: addX, cy: addY, r: ADD_R, class: 'add-btn' })
@@ -741,7 +741,7 @@ function closePathPopup(clearDraft) {
 }
 
 function positionPathPopup() {
-  const ADD_R = isMobile ? 12 : 8
+  const ADD_R = isMobile ? 14 : 11
   pathPopup.style.left = (pathPopupSvgX + ADD_R + 4) + 'px'
   pathPopup.style.top = (pathPopupSvgY - 4) + 'px'
 }
