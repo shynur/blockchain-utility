@@ -165,6 +165,7 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
 #seed-input {
   flex: 1; padding: 8px 12px; font-family: inherit; font-size: 14px;
   background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 4px; outline: none;
+  resize: none; overflow: hidden; line-height: 1.4; field-sizing: content;
 }
 #seed-input:focus { border-color: var(--accent); }
 #input-type { font-size: 12px; color: var(--accent); min-width: 50px; text-align: right; }
@@ -211,11 +212,12 @@ svg text { user-select: none; }
   background: var(--panel-bg); border: 1px solid var(--accent); border-radius: 4px;
   padding: 6px; box-shadow: 0 4px 12px var(--shadow);
 }
-#path-popup input {
+#path-popup textarea {
   width: 160px; padding: 4px 6px; font-family: 'Courier New', monospace; font-size: 12px;
   background: var(--bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 3px; outline: none;
+  resize: none; overflow: hidden; line-height: 1.4; field-sizing: content;
 }
-#path-popup input:focus { border-color: var(--accent); }
+#path-popup textarea:focus { border-color: var(--accent); }
 
 #context-menu {
   display: none; position: absolute; background: var(--panel-bg); border: 1px solid var(--panel-border);
@@ -235,14 +237,14 @@ svg text { user-select: none; }
 </a>
 
 <div id="input-section">
-  <input id="seed-input" type="text" placeholder="种子 (hex) / xprv / xpub / tprv / tpub" spellcheck="false" autocomplete="off" autofocus>
+  <textarea id="seed-input" rows="1" placeholder="种子 (hex) / xprv / xpub / tprv / tpub" spellcheck="false" autocomplete="off" autofocus></textarea>
   <span id="input-type"></span>
 </div>
 <div id="input-error"></div>
 <div id="info-section"></div>
 <div id="tree-container">
   <svg id="tree-svg"></svg>
-  <div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
+  <div id="path-popup"><textarea rows="1" placeholder="/path" spellcheck="false" autocomplete="off"></textarea></div>
   <div id="context-menu"></div>
   <div id="node-info"></div>
 </div>
@@ -387,6 +389,7 @@ const inputErrorEl = document.getElementById('input-error')
 const infoEl = document.getElementById('info-section')
 
 const VALID_CHAR = /[^0-9a-km-zA-HJ-NP-Z]/g
+seedInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault() })
 seedInput.addEventListener('input', () => {
   const s = seedInput.selectionStart
   const v = seedInput.value
@@ -396,7 +399,17 @@ seedInput.addEventListener('input', () => {
     seedInput.value = f
     seedInput.selectionStart = seedInput.selectionEnd = beforeCursor.length
   }
+  autoResizeInput()
 })
+function autoResizeInput() {
+  seedInput.style.height = 'auto'
+  seedInput.style.height = seedInput.scrollHeight + 'px'
+}
+let lastInputWidth = 0
+new ResizeObserver(() => {
+  const w = seedInput.clientWidth
+  if (w !== lastInputWidth) { lastInputWidth = w; autoResizeInput() }
+}).observe(seedInput)
 
 let inputTimer = null
 seedInput.addEventListener('input', () => {
@@ -681,7 +694,7 @@ function hideNodeInfo() {
 // ── Path popup ──
 
 const pathPopup = document.getElementById('path-popup')
-const pathInput = pathPopup.querySelector('input')
+const pathInput = pathPopup.querySelector('textarea')
 let pathPopupNode = null
 let pathPopupSvgX = 0
 let pathPopupSvgY = 0
@@ -718,6 +731,18 @@ function positionPathPopup() {
   pathPopup.style.left = (pathPopupSvgX + ADD_R + 4) + 'px'
   pathPopup.style.top = (pathPopupSvgY - 4) + 'px'
 }
+
+pathInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault() })
+pathInput.addEventListener('input', () => { autoResizePathInput() })
+function autoResizePathInput() {
+  pathInput.style.height = 'auto'
+  pathInput.style.height = pathInput.scrollHeight + 'px'
+}
+let lastPathInputWidth = 0
+new ResizeObserver(() => {
+  const w = pathInput.clientWidth
+  if (w !== lastPathInputWidth) { lastPathInputWidth = w; autoResizePathInput() }
+}).observe(pathInput)
 
 pathInput.addEventListener('keydown', async e => {
   if (e.key === 'Escape') { closePathPopup(); return }
