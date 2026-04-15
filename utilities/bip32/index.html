@@ -81,10 +81,10 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 
 #### 点击节点
 
-显示 c (chain code) 和 k (私钥) (若可获得).
-再次点击显示 K (公钥).
-
-点击会切换显示.
+点击节点会在三种状态之间循环:
+1. 显示 K (公钥)
+2. 显示 k (私钥) (若可获得) 和 c (chain code)
+3. 隐藏
 
 #### 右击节点
 
@@ -670,11 +670,11 @@ function showNodeInfo(node, circleEl) {
   const key = node.key
   const lines = []
   if (node.infoState === 1) {
-    lines.push('c: ' + key.c.toString(16).padStart(64, '0'))
-    if (!key.is_public_key()) lines.push('k: ' + key.k.toString(16).padStart(64, '0'))
-  } else {
     const pub = key.is_public_key() ? key : key.N()
     lines.push('K: ' + toHex(pub.K.serialize()))
+  } else {
+    if (!key.is_public_key()) lines.push('k: ' + key.k.toString(16).padStart(64, '0'))
+    lines.push('c: ' + key.c.toString(16).padStart(64, '0'))
   }
   nodeInfoEl.textContent = lines.join('\n')
 
