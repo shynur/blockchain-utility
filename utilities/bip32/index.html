@@ -180,7 +180,8 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
 #info-section .fingerprint { color: var(--accent); }
 
 #tree-container { overflow: auto; position: relative; }
-svg text { user-select: none; }
+svg text { user-select: none; -webkit-user-select: none; }
+svg { -webkit-touch-callout: none; }
 .edge-line { fill: none; stroke: var(--accent); stroke-width: 1.5; }
 .edge-hardened { stroke-dasharray: 6 4; }
 .node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2.5; cursor: pointer; }
@@ -596,9 +597,9 @@ function drawNodes(node, ox) {
   circle.addEventListener('contextmenu', e => showContextMenu(e, node))
   let longPressTimer = null
   circle.addEventListener('touchstart', e => {
+    e.preventDefault()
     longPressTimer = setTimeout(() => {
       longPressTimer = null
-      e.preventDefault()
       showContextMenu(e.changedTouches[0], node)
     }, 500)
   }, { passive: false })
