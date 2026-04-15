@@ -747,7 +747,14 @@ function positionPathPopup() {
 }
 
 pathInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault() })
-pathInput.addEventListener('input', () => { autoResizePathInput() })
+pathInput.addEventListener('input', () => {
+  const v = pathInput.value
+  if (v.length > 0 && v[0] !== '/') {
+    const idx = v.indexOf('/')
+    pathInput.value = idx >= 0 ? v.slice(idx) : ''
+  }
+  autoResizePathInput()
+})
 function autoResizePathInput() {
   pathInput.style.height = 'auto'
   pathInput.style.height = pathInput.scrollHeight + 'px'
