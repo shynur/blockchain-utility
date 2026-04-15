@@ -558,6 +558,16 @@ function drawNodes(node, ox) {
   const circle = el('circle', { cx, cy, r: NODE_R, class: 'node-circle' })
   circle.addEventListener('click', () => showNodeInfo(node, circle))
   circle.addEventListener('contextmenu', e => showContextMenu(e, node))
+  let longPressTimer = null
+  circle.addEventListener('touchstart', e => {
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null
+      e.preventDefault()
+      showContextMenu(e.changedTouches[0], node)
+    }, 500)
+  }, { passive: false })
+  circle.addEventListener('touchend', () => { if (longPressTimer) clearTimeout(longPressTimer) })
+  circle.addEventListener('touchmove', () => { if (longPressTimer) clearTimeout(longPressTimer) })
   svg.appendChild(circle)
 
   // label
@@ -707,7 +717,7 @@ function positionContextMenu() {
 }
 
 function showContextMenu(e, node) {
-  e.preventDefault()
+  if (e.preventDefault) e.preventDefault()
   ctxMenu.innerHTML = ''
   ctxMenuNode = node
   const key = node.key
