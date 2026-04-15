@@ -126,6 +126,7 @@ GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root {
   --bg: #eef0f2; --fg: #1a1a1a;
@@ -229,6 +230,15 @@ svg { -webkit-touch-callout: none; }
   padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Courier New', monospace; color: var(--fg);
 }
 #context-menu .menu-item:hover { background: var(--node-fill); }
+
+@media (max-width: 600px) {
+  body { padding: 8px; }
+  #seed-input { font-size: 16px; }
+  #info-section { font-size: 12px; padding: 8px 10px; }
+  #node-info { font-size: 9px; }
+  #path-popup textarea { width: 140px; font-size: 14px; }
+  #context-menu .menu-item { padding: 10px 16px; font-size: 14px; }
+}
 </style>
 </head>
 <body>
@@ -254,11 +264,14 @@ svg { -webkit-touch-callout: none; }
 import { XKey, XPrv, XPub } from './index.mjs'
 
 const HARDENED = 2 ** 31
-const NODE_R = 20
-const H_GAP = 80      // horizontal spacing between leaf centers
-const V_GAP = 90       // vertical spacing between levels
-const TOP_PAD = 40     // top padding inside SVG
-const SIDE_PAD = 80    // side padding
+let NODE_R = 20
+let H_GAP = 80
+let V_GAP = 90
+const TOP_PAD = 40
+const SIDE_PAD = 80
+
+const isMobile = matchMedia('(max-width: 600px)').matches
+if (isMobile) { NODE_R = 24; H_GAP = 90; V_GAP = 100 }
 
 // ── State ──
 
@@ -620,7 +633,7 @@ function drawNodes(node, ox) {
   }
 
   // + button (right-bottom of node)
-  const ADD_R = 8
+  const ADD_R = isMobile ? 12 : 8
   const addX = cx + NODE_R * 0.7
   const addY = cy + NODE_R * 0.7
   const addBtn = el('circle', { cx: addX, cy: addY, r: ADD_R, class: 'add-btn' })
@@ -728,7 +741,7 @@ function closePathPopup(clearDraft) {
 }
 
 function positionPathPopup() {
-  const ADD_R = 8
+  const ADD_R = isMobile ? 12 : 8
   pathPopup.style.left = (pathPopupSvgX + ADD_R + 4) + 'px'
   pathPopup.style.top = (pathPopupSvgY - 4) + 'px'
 }
@@ -770,7 +783,11 @@ let ctxMenuSvgY = 0
 document.addEventListener('click', () => { ctxMenu.style.display = 'none'; ctxMenuNode = null })
 
 function positionContextMenu() {
-  ctxMenu.style.left = (ctxMenuSvgX + NODE_R + 4) + 'px'
+  let left = ctxMenuSvgX + NODE_R + 4
+  const menuW = ctxMenu.offsetWidth || 140
+  const viewW = document.documentElement.clientWidth
+  if (left + menuW > viewW - 8) left = Math.max(8, viewW - menuW - 8)
+  ctxMenu.style.left = left + 'px'
   ctxMenu.style.top = (ctxMenuSvgY - 4) + 'px'
 }
 
