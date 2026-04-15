@@ -13,6 +13,8 @@
 
 [HD 密钥树生成 (BIP 32)](utilities/bip32)
 
+[助记词钱包 (BIP 44)](utilities/bip44)
+
 ____
 
 <footer>
