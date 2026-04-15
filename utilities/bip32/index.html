@@ -218,7 +218,7 @@ svg text { user-select: none; }
 #path-popup input:focus { border-color: var(--accent); }
 
 #context-menu {
-  display: none; position: fixed; background: var(--panel-bg); border: 1px solid var(--panel-border);
+  display: none; position: absolute; background: var(--panel-bg); border: 1px solid var(--panel-border);
   border-radius: 4px; padding: 4px 0; z-index: 1000; min-width: 140px;
   box-shadow: 0 4px 12px var(--shadow);
 }
@@ -243,9 +243,9 @@ svg text { user-select: none; }
 <div id="tree-container">
   <svg id="tree-svg"></svg>
   <div id="path-popup"><input type="text" placeholder="/path" spellcheck="false" autocomplete="off"></div>
+  <div id="context-menu"></div>
 </div>
 <div id="node-info"></div>
-<div id="context-menu"></div>
 
 <script type="module">
 import { XKey, XPrv, XPub } from './index.mjs'
@@ -522,6 +522,18 @@ async function render() {
       positionPathPopup()
     }
   }
+
+  // reposition context menu if open
+  if (ctxMenuNode && ctxMenu.style.display === 'block') {
+    if (!isInTree(ctxMenuNode)) {
+      ctxMenu.style.display = 'none'
+      ctxMenuNode = null
+    } else {
+      ctxMenuSvgX = ctxMenuNode.x + ox
+      ctxMenuSvgY = ctxMenuNode.y
+      positionContextMenu()
+    }
+  }
 }
 
 function drawEdges(node, ox) {
@@ -545,7 +557,7 @@ function drawNodes(node, ox) {
   // circle
   const circle = el('circle', { cx, cy, r: NODE_R, class: 'node-circle' })
   circle.addEventListener('click', () => showNodeInfo(node, circle))
-  circle.addEventListener('contextmenu', e => { e.preventDefault(); showContextMenu(e, node) })
+  circle.addEventListener('contextmenu', e => showContextMenu(e, node))
   svg.appendChild(circle)
 
   // label
@@ -684,10 +696,20 @@ pathInput.addEventListener('keydown', async e => {
 // ── Context menu ──
 
 const ctxMenu = document.getElementById('context-menu')
-document.addEventListener('click', () => ctxMenu.style.display = 'none')
+let ctxMenuNode = null
+let ctxMenuSvgX = 0
+let ctxMenuSvgY = 0
+document.addEventListener('click', () => { ctxMenu.style.display = 'none'; ctxMenuNode = null })
+
+function positionContextMenu() {
+  ctxMenu.style.left = (ctxMenuSvgX + NODE_R + 4) + 'px'
+  ctxMenu.style.top = (ctxMenuSvgY - 4) + 'px'
+}
 
 function showContextMenu(e, node) {
+  e.preventDefault()
   ctxMenu.innerHTML = ''
+  ctxMenuNode = node
   const key = node.key
 
   // delete (not for root)
@@ -715,10 +737,11 @@ function showContextMenu(e, node) {
     download(buildFilename(node, 'pub') + '.txt', s)
   })
 
-  if (ctxMenu.children.length === 0) return
+  if (ctxMenu.children.length === 0) { ctxMenuNode = null; return }
+  ctxMenuSvgX = node.x + lastOx
+  ctxMenuSvgY = node.y
   ctxMenu.style.display = 'block'
-  ctxMenu.style.left = e.clientX + 'px'
-  ctxMenu.style.top = e.clientY + 'px'
+  positionContextMenu()
 }
 
 function addMenuItem(text, onClick) {
