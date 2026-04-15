@@ -164,17 +164,17 @@ body { font-family: 'Courier New', monospace; background: var(--bg); color: var(
 
 #input-section { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
 #seed-input {
-  flex: 1; padding: 8px 12px; font-family: inherit; font-size: 14px;
+  flex: 1; padding: 8px 12px; font-family: inherit; font-size: 24px;
   background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 4px; outline: none;
   resize: none; overflow: hidden; line-height: 1.4; field-sizing: content;
 }
 #seed-input:focus { border-color: var(--accent); }
-#input-type { font-size: 12px; color: var(--accent); min-width: 50px; text-align: right; }
-#input-error { font-size: 12px; color: var(--error); min-height: 18px; margin-bottom: 4px; }
+#input-type { font-size: 22px; color: var(--accent); min-width: 50px; text-align: right; }
+#input-error { font-size: 22px; color: var(--error); min-height: 26px; margin-bottom: 4px; }
 
 #info-section {
   background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px; padding: 10px 14px;
-  margin-bottom: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
+  margin-bottom: 12px; font-size: 22px; line-height: 1.6; white-space: pre-wrap; word-break: break-all;
   min-height: 20px;
 }
 #info-section:empty { display: none; }
@@ -188,24 +188,24 @@ svg { -webkit-touch-callout: none; }
 .node-circle { fill: var(--node-fill); stroke: var(--node-stroke); stroke-width: 2.5; cursor: pointer; }
 .node-circle:hover { fill: var(--accent-hover); }
 .node-label {
-  fill: var(--fg); font-size: 13px; font-family: 'Courier New', monospace;
+  fill: var(--fg); font-size: 22px; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 .node-annotation {
-  fill: var(--annotation); font-size: 11px; font-family: 'Courier New', monospace;
+  fill: var(--annotation); font-size: 20px; font-family: 'Courier New', monospace;
   text-anchor: middle; pointer-events: none;
 }
 #node-info {
   display: none; position: absolute; z-index: 998;
   background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px;
-  padding: 6px 10px; font-size: 10px; color: var(--accent);
+  padding: 6px 10px; font-size: 18px; color: var(--accent);
   font-family: 'Courier New', monospace; white-space: pre;
   box-shadow: 0 4px 12px var(--shadow);
 }
 .add-btn { fill: var(--node-fill); stroke: var(--accent); stroke-width: 2; cursor: pointer; }
 .add-btn:hover { fill: var(--accent-hover); }
 .add-btn-text {
-  fill: var(--accent); font-size: 14px; font-weight: bold; font-family: 'Courier New', monospace;
+  fill: var(--accent); font-size: 24px; font-weight: bold; font-family: 'Courier New', monospace;
   text-anchor: middle; dominant-baseline: central; pointer-events: none;
 }
 
@@ -215,7 +215,7 @@ svg { -webkit-touch-callout: none; }
   padding: 0;
 }
 #path-popup textarea {
-  width: 160px; padding: 4px 6px; font-family: 'Courier New', monospace; font-size: 12px;
+  width: 200px; padding: 4px 6px; font-family: 'Courier New', monospace; font-size: 22px;
   background: var(--bg); border: 1px solid var(--panel-border); color: var(--fg); border-radius: 3px; outline: none;
   resize: none; overflow: hidden; line-height: 1.4; field-sizing: content;
 }
@@ -227,17 +227,17 @@ svg { -webkit-touch-callout: none; }
   box-shadow: 0 4px 12px var(--shadow);
 }
 #context-menu .menu-item {
-  padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Courier New', monospace; color: var(--fg);
+  padding: 6px 14px; cursor: pointer; font-size: 22px; font-family: 'Courier New', monospace; color: var(--fg);
 }
 #context-menu .menu-item:hover { background: var(--node-fill); }
 
 @media (max-width: 600px) {
   body { padding: 8px; }
-  #seed-input { font-size: 16px; }
-  #info-section { font-size: 12px; padding: 8px 10px; }
-  #node-info { font-size: 9px; }
-  #path-popup textarea { width: 140px; font-size: 14px; }
-  #context-menu .menu-item { padding: 10px 16px; font-size: 14px; }
+  #seed-input { font-size: 26px; }
+  #info-section { font-size: 20px; padding: 8px 10px; }
+  #node-info { font-size: 16px; }
+  #path-popup textarea { width: 180px; font-size: 24px; }
+  #context-menu .menu-item { padding: 10px 16px; font-size: 24px; }
 }
 </style>
 </head>
