@@ -318,7 +318,6 @@ function renderOutputs() {
                         <span class="output-note">${renderNoteParts(output.noteParts)}</span>
                     </div>
                 </div>
-                <span class="badge">depth ${output.depth}</span>
             </div>
             <div class="output-fields">
                 ${xprvRow}
