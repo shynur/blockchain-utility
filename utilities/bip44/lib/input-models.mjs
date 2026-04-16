@@ -4,6 +4,14 @@ import { isAsciiLetter, isBase58Char, isWhitespace } from './utils.mjs'
 const MAX_MNEMONIC_WORDS = WORD_MARKERS.length
 const XKEY_LENGTH = 111
 
+function isAllowedPassphraseChar(char) {
+    return char === ' ' || !isWhitespace(char)
+}
+
+function filterPassphraseText(text) {
+    return [...text].filter(isAllowedPassphraseChar).join('')
+}
+
 function normalizeMnemonicPaste(text) {
     text = text.replace(/^\s+/, '')
     if (text && !isAsciiLetter(text[0]))
@@ -316,14 +324,14 @@ export class PassphraseModel {
      * @param {string} raw
      */
     setRaw(raw) {
-        this.raw = [...raw].filter(char => !isWhitespace(char)).join('')
+        this.raw = filterPassphraseText(raw)
     }
 
     /**
      * @param {string} text
      */
     insertText(text) {
-        this.raw += [...text].filter(char => !isWhitespace(char)).join('')
+        this.raw += filterPassphraseText(text)
     }
 
     backspace() {
@@ -334,7 +342,7 @@ export class PassphraseModel {
      * @param {InputEvent} event
      */
     applyBeforeInput(event) {
-        if (event.inputType === 'insertText' && event.data && [...event.data].some(isWhitespace))
+        if (event.inputType === 'insertText' && event.data && [...event.data].some(char => !isAllowedPassphraseChar(char)))
             event.preventDefault()
         if (event.inputType === 'insertFromPaste')
             event.preventDefault()
@@ -351,7 +359,7 @@ export class PassphraseModel {
      * @param {string} text
      */
     applyPaste(text) {
-        this.raw += [...text].filter(char => !isWhitespace(char)).join('')
+        this.raw += filterPassphraseText(text)
     }
 
     getDisplayValue() {
