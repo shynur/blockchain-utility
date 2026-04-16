@@ -21,7 +21,6 @@ const state = {
 
 const OUTPUT_KINDS = ['xprv', 'xpub', 'K']
 const DEFAULT_REQUESTED_KINDS = {
-    root: { xprv: false, xpub: false, K: false },
     purpose: { xprv: false, xpub: false, K: false },
     coin: { xprv: false, xpub: true, K: false },
     account: { xprv: false, xpub: true, K: false },

@@ -110,14 +110,13 @@ export async function resolveRootSource(source) {
  *   requestedKinds: Record<string, { xprv: boolean, xpub: boolean, K: boolean }>,
  *   labels: Partial<Record<'coin' | 'account' | 'change', string> & { referencePath: string }>,
  * }} form
- * @param {boolean} includeRootOutput
  * @returns {Promise<{
  *   derived: DerivedNodeOutput[],
  *   basePath: string,
  *   fixedLevels: Array<{ level: typeof BIP44_LEVELS[number], known: boolean, text: string }>,
  * }>}
  */
-export async function deriveBip44(root, form, includeRootOutput = true) {
+export async function deriveBip44(root, form) {
     const outputs = []
     /** @type {Array<{ level: typeof BIP44_LEVELS[number], known: boolean, text: string }>} */
     const fixedLevels = []
@@ -177,19 +176,6 @@ export async function deriveBip44(root, form, includeRootOutput = true) {
                 key: current,
             })
         }
-    }
-
-    const rootRequestedKinds = form.requestedKinds.root ?? { xprv: false, xpub: false, K: false }
-    if (includeRootOutput && hasRequestedKinds(rootRequestedKinds)) {
-        outputs.unshift({
-            id: 'root',
-            depth: root.depth,
-            label: 'root',
-            pathFromRoot: '',
-            requestedKinds: rootRequestedKinds,
-            ...(await serializeNode(root, resolveAbsolutePath(root, root.depth === 0 ? 'm' : `m(?)`, form.labels))),
-            key: root,
-        })
     }
 
     if (current.depth === 4) {
