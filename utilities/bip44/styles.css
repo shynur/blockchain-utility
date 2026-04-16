@@ -60,6 +60,18 @@ button {
     margin-bottom: 18px;
 }
 
+.top-panels {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 1fr);
+    gap: 18px;
+    align-items: start;
+    margin-bottom: 18px;
+}
+
+.top-panels > .panel {
+    margin-bottom: 0;
+}
+
 .hero {
     display: grid;
     grid-template-columns: minmax(0, 1.2fr) minmax(260px, 320px);
@@ -416,7 +428,7 @@ small {
 
 .info-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 10px;
 }
 
@@ -518,6 +530,12 @@ small {
     color: #fff7e8;
     padding: 9px 10px;
     font-size: 0.9rem;
+}
+
+@media (max-width: 980px) {
+    .top-panels {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 860px) {
