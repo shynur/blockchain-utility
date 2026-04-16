@@ -224,7 +224,7 @@ function renderRootInfo() {
         ['network', state.rootInfo.network],
         ['depth', String(state.rootInfo.depth)],
         ['index', state.rootInfo.index ?? '-'],
-        ['parent fp', state.rootInfo.parentFingerprint ?? '-'],
+        ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
         ['fingerprint', state.rootInfo.fingerprintHex],
         ['identifier', state.rootInfo.identifierHex],
     ]
