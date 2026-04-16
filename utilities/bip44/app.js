@@ -249,16 +249,22 @@ function handleMaskedBeforeInput(event, model) {
 
 function renderRootInfo() {
     el.rootInfo.replaceChildren()
-    if (!state.rootInfo)
+    if (!state.rootInfo) {
+        document.documentElement.style.setProperty('--status-panel-width', '420px')
+        el.rootInfo.style.setProperty('--status-columns', '2')
         return
+    }
 
     const items = [
-        ['type', state.rootInfo.type],
         ['depth', String(state.rootInfo.depth)],
         ['index', state.rootInfo.index ?? '-'],
         ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
         ['identifier', state.rootInfo.identifierHex],
     ]
+    const columnCount = items.length >= 5 ? 3 : items.length >= 3 ? 2 : 1
+    const panelWidth = columnCount === 1 ? '320px' : columnCount === 2 ? '420px' : '620px'
+    document.documentElement.style.setProperty('--status-panel-width', panelWidth)
+    el.rootInfo.style.setProperty('--status-columns', String(columnCount))
 
     for (const [label, value] of items) {
         const node = document.createElement('div')
