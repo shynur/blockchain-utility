@@ -85,8 +85,9 @@ function highlightedNotePart(text) {
 
 function coinAccountNoteParts(coin, account, highlightAccount) {
     return [
-        plainNotePart(`${coin.localName}账户 `),
+        plainNotePart(`${coin.localName} `),
         highlightAccount ? highlightedNotePart(account) : plainNotePart(account),
+        plainNotePart(' 号账户'),
     ]
 }
 
@@ -116,7 +117,7 @@ function describeOutputNoteParts(levelId, form, addressIndex = null) {
         const chainName = changeChainName(form.change)
         return [
             ...coinAccountNoteParts(coin, form.account, false),
-            plainNotePart(' 的'),
+            plainNotePart('的'),
             highlightedNotePart(chainName),
             plainNotePart('链'),
         ]
@@ -126,9 +127,9 @@ function describeOutputNoteParts(levelId, form, addressIndex = null) {
         const chainName = changeChainName(form.change)
         return [
             ...coinAccountNoteParts(coin, form.account, false),
-            plainNotePart(` 的${chainName}链的第 `),
+            plainNotePart('的第 '),
             highlightedNotePart(addressIndex ?? ''),
-            plainNotePart(' 个地址'),
+            plainNotePart(` 个${chainName}地址`),
         ]
     }
 
