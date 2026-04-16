@@ -161,6 +161,16 @@ h2 {
     line-height: 1.6;
 }
 
+.path-summary {
+    font-family: var(--mono);
+    overflow-wrap: anywhere;
+}
+
+.path-separator {
+    display: inline-block;
+    margin-inline: 0.35ch;
+}
+
 .badge {
     flex: none;
     padding: 7px 12px;

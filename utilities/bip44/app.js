@@ -146,12 +146,32 @@ function renderAddressChips() {
     }
 }
 
+function renderPathText(container, path) {
+    container.replaceChildren()
+    container.setAttribute('aria-label', path)
+
+    const segments = path.split('/')
+    for (const [index, segment] of segments.entries()) {
+        if (index > 0) {
+            const separator = document.createElement('span')
+            separator.className = 'path-separator'
+            separator.textContent = '/'
+            separator.setAttribute('aria-hidden', 'true')
+            container.append(separator)
+        }
+
+        const segmentNode = document.createElement('span')
+        segmentNode.textContent = segment
+        container.append(segmentNode)
+    }
+}
+
 function renderPathSummary() {
     const form = getFormState()
-    if (state.rootResult?.root)
-        el.pathSummary.textContent = getPathPreview(state.rootResult.root, form)
-    else
-        el.pathSummary.textContent = `m/44'/${form.coinType}'/${form.account}'/${form.change}/${form.addressIndexes.length === 1 ? form.addressIndexes[0] : '{address_index}'}`
+    const path = state.rootResult?.root
+        ? getPathPreview(state.rootResult.root, form)
+        : `m/44'/${form.coinType}'/${form.account}'/${form.change}/${form.addressIndexes.length === 1 ? form.addressIndexes[0] : '{address_index}'}`
+    renderPathText(el.pathSummary, path)
 
     const coin = getCoinTypeOption(form.coinType)
     el.changeSwitch.setAttribute('aria-pressed', String(form.change === 1))
