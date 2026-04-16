@@ -242,7 +242,6 @@ function renderRootInfo() {
         ['depth', String(state.rootInfo.depth)],
         ['index', state.rootInfo.index ?? '-'],
         ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
-        ['fingerprint', state.rootInfo.fingerprintHex],
         ['identifier', state.rootInfo.identifierHex],
     ]
 
@@ -250,9 +249,9 @@ function renderRootInfo() {
         const node = document.createElement('div')
         node.className = 'info-item'
         const renderedValue = label === 'identifier'
-            ? `<strong><mark>${escapeHtml(value.slice(0, 8))}</mark>${escapeHtml(value.slice(8))}</strong>`
+            ? `<strong><span class="identifier-fingerprint">${escapeHtml(value.slice(0, 8))}</span>${escapeHtml(value.slice(8))}</strong>`
             : `<strong>${escapeHtml(value)}</strong>`
-        node.innerHTML = `<span>${escapeHtml(label)}</span>${renderedValue}`
+        node.innerHTML = `<span class="info-item-label">${escapeHtml(label)}</span>${renderedValue}`
         el.rootInfo.append(node)
     }
 }

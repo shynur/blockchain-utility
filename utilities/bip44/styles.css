@@ -427,7 +427,7 @@ small {
     overflow-wrap: anywhere;
 }
 
-.info-item span {
+.info-item-label {
     display: block;
     margin-bottom: 6px;
     color: var(--muted);
@@ -436,6 +436,10 @@ small {
 
 .info-item strong {
     font-family: var(--mono);
+}
+
+.identifier-fingerprint {
+    color: var(--accent-2);
 }
 
 .outputs {
