@@ -20,10 +20,10 @@ const state = {
 
 const DEFAULT_REQUESTED_KINDS = {
     purpose: { xprv: false, xpub: false, K: false },
-    coin: { xprv: false, xpub: true, K: false },
-    account: { xprv: false, xpub: true, K: false },
+    coin: { xprv: false, xpub: false, K: false },
+    account: { xprv: true, xpub: true, K: false },
     change: { xprv: false, xpub: false, K: false },
-    address: { xprv: false, xpub: true, K: true },
+    address: { xprv: false, xpub: false, K: true },
 }
 const AVAILABLE_OUTPUT_KINDS = {
     purpose: ['xprv', 'xpub'],
