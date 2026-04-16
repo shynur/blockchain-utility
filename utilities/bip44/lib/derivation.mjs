@@ -30,6 +30,14 @@ export function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
     return ['m', ...baseSegments, ...extraSegments].join('')
 }
 
+export function formatAddressIndexesPreview(addressIndexes) {
+    if (addressIndexes.length === 0)
+        return '{address_index}'
+    if (addressIndexes.length === 1)
+        return String(addressIndexes[0])
+    return `{${addressIndexes.join(',')}}`
+}
+
 /**
  * @param {InstanceType<typeof libbip32.XKey>} key
  * @param {string} absolutePath
@@ -227,10 +235,8 @@ export function getPathPreview(root, form) {
         selectableSegments.push(`${form.account}'`)
     if (root.depth < 4)
         selectableSegments.push(`${form.change}`)
-    if (root.depth < 5 && form.addressIndexes.length === 1)
-        selectableSegments.push(String(form.addressIndexes[0]))
-    else if (root.depth < 5 && form.addressIndexes.length > 1)
-        selectableSegments.push('{address_index}')
+    if (root.depth < 5)
+        selectableSegments.push(formatAddressIndexesPreview(form.addressIndexes))
 
     return ['m', ...fixedSegments, ...selectableSegments].join('/')
 }

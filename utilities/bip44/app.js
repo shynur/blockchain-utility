@@ -1,5 +1,5 @@
 import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
-import { deriveBip44, describeRootKey, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
+import { deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
 import { escapeHtml, parseUint31, pluralizeWords } from './lib/utils.mjs'
@@ -181,7 +181,7 @@ function renderPathSummary() {
     const form = getFormState()
     const path = state.rootResult?.root
         ? getPathPreview(state.rootResult.root, form)
-        : `m/44'/${form.coinType}'/${form.account}'/${form.change}/${form.addressIndexes.length === 1 ? form.addressIndexes[0] : '{address_index}'}`
+        : `m/44'/${form.coinType}'/${form.account}'/${form.change}/${formatAddressIndexesPreview(form.addressIndexes)}`
     renderPathText(el.pathSummary, path)
 
     const coin = getCoinTypeOption(form.coinType)
