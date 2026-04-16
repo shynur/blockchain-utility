@@ -1,6 +1,8 @@
 import { VALID_MNEMONIC_COUNTS, WORD_MARKERS } from './constants.mjs'
 import { isAsciiLetter, isBase58Char, isWhitespace } from './utils.mjs'
 
+const MAX_MNEMONIC_WORDS = WORD_MARKERS.length
+
 function normalizeMnemonicPaste(text) {
     text = text.replace(/^\s+/, '')
     if (text && !isAsciiLetter(text[0]))
@@ -61,6 +63,32 @@ function collapseMnemonic(raw) {
     return result
 }
 
+function limitMnemonicWordCount(raw) {
+    let result = ''
+    let previousWasSpace = true
+    let wordCount = 0
+
+    for (const char of collapseMnemonic(raw)) {
+        if (isAsciiLetter(char)) {
+            if (previousWasSpace) {
+                if (wordCount >= MAX_MNEMONIC_WORDS)
+                    break
+                wordCount += 1
+            }
+            result += char
+            previousWasSpace = false
+            continue
+        }
+
+        if (isWhitespace(char) && !previousWasSpace) {
+            result += ' '
+            previousWasSpace = true
+        }
+    }
+
+    return result
+}
+
 export class RootInputModel {
     /**
      * @param {string} initialText
@@ -77,7 +105,7 @@ export class RootInputModel {
      * @param {string} raw
      */
     setRaw(raw) {
-        const candidate = collapseMnemonic(raw)
+        const candidate = limitMnemonicWordCount(raw)
         const prefixCandidate = candidate.replace(/\s+/g, '')
         if (prefixCandidate.startsWith('xpub') || prefixCandidate.startsWith('xprv'))
             this.mode = 'xkey'
@@ -106,7 +134,7 @@ export class RootInputModel {
             }
 
             if (isAsciiLetter(char)) {
-                this.raw += char.toLowerCase()
+                this.raw = limitMnemonicWordCount(`${this.raw}${char.toLowerCase()}`)
                 const compact = this.raw.replace(/\s+/g, '')
                 if (compact.startsWith('xpub') || compact.startsWith('xprv')) {
                     this.mode = 'xkey'
@@ -116,7 +144,7 @@ export class RootInputModel {
             }
 
             if (isWhitespace(char) && this.raw && !this.raw.endsWith(' '))
-                this.raw += ' '
+                this.raw = limitMnemonicWordCount(`${this.raw} `)
         }
     }
 
@@ -151,7 +179,7 @@ export class RootInputModel {
 
         this.raw = this.mode === 'xkey'
             ? normalizeXKeyPaste(currentValue)
-            : collapseMnemonic(currentValue)
+            : limitMnemonicWordCount(currentValue)
 
         if (insertedText && this.mode === 'mnemonic') {
             const prefixCandidate = this.raw.replace(/\s+/g, '')
@@ -188,7 +216,7 @@ export class RootInputModel {
         }
 
         this.mode = 'mnemonic'
-        this.raw = collapseMnemonic(`${this.raw}${mnemonicText}`)
+        this.raw = limitMnemonicWordCount(`${this.raw}${mnemonicText}`)
     }
 
     backspace() {
