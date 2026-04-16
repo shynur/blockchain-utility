@@ -527,3 +527,7 @@ syncKindAvailability()
 renderAddressChips()
 renderPathSummary()
 renderOutputs()
+window.requestAnimationFrame(() => {
+    el.rootInput.focus()
+    el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
+})
