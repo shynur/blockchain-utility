@@ -19,13 +19,19 @@ const state = {
     referencePath: '',
 }
 
-const OUTPUT_KINDS = ['xprv', 'xpub', 'K']
 const DEFAULT_REQUESTED_KINDS = {
     purpose: { xprv: false, xpub: false, K: false },
     coin: { xprv: false, xpub: true, K: false },
     account: { xprv: false, xpub: true, K: false },
     change: { xprv: false, xpub: false, K: false },
     address: { xprv: false, xpub: true, K: true },
+}
+const AVAILABLE_OUTPUT_KINDS = {
+    purpose: ['xprv', 'xpub'],
+    coin: ['xprv', 'xpub'],
+    account: ['xprv', 'xpub'],
+    change: ['xprv', 'xpub'],
+    address: ['xprv', 'xpub', 'K'],
 }
 
 const el = {
@@ -68,7 +74,7 @@ const requestedKindsState = cloneRequestedKinds()
 
 function createKindControls(group) {
     const wrap = document.querySelector(`[data-kind-group="${group}"]`)
-    for (const kind of OUTPUT_KINDS) {
+    for (const kind of AVAILABLE_OUTPUT_KINDS[group]) {
         const label = document.createElement('label')
         label.className = 'checkline'
         label.dataset.kind = kind
@@ -86,9 +92,18 @@ function createKindControls(group) {
 for (const group of Object.keys(DEFAULT_REQUESTED_KINDS))
     createKindControls(group)
 
+function sanitizeRequestedKinds(group, kinds) {
+    const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
+    return {
+        xprv: allowedKinds.has('xprv') && kinds.xprv,
+        xpub: allowedKinds.has('xpub') && kinds.xpub,
+        K: allowedKinds.has('K') && kinds.K,
+    }
+}
+
 function getGenerateAt() {
     return Object.fromEntries(
-        Object.entries(requestedKindsState).map(([group, kinds]) => [group, { ...kinds }]),
+        Object.entries(requestedKindsState).map(([group, kinds]) => [group, sanitizeRequestedKinds(group, kinds)]),
     )
 }
 
