@@ -12,7 +12,6 @@ const state = {
     rootResult: null,
     rootInfo: null,
     outputs: [],
-    fixedLevels: [],
     pendingToken: 0,
     change: 0,
     revealXprv: new Set(),
@@ -50,7 +49,6 @@ const el = {
     addressError: document.querySelector('#address-error'),
     addressList: document.querySelector('#address-index-list'),
     pathSummary: document.querySelector('#path-summary'),
-    fixedPathNote: document.querySelector('#fixed-path-note'),
     referencePathWrap: document.querySelector('#reference-path-wrap'),
     referencePathInput: document.querySelector('#reference-path-input'),
     deriveNow: document.querySelector('#derive-now'),
@@ -192,14 +190,6 @@ function renderPathSummary() {
         ? '0: external / receiving addresses'
         : '1: internal / change addresses'
     el.coinType.title = `${coin.value}': ${coin.name}`
-
-    if (state.fixedLevels.length) {
-        el.fixedPathNote.classList.remove('hidden')
-        el.fixedPathNote.textContent = `导入 key 的已知层级: ${state.fixedLevels.map(item => `${item.level.label}=${item.text}`).join(' / ')}`
-    } else {
-        el.fixedPathNote.classList.add('hidden')
-        el.fixedPathNote.textContent = ''
-    }
 
     const showReference = Boolean(state.rootResult && state.rootResult.kind === 'xkey' && state.rootResult.root.depth > 0)
     el.referencePathWrap.classList.toggle('hidden', !showReference)
@@ -344,7 +334,6 @@ function clearResults(message) {
     state.rootResult = null
     state.rootInfo = null
     state.outputs = []
-    state.fixedLevels = []
     el.statusLine.textContent = message
     syncKindAvailability()
     renderRootInfo()
@@ -418,7 +407,6 @@ async function runDerive() {
             return
 
         state.outputs = derived.derived
-        state.fixedLevels = derived.fixedLevels
         el.statusLine.textContent = state.rootResult.kind === 'mnemonic'
             ? '助记词有效, 已生成 BIP44 节点。'
             : '导入 key 有效, 已按可用子路径生成节点。'

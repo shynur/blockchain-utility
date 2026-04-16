@@ -412,15 +412,6 @@ small {
     font-weight: 800;
 }
 
-.fixed-note {
-    margin-bottom: 16px;
-    padding: 14px 16px;
-    border-radius: 18px;
-    background: rgba(15, 107, 92, 0.1);
-    color: #20423c;
-    line-height: 1.65;
-}
-
 .ghost-button {
     border: 1px solid rgba(15, 107, 92, 0.32);
     border-radius: 999px;
