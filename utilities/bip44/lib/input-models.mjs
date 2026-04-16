@@ -2,6 +2,7 @@ import { VALID_MNEMONIC_COUNTS, WORD_MARKERS } from './constants.mjs'
 import { isAsciiLetter, isBase58Char, isWhitespace } from './utils.mjs'
 
 const MAX_MNEMONIC_WORDS = WORD_MARKERS.length
+const XKEY_LENGTH = 111
 
 function normalizeMnemonicPaste(text) {
     text = text.replace(/^\s+/, '')
@@ -39,6 +40,10 @@ function normalizeXKeyPaste(text) {
             result += char
     }
     return result
+}
+
+function clampXKey(raw) {
+    return raw.slice(0, XKEY_LENGTH)
 }
 
 function trimTrailingSpaces(text) {
@@ -113,7 +118,7 @@ export class RootInputModel {
             this.mode = 'mnemonic'
 
         this.raw = this.mode === 'xkey'
-            ? normalizeXKeyPaste(raw)
+            ? clampXKey(normalizeXKeyPaste(raw))
             : candidate
     }
 
@@ -126,7 +131,7 @@ export class RootInputModel {
     insertText(text) {
         for (const char of text) {
             if (this.mode === 'xkey') {
-                if (isBase58Char(char))
+                if (isBase58Char(char) && this.raw.length < XKEY_LENGTH)
                     this.raw += char
                 if (!(this.raw.startsWith('xpub') || this.raw.startsWith('xprv')))
                     this.mode = 'mnemonic'
@@ -178,14 +183,14 @@ export class RootInputModel {
             this.mode = 'xkey'
 
         this.raw = this.mode === 'xkey'
-            ? normalizeXKeyPaste(currentValue)
+            ? clampXKey(normalizeXKeyPaste(currentValue))
             : limitMnemonicWordCount(currentValue)
 
         if (insertedText && this.mode === 'mnemonic') {
             const prefixCandidate = this.raw.replace(/\s+/g, '')
             if (prefixCandidate.startsWith('xpub') || prefixCandidate.startsWith('xprv')) {
                 this.mode = 'xkey'
-                this.raw = normalizeXKeyPaste(currentValue)
+                this.raw = clampXKey(normalizeXKeyPaste(currentValue))
             }
         }
 
@@ -201,7 +206,7 @@ export class RootInputModel {
      */
     applyPaste(pastedText) {
         if (this.mode === 'xkey') {
-            this.raw += normalizeXKeyPaste(pastedText)
+            this.raw = clampXKey(this.raw + normalizeXKeyPaste(pastedText))
             if (!(this.raw.startsWith('xpub') || this.raw.startsWith('xprv')))
                 this.mode = 'mnemonic'
             return
@@ -211,7 +216,7 @@ export class RootInputModel {
         const compactMnemonic = `${this.raw}${mnemonicText}`.replace(/\s+/g, '')
         if (compactMnemonic.startsWith('xpub') || compactMnemonic.startsWith('xprv')) {
             this.mode = 'xkey'
-            this.raw = normalizeXKeyPaste(`${this.raw}${pastedText}`)
+            this.raw = clampXKey(normalizeXKeyPaste(`${this.raw}${pastedText}`))
             return
         }
 
@@ -277,24 +282,22 @@ export class RootInputModel {
     getXKeyMaskedValue() {
         if (this.raw.startsWith('xprv')) {
             const masked = `xprv${'*'.repeat(Math.max(0, this.raw.length - 4))}`
-            if (masked.length > 111)
-                return `${masked.slice(0, 111)}|${masked.slice(111)}`
-            if (masked.length === 111)
-                return `${masked}|`
-            return masked
+            return `${masked.padEnd(XKEY_LENGTH, ' ')}|`
         }
 
-        if (this.raw.length > 111)
-            return `${this.raw.slice(0, 111)}|${this.raw.slice(111)}`
-        if (this.raw.length === 111)
-            return `${this.raw}|`
-        return this.raw
+        return `${this.raw.padEnd(XKEY_LENGTH, ' ')}|`
     }
 
     getDisplayValue() {
         return this.mode === 'xkey'
             ? this.getXKeyMaskedValue()
             : this.getMnemonicMaskedValue()
+    }
+
+    getDisplayCursorPosition() {
+        if (this.mode === 'xkey')
+            return this.raw.length
+        return this.getDisplayValue().length
     }
 
     getRawValue() {

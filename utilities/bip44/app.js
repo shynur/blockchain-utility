@@ -112,16 +112,17 @@ function setFieldValue(input, value) {
 function syncMaskedInputs() {
     setFieldValue(el.rootInput, rootModel.getDisplayValue())
     setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
-    el.rootInput.selectionStart = el.rootInput.selectionEnd = el.rootInput.value.length
+    el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
     el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
 
     el.inputModeBadge.textContent = rootModel.mode
     el.passphraseWrap.classList.toggle('hidden', rootModel.mode === 'xkey')
+    el.rootInput.setAttribute('wrap', rootModel.mode === 'xkey' ? 'off' : 'soft')
 
     if (rootModel.mode === 'xkey') {
         el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')
-            ? 'xprv: 前缀保留明文, 后续字符隐藏; 到 111 字符时会自动校验。'
-            : 'xpub: 只接受 base58 字符; 第 111 个字符后显示 | 供核对长度。'
+            ? 'xprv: 前缀保留明文, 后续字符隐藏; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'
+            : 'xpub: 只接受 base58 字符; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'
     } else {
         const words = rootModel.getWordState()
         el.rootHelp.textContent = `${pluralizeWords(words.candidateCount)}; 合法词数: ${VALID_MNEMONIC_COUNTS.join('/')}。输入空白会隐藏刚完成的 word。`
