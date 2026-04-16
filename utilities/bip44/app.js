@@ -60,8 +60,6 @@ for (const option of COIN_TYPES) {
     el.coinType.append(node)
 }
 
-addressState.values = [0]
-
 function cloneRequestedKinds() {
     return Object.fromEntries(Object.entries(DEFAULT_REQUESTED_KINDS).map(([key, value]) => [key, { ...value }]))
 }
