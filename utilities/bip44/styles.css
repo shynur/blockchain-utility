@@ -47,7 +47,7 @@ button {
 .app-shell {
     width: calc(100% - clamp(18px, 2.4vw, 32px));
     margin: 0 auto;
-    padding: 32px 0 56px;
+    padding-block: calc(clamp(18px, 2.4vw, 32px) / 2);
 }
 
 .panel {
@@ -549,7 +549,7 @@ small {
 @media (max-width: 520px) {
     .app-shell {
         width: calc(100% - 18px);
-        padding-top: 12px;
+        padding-block: 9px;
     }
 
     .panel {
