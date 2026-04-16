@@ -243,7 +243,6 @@ export async function describeRootKey(key) {
     const fingerprint = await key.fingerprint()
     return {
         type: key.is_public_key() ? 'public' : 'private',
-        network: key.version,
         depth: key.depth,
         index: key.depth > 0 ? formatChildNumber(key.i) : null,
         parentFingerprint: key.depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
