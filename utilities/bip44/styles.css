@@ -64,12 +64,18 @@ button {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(300px, 1fr);
     gap: 18px;
-    align-items: start;
+    align-items: stretch;
     margin-bottom: 18px;
 }
 
 .top-panels > .panel {
+    height: 100%;
     margin-bottom: 0;
+}
+
+.status-panel {
+    display: flex;
+    flex-direction: column;
 }
 
 .hero {
@@ -430,6 +436,9 @@ small {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 10px;
+    flex: 1;
+    min-height: 0;
+    align-content: stretch;
 }
 
 .info-item {
