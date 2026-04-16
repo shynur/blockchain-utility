@@ -490,10 +490,34 @@ small {
     font-size: 1.25rem;
 }
 
+.output-top > div {
+    min-width: 0;
+    flex: 1;
+}
+
+.output-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: baseline;
+    color: var(--muted);
+    font-size: 0.9rem;
+    width: 100%;
+}
+
 .output-top p {
     margin: 0;
-    color: var(--muted);
     font-family: var(--mono);
+    overflow-wrap: anywhere;
+}
+
+.output-note {
+    text-align: right;
+}
+
+.output-note-highlight {
+    color: var(--accent-2);
+    font-weight: 800;
 }
 
 .output-fields {

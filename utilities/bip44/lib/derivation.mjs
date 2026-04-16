@@ -7,6 +7,7 @@ import { bytesToHex, formatChildNumber, serializeCompressedPublicKeyHex } from '
  *   id: string,
  *   depth: number,
  *   label: string,
+ *   noteParts: Array<{ text: string, highlight: boolean }>,
  *   pathFromRoot: string,
  *   absolutePath: string,
  *   key: InstanceType<typeof libbip32.XKey>,
@@ -22,6 +23,7 @@ export function getCoinTypeOption(value) {
     return COIN_TYPES.find(option => option.value === value) ?? {
         value,
         symbol: `#${value}`,
+        localName: '自定义币种',
         name: 'Custom',
     }
 }
@@ -71,6 +73,66 @@ function resolveAbsolutePath(root, fallbackAbsolutePath, labels) {
 
 function hasRequestedKinds(kinds) {
     return kinds.xprv || kinds.xpub || kinds.K
+}
+
+function plainNotePart(text) {
+    return { text: String(text), highlight: false }
+}
+
+function highlightedNotePart(text) {
+    return { text: String(text), highlight: true }
+}
+
+function coinAccountNoteParts(coin, account, highlightAccount) {
+    return [
+        plainNotePart(`${coin.localName}账户 `),
+        highlightAccount ? highlightedNotePart(account) : plainNotePart(account),
+    ]
+}
+
+function changeChainName(change) {
+    return change === 0 ? '收款' : '找零'
+}
+
+function describeOutputNoteParts(levelId, form, addressIndex = null) {
+    const coin = getCoinTypeOption(form.coinType)
+
+    if (levelId === 'purpose')
+        return [
+            plainNotePart('BIP '),
+            highlightedNotePart('44'),
+        ]
+
+    if (levelId === 'coin')
+        return [
+            highlightedNotePart(coin.symbol),
+            plainNotePart(` - ${coin.localName} (${coin.name})`),
+        ]
+
+    if (levelId === 'account')
+        return coinAccountNoteParts(coin, form.account, true)
+
+    if (levelId === 'change') {
+        const chainName = changeChainName(form.change)
+        return [
+            ...coinAccountNoteParts(coin, form.account, false),
+            plainNotePart(' 的'),
+            highlightedNotePart(chainName),
+            plainNotePart('链'),
+        ]
+    }
+
+    if (levelId === 'address') {
+        const chainName = changeChainName(form.change)
+        return [
+            ...coinAccountNoteParts(coin, form.account, false),
+            plainNotePart(` 的${chainName}链的第 `),
+            highlightedNotePart(addressIndex ?? ''),
+            plainNotePart(' 个地址'),
+        ]
+    }
+
+    return []
 }
 
 /**
@@ -178,6 +240,7 @@ export async function deriveBip44(root, form) {
                 id: level.id,
                 depth: current.depth,
                 label: level.label,
+                noteParts: describeOutputNoteParts(level.id, form),
                 pathFromRoot: baseSegments.join(''),
                 requestedKinds,
                 ...(await serializeNode(current, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments), form.labels))),
@@ -195,6 +258,7 @@ export async function deriveBip44(root, form) {
                     id: `address-${index}`,
                     depth: child.depth,
                     label: `${index}`,
+                    noteParts: describeOutputNoteParts('address', form, index),
                     pathFromRoot: `${baseSegments.join('')}/${index}`,
                     requestedKinds,
                     ...(await serializeNode(child, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments, [`/${index}`]), form.labels))),

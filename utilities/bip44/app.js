@@ -273,6 +273,13 @@ function maskXprv(value) {
     return `${value.slice(0, 4)}${'*'.repeat(Math.max(0, value.length - 4))}`
 }
 
+function renderNoteParts(parts) {
+    return parts.map(part => {
+        const className = part.highlight ? ' class="output-note-highlight"' : ''
+        return `<span${className}>${escapeHtml(part.text)}</span>`
+    }).join('')
+}
+
 function renderOutputs() {
     el.outputs.replaceChildren()
     el.outputs.classList.toggle('empty', state.outputs.length === 0)
@@ -298,7 +305,10 @@ function renderOutputs() {
             <div class="output-top">
                 <div>
                     <h3>${escapeHtml(output.label)}</h3>
-                    <p>${escapeHtml(output.absolutePath)}</p>
+                    <div class="output-meta">
+                        <p>${escapeHtml(output.absolutePath)}</p>
+                        <span class="output-note">${renderNoteParts(output.noteParts)}</span>
+                    </div>
                 </div>
                 <span class="badge">depth ${output.depth}</span>
             </div>

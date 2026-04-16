@@ -11,22 +11,22 @@ export const HARDENED_OFFSET = 2 ** 31
 export const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
 export const COIN_TYPES = [
-    { value: 0, symbol: 'BTC', name: 'Bitcoin' },
-    { value: 1, symbol: 'TBTC', name: 'Bitcoin Testnet' },
-    { value: 2, symbol: 'LTC', name: 'Litecoin' },
-    { value: 3, symbol: 'DOGE', name: 'Dogecoin' },
-    { value: 60, symbol: 'ETH', name: 'Ethereum' },
-    { value: 61, symbol: 'ETC', name: 'Ethereum Classic' },
-    { value: 118, symbol: 'ATOM', name: 'Cosmos' },
-    { value: 128, symbol: 'XMR', name: 'Monero' },
-    { value: 133, symbol: 'ZEC', name: 'Zcash' },
-    { value: 144, symbol: 'XRP', name: 'XRP' },
-    { value: 145, symbol: 'BCH', name: 'Bitcoin Cash' },
-    { value: 1815, symbol: 'ADA', name: 'Cardano' },
-    { value: 195, symbol: 'TRX', name: 'TRON' },
-    { value: 354, symbol: 'DOT', name: 'Polkadot' },
-    { value: 501, symbol: 'SOL', name: 'Solana' },
-    { value: 714, symbol: 'BNB', name: 'BNB Smart Chain' },
+    { value: 0, symbol: 'BTC', localName: '比特币', name: 'Bitcoin' },
+    { value: 1, symbol: 'TBTC', localName: '比特币测试网', name: 'Bitcoin Testnet' },
+    { value: 2, symbol: 'LTC', localName: '莱特币', name: 'Litecoin' },
+    { value: 3, symbol: 'DOGE', localName: '狗狗币', name: 'Dogecoin' },
+    { value: 60, symbol: 'ETH', localName: '以太坊', name: 'Ethereum' },
+    { value: 61, symbol: 'ETC', localName: '以太坊经典', name: 'Ethereum Classic' },
+    { value: 118, symbol: 'ATOM', localName: 'Cosmos', name: 'Cosmos' },
+    { value: 128, symbol: 'XMR', localName: '门罗币', name: 'Monero' },
+    { value: 133, symbol: 'ZEC', localName: 'Zcash', name: 'Zcash' },
+    { value: 144, symbol: 'XRP', localName: 'XRP', name: 'XRP' },
+    { value: 145, symbol: 'BCH', localName: '比特币现金', name: 'Bitcoin Cash' },
+    { value: 1815, symbol: 'ADA', localName: 'Cardano', name: 'Cardano' },
+    { value: 195, symbol: 'TRX', localName: 'TRON', name: 'TRON' },
+    { value: 354, symbol: 'DOT', localName: 'Polkadot', name: 'Polkadot' },
+    { value: 501, symbol: 'SOL', localName: 'Solana', name: 'Solana' },
+    { value: 714, symbol: 'BNB', localName: 'BNB 智能链', name: 'BNB Smart Chain' },
 ]
 
 export const BIP44_LEVELS = [
