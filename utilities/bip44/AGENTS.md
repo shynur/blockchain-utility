@@ -13,4 +13,4 @@ The app (i.e., this entire directory) will ultimately be deployed to the server 
 
 ## Git
 
-See <https://gist.github.com/shynur/49d402f4540eab51b2e777277b455615#commit-messages> for the Git commit message guidelines.
+See <https://gist.githubusercontent.com/shynur/49d402f4540eab51b2e777277b455615/raw/ba27d8a2462fa2042e9554439ff7e243f2d34ba9/CONTRIBUTE.md>’s section `## Commit Message` for the Git commit message guidelines.
