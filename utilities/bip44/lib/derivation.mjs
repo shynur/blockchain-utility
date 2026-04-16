@@ -1,5 +1,4 @@
-import { XKey, XPrv } from '../index.mjs'
-import { mnemonicSentenceToSeed, validateMnemonicSentence } from '../../bip39/index.mjs'
+import { libbip32, libbip39 } from '../deps.mjs'
 import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET } from './constants.mjs'
 import { bytesToHex, formatChildNumber, serializeCompressedPublicKeyHex } from './utils.mjs'
 
@@ -10,7 +9,7 @@ import { bytesToHex, formatChildNumber, serializeCompressedPublicKeyHex } from '
  *   label: string,
  *   pathFromRoot: string,
  *   absolutePath: string,
- *   key: import('../../bip32/index.mjs').XKey,
+ *   key: InstanceType<typeof libbip32.XKey>,
  *   requestedKinds: { xprv: boolean, xpub: boolean, K: boolean },
  *   canXprv: boolean,
  *   xprv: string | null,
@@ -32,7 +31,7 @@ export function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
 }
 
 /**
- * @param {import('../../bip32/index.mjs').XKey} key
+ * @param {InstanceType<typeof libbip32.XKey>} key
  * @param {string} absolutePath
  */
 async function serializeNode(key, absolutePath) {
@@ -40,8 +39,8 @@ async function serializeNode(key, absolutePath) {
     return {
         absolutePath,
         canXprv,
-        xprv: canXprv ? await /** @type {import('../../bip32/index.mjs').XPrv} */ (key).serialize() : null,
-        xpub: await (key.is_public_key() ? key : /** @type {import('../../bip32/index.mjs').XPrv} */ (key).N()).serialize(),
+        xprv: canXprv ? await /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).serialize() : null,
+        xpub: await (key.is_public_key() ? key : /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).N()).serialize(),
         K: serializeCompressedPublicKeyHex(key),
     }
 }
@@ -78,11 +77,11 @@ export async function resolveRootSource(source) {
     if (source.importMode === 'mnemonic') {
         const mnemonicSentence = source.mnemonicSentence ?? ''
         const passphrase = source.passphrase ?? ''
-        const isValid = await validateMnemonicSentence(mnemonicSentence, 'en')
+        const isValid = await libbip39.validateMnemonicSentence(mnemonicSentence, 'en')
         if (!isValid)
             throw new Error('助记词校验失败: 请检查单词拼写、词数和 checksum')
-        const seed = await mnemonicSentenceToSeed(mnemonicSentence, passphrase)
-        const root = await XPrv.from(seed)
+        const seed = await libbip39.mnemonicSentenceToSeed(mnemonicSentence, passphrase)
+        const root = await libbip32.XPrv.from(seed)
         return {
             kind: 'mnemonic',
             root,
@@ -92,7 +91,7 @@ export async function resolveRootSource(source) {
     }
 
     const xkeyText = source.xkeyText ?? ''
-    const root = await XKey.deserialize(xkeyText)
+    const root = await libbip32.XKey.deserialize(xkeyText)
     return {
         kind: 'xkey',
         root,
@@ -102,7 +101,7 @@ export async function resolveRootSource(source) {
 }
 
 /**
- * @param {import('../../bip32/index.mjs').XKey} root
+ * @param {InstanceType<typeof libbip32.XKey>} root
  * @param {{
  *   coinType: number,
  *   account: number,
@@ -219,7 +218,7 @@ export async function deriveBip44(root, form, includeRootOutput = true) {
 }
 
 /**
- * @param {import('../../bip32/index.mjs').XKey} root
+ * @param {InstanceType<typeof libbip32.XKey>} root
  * @param {{
  *   coinType: number,
  *   account: number,
@@ -251,7 +250,7 @@ export function getPathPreview(root, form) {
 }
 
 /**
- * @param {import('../../bip32/index.mjs').XKey} key
+ * @param {InstanceType<typeof libbip32.XKey>} key
  */
 export async function describeRootKey(key) {
     const identifier = await key.identifier()
