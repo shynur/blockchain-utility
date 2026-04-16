@@ -280,6 +280,14 @@ function renderNoteParts(parts) {
     }).join('')
 }
 
+function syncXprvRevealButton(button, output, card) {
+    const reveal = state.revealXprv.has(output.id)
+    const secret = card.querySelector('[data-xprv-value]')
+    if (secret)
+        secret.textContent = reveal ? output.xprv : maskXprv(output.xprv)
+    button.textContent = reveal ? '隐藏' : '显示'
+}
+
 function renderOutputs() {
     el.outputs.replaceChildren()
     el.outputs.classList.toggle('empty', state.outputs.length === 0)
@@ -297,7 +305,7 @@ function renderOutputs() {
             ? `
                 <div class="output-row">
                     <label>xprv</label>
-                    <div class="secret">${escapeHtml(reveal ? output.xprv : maskXprv(output.xprv))}</div>
+                    <div class="secret" data-xprv-value>${escapeHtml(reveal ? output.xprv : maskXprv(output.xprv))}</div>
                     <button class="tiny-button" type="button" data-toggle-xprv="${escapeHtml(output.id)}">${reveal ? '隐藏' : '显示'}</button>
                 </div>`
             : ''
@@ -333,7 +341,7 @@ function renderOutputs() {
                     state.revealXprv.delete(output.id)
                 else
                     state.revealXprv.add(output.id)
-                renderOutputs()
+                syncXprvRevealButton(toggle, output, card)
             })
         }
         el.outputs.append(card)
