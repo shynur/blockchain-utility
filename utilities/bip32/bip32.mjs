@@ -358,16 +358,14 @@ class ExtendedPrivateKey extends ExtendedKey {
 }
 
 /**
- * Compute the traditional Bitcoin P2PKH address from a serialized public key.
- * BIP 32 §Key identifiers: Hash160(ser_P(K)) "corresponds exactly to the data
- * used in traditional Bitcoin addresses."
+ * Traditional Bitcoin P2PKH address from a serialized public key.
  * @param {Readonly<Uint8Array>} serialized_K - 33B compressed public key (output of ser_P)
  * @param {'mainnet' | 'testnet'} version
  * @returns {Promise<string>} Base58Check-encoded P2PKH address
  */
 export async function AddressOfK(serialized_K, version = 'mainnet') {
     const identifier = await bip32math.Hash160(serialized_K)
-    const version_byte = new Uint8Array([version == 'mainnet' ? 0x00 : 0x6f])
+    const version_byte = new Uint8Array([version == 'mainnet' ? 0x00 : 0x6F])
     return bip32math.base58checkEncode(bip32math.cat(version_byte, identifier))
 }
 

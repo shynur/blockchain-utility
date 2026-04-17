@@ -17,7 +17,7 @@ const state = {
     revealXprv: new Set(),
     revealPrivateKey: new Set(),
     referencePath: '',
-    selectedPathCards: new Set(['purpose', 'coin', 'account', 'change']),
+    selectedPathCards: new Set(),
 }
 
 const DEFAULT_REQUESTED_KINDS = {
