@@ -119,7 +119,7 @@ switch 上显示当前值 (`0` 或 `1`), 备注使用中文说明.
 
 只有 `address_index` 允许额外选择是否生成 `k` 和 `K`.
 当 `coin_type'` 是 BTC 或 BTC testnet 时, `address_index` 额外允许选择是否生成 `A`.
-当前 `A` 只覆盖 `libbip32.AddressOfK` 支持的 Bitcoin mainnet/testnet P2PKH 地址.
+当前 `A` 只覆盖 Bitcoin mainnet/testnet P2PKH 地址.
 
 可多选.
 
