@@ -227,6 +227,16 @@ small {
     align-items: stretch;
 }
 
+@media (min-width: 861px) {
+    .path-grid > .address-card:last-child:nth-child(3n + 1) {
+        grid-column: 1 / -1;
+    }
+
+    .path-grid > .address-card:last-child:nth-child(3n + 2) {
+        grid-column: span 2;
+    }
+}
+
 .path-card {
     min-height: 112px;
     display: flex;
