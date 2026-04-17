@@ -277,6 +277,42 @@ function commitAddressDraft() {
     scheduleDerive()
 }
 
+function appendPathTextPart(container, text, className = '') {
+    const node = document.createElement('span')
+    if (className)
+        node.className = className
+    node.textContent = text
+    container.append(node)
+}
+
+function appendPathBreak(container) {
+    container.append(document.createElement('wbr'))
+}
+
+function renderPathSegment(container, segment) {
+    const match = segment.match(/^\{(\d+(?:,\d+)*)\}$/)
+    if (!match) {
+        appendPathTextPart(container, segment, 'path-segment')
+        return
+    }
+
+    appendPathTextPart(container, '{', 'path-address-token')
+    appendPathBreak(container)
+
+    const values = match[1].split(',')
+    for (const [index, value] of values.entries()) {
+        appendPathTextPart(container, value, 'path-address-token')
+        if (index >= values.length - 1)
+            continue
+
+        appendPathTextPart(container, ',', 'path-address-token')
+        appendPathBreak(container)
+    }
+
+    appendPathBreak(container)
+    appendPathTextPart(container, '}', 'path-address-token')
+}
+
 function renderPathText(container, path) {
     container.replaceChildren()
     container.setAttribute('aria-label', path)
@@ -291,9 +327,7 @@ function renderPathText(container, path) {
             container.append(separator)
         }
 
-        const segmentNode = document.createElement('span')
-        segmentNode.textContent = segment
-        container.append(segmentNode)
+        renderPathSegment(container, segment)
     }
 }
 

@@ -115,12 +115,18 @@ h2 {
 
 .path-summary {
     font-family: var(--mono);
-    overflow-wrap: anywhere;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 .path-separator {
     display: inline-block;
     margin-inline: 0.35ch;
+}
+
+.path-segment,
+.path-address-token {
+    white-space: nowrap;
 }
 
 .badge {
