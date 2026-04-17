@@ -39,7 +39,6 @@ const el = {
     rootInput: document.querySelector('#root-input'),
     rootHelp: document.querySelector('#root-help'),
     rootError: document.querySelector('#root-error'),
-    inputModeBadge: document.querySelector('#input-mode-badge'),
     passphraseWrap: document.querySelector('#passphrase-wrap'),
     passphraseInput: document.querySelector('#passphrase-input'),
     coinType: document.querySelector('#coin-type'),
@@ -172,7 +171,6 @@ function syncMaskedInputs() {
     el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
     el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
 
-    el.inputModeBadge.textContent = rootModel.mode
     el.passphraseWrap.classList.toggle('hidden', rootModel.mode === 'xkey')
     el.rootInput.setAttribute('wrap', 'soft')
     el.passphraseInput.setAttribute('wrap', 'soft')
