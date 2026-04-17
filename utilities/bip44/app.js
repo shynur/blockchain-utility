@@ -157,6 +157,11 @@ function setFieldValue(input, value) {
         input.value = value
 }
 
+function fitTextareaToContent(textarea) {
+    textarea.style.height = 'auto'
+    textarea.style.height = `${textarea.scrollHeight}px`
+}
+
 function syncPathCardSelection() {
     for (const [group, card] of Object.entries(pathCards))
         card.classList.toggle('selected', state.selectedPathCards.has(group))
@@ -170,7 +175,8 @@ function syncMaskedInputs() {
 
     el.inputModeBadge.textContent = rootModel.mode
     el.passphraseWrap.classList.toggle('hidden', rootModel.mode === 'xkey')
-    el.rootInput.setAttribute('wrap', rootModel.mode === 'xkey' ? 'off' : 'soft')
+    el.rootInput.setAttribute('wrap', 'soft')
+    fitTextareaToContent(el.rootInput)
 
     if (rootModel.mode === 'xkey') {
         el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')

@@ -234,10 +234,18 @@ select:focus {
 }
 
 textarea {
-    resize: vertical;
-    min-height: 96px;
+    min-height: 72px;
     font-family: var(--mono);
     line-height: 1.6;
+}
+
+#root-input {
+    min-height: calc(1em * 1.6 + 28px);
+    overflow-x: hidden;
+    overflow-y: hidden;
+    white-space: break-spaces;
+    word-break: break-all;
+    resize: none;
 }
 
 textarea[wrap="off"] {
