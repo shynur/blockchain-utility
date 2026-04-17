@@ -20,9 +20,20 @@ export function formatChildNumber(index) {
     return index >= HARDENED_OFFSET ? `${index - HARDENED_OFFSET}'` : String(index)
 }
 
-export function serializeCompressedPublicKeyHex(key) {
+export function serializeCompressedPublicKey(key) {
     const point = key.is_public_key() ? key.K : key.N().K
-    return bytesToHex(point.serialize())
+    return point.serialize()
+}
+
+export function serializeCompressedPublicKeyHex(key) {
+    return bytesToHex(serializeCompressedPublicKey(key))
+}
+
+export function serializePrivateKeyHex(key) {
+    if (key.is_public_key())
+        return null
+
+    return key.k.toString(16).padStart(64, '0')
 }
 
 export function clampUint31Text(text) {

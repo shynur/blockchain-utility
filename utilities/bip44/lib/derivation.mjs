@@ -1,6 +1,6 @@
 import { libbip32, libbip39 } from '../deps.mjs'
 import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET } from './constants.mjs'
-import { bytesToHex, formatChildNumber, serializeCompressedPublicKeyHex } from './utils.mjs'
+import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeCompressedPublicKeyHex, serializePrivateKeyHex } from './utils.mjs'
 
 /**
  * @typedef {{
@@ -11,11 +11,13 @@ import { bytesToHex, formatChildNumber, serializeCompressedPublicKeyHex } from '
  *   pathFromRoot: string,
  *   absolutePath: string,
  *   key: InstanceType<typeof libbip32.XKey>,
- *   requestedKinds: { xprv: boolean, xpub: boolean, K: boolean },
+ *   requestedKinds: { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean },
  *   canXprv: boolean,
  *   xprv: string | null,
  *   xpub: string,
+ *   k: string | null,
  *   K: string,
+ *   A: string | null,
  * }} DerivedNodeOutput
  */
 
@@ -40,18 +42,26 @@ export function formatAddressIndexesPreview(addressIndexes) {
     return `{${addressIndexes.join(',')}}`
 }
 
+export function canDeriveBitcoinAddress(coinType) {
+    return coinType === 0 || coinType === 1
+}
+
 /**
  * @param {InstanceType<typeof libbip32.XKey>} key
  * @param {string} absolutePath
+ * @param {number} coinType
  */
-async function serializeNode(key, absolutePath) {
+async function serializeNode(key, absolutePath, coinType) {
     const canXprv = !key.is_public_key()
+    const publicKey = serializeCompressedPublicKey(key)
     return {
         absolutePath,
         canXprv,
         xprv: canXprv ? await /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).serialize() : null,
         xpub: await (key.is_public_key() ? key : /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).N()).serialize(),
+        k: serializePrivateKeyHex(key),
         K: serializeCompressedPublicKeyHex(key),
+        A: canDeriveBitcoinAddress(coinType) ? await libbip32.AddressOfK(publicKey, coinType === 1 ? 'testnet' : 'mainnet') : null,
     }
 }
 
@@ -72,7 +82,7 @@ function resolveAbsolutePath(root, fallbackAbsolutePath, labels) {
 }
 
 function hasRequestedKinds(kinds) {
-    return kinds.xprv || kinds.xpub || kinds.K
+    return kinds.xprv || kinds.xpub || kinds.k || kinds.K || kinds.A
 }
 
 function plainNotePart(text) {
@@ -178,7 +188,7 @@ export async function resolveRootSource(source) {
  *   account: number,
  *   change: 0 | 1,
  *   addressIndexes: number[],
- *   requestedKinds: Record<string, { xprv: boolean, xpub: boolean, K: boolean }>,
+ *   requestedKinds: Record<string, { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean }>,
  *   labels: Partial<Record<'coin' | 'account' | 'change', string> & { referencePath: string }>,
  * }} form
  * @returns {Promise<{
@@ -244,7 +254,7 @@ export async function deriveBip44(root, form) {
                 noteParts: describeOutputNoteParts(level.id, form),
                 pathFromRoot: baseSegments.join(''),
                 requestedKinds,
-                ...(await serializeNode(current, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments), form.labels))),
+                ...(await serializeNode(current, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments), form.labels), form.coinType)),
                 key: current,
             })
         }
@@ -253,7 +263,7 @@ export async function deriveBip44(root, form) {
     if (current.depth === 4) {
         for (const index of form.addressIndexes) {
             const child = await current.tree(`/${index}`)
-            const requestedKinds = form.requestedKinds.address ?? { xprv: false, xpub: false, K: false }
+            const requestedKinds = form.requestedKinds.address ?? { xprv: false, xpub: false, k: false, K: false, A: false }
             if (hasRequestedKinds(requestedKinds)) {
                 outputs.push({
                     id: `address-${index}`,
@@ -262,7 +272,7 @@ export async function deriveBip44(root, form) {
                     noteParts: describeOutputNoteParts('address', form, index),
                     pathFromRoot: `${baseSegments.join('')}/${index}`,
                     requestedKinds,
-                    ...(await serializeNode(child, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments, [`/${index}`]), form.labels))),
+                    ...(await serializeNode(child, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments, [`/${index}`]), form.labels), form.coinType)),
                     key: child,
                 })
             }

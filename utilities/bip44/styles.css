@@ -326,6 +326,10 @@ small {
     color: var(--muted);
 }
 
+.checkline[hidden] {
+    display: none;
+}
+
 .checkline input {
     width: auto;
     accent-color: var(--accent);

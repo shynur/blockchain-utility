@@ -113,17 +113,27 @@ word 输入框检测到粘贴或击键的第一个非空白字符是 x 后,
 
 每个输入会加入到已输入列表, 每个元素后面有个 `x` 可以移除该元素.
 
-### 生成 xprv/xpub/K
+### 生成 xprv/xpub/k/K/A
 
 每个 path 选项后面, 都可以选择是否要在此节点处生成 xprv/xpub.
 
-只有 `address_index` 允许额外选择是否生成 `K`.
+只有 `address_index` 允许额外选择是否生成 `k` 和 `K`.
+当 `coin_type'` 是 BTC 或 BTC testnet 时, `address_index` 额外允许选择是否生成 `A`.
+当前 `A` 只覆盖 `libbip32.AddressOfK` 支持的 Bitcoin mainnet/testnet P2PKH 地址.
 
 可多选.
+
+#### k
+
+k 表示私钥, 以 hex 格式展示.
 
 #### K
 
 K 表示压缩公钥 (33 bytes), 以 hex 格式展示.
+
+#### A
+
+A 表示 Bitcoin P2PKH address.
 
 #### xprv
 

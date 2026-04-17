@@ -1,5 +1,5 @@
 import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
-import { deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
+import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
 import { escapeHtml, parseUint31, pluralizeWords } from './lib/utils.mjs'
@@ -15,22 +15,23 @@ const state = {
     pendingToken: 0,
     change: 0,
     revealXprv: new Set(),
+    revealPrivateKey: new Set(),
     referencePath: '',
 }
 
 const DEFAULT_REQUESTED_KINDS = {
-    purpose: { xprv: false, xpub: false, K: false },
-    coin: { xprv: false, xpub: false, K: false },
-    account: { xprv: true, xpub: true, K: false },
-    change: { xprv: false, xpub: false, K: false },
-    address: { xprv: false, xpub: false, K: true },
+    purpose: { xprv: false, xpub: false, k: false, K: false, A: false },
+    coin: { xprv: false, xpub: false, k: false, K: false, A: false },
+    account: { xprv: true, xpub: true, k: false, K: false, A: false },
+    change: { xprv: false, xpub: false, k: false, K: false, A: false },
+    address: { xprv: false, xpub: false, k: false, K: false, A: false },
 }
 const AVAILABLE_OUTPUT_KINDS = {
     purpose: ['xprv', 'xpub'],
     coin: ['xprv', 'xpub'],
     account: ['xprv', 'xpub'],
     change: ['xprv', 'xpub'],
-    address: ['xprv', 'xpub', 'K'],
+    address: ['k', 'K', 'A'],
 }
 
 const el = {
@@ -69,6 +70,23 @@ function cloneRequestedKinds() {
 }
 
 const requestedKindsState = cloneRequestedKinds()
+const addressAStateByCoinType = new Map([
+    [0, false],
+    [1, false],
+])
+
+function getSelectedCoinType() {
+    return Number(el.coinType.value)
+}
+
+function getAddressAState(coinType = getSelectedCoinType()) {
+    return addressAStateByCoinType.get(coinType) ?? false
+}
+
+function setAddressAState(checked, coinType = getSelectedCoinType()) {
+    if (canDeriveBitcoinAddress(coinType))
+        addressAStateByCoinType.set(coinType, checked)
+}
 
 function createKindControls(group) {
     const wrap = document.querySelector(`[data-kind-group="${group}"]`)
@@ -78,9 +96,14 @@ function createKindControls(group) {
         label.dataset.kind = kind
         label.innerHTML = `<input type="checkbox" data-output-group="${group}" data-output-kind="${kind}"><span>${kind}</span>`
         const input = label.querySelector('input')
-        input.checked = requestedKindsState[group][kind]
+        input.checked = group === 'address' && kind === 'A'
+            ? getAddressAState()
+            : requestedKindsState[group][kind]
         input.addEventListener('input', () => {
-            requestedKindsState[group][kind] = input.checked
+            if (group === 'address' && kind === 'A')
+                setAddressAState(input.checked)
+            else
+                requestedKindsState[group][kind] = input.checked
             scheduleDerive()
         })
         wrap.append(label)
@@ -92,10 +115,13 @@ for (const group of Object.keys(DEFAULT_REQUESTED_KINDS))
 
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
+    const canAddress = group === 'address' && canDeriveBitcoinAddress(getSelectedCoinType())
     return {
         xprv: allowedKinds.has('xprv') && kinds.xprv,
         xpub: allowedKinds.has('xpub') && kinds.xpub,
+        k: allowedKinds.has('k') && kinds.k,
         K: allowedKinds.has('K') && kinds.K,
+        A: allowedKinds.has('A') && canAddress && getAddressAState(),
     }
 }
 
@@ -212,6 +238,28 @@ function syncKindAvailability() {
         }
         label.classList.toggle('disabled', disabled)
     }
+
+    for (const input of document.querySelectorAll('[data-output-kind="k"]')) {
+        const label = input.closest('.checkline')
+        const group = input.dataset.outputGroup
+        const disabled = !canShowXprv
+        input.disabled = disabled
+        label.hidden = disabled
+        if (disabled) {
+            requestedKindsState[group].k = false
+            input.checked = false
+        }
+        label.classList.toggle('disabled', disabled)
+    }
+
+    const canShowAddress = canDeriveBitcoinAddress(getSelectedCoinType())
+    for (const input of document.querySelectorAll('[data-output-kind="A"]')) {
+        const label = input.closest('.checkline')
+        input.disabled = !canShowAddress
+        label.hidden = !canShowAddress
+        label.classList.toggle('disabled', !canShowAddress)
+        input.checked = getAddressAState()
+    }
 }
 
 function handleMaskedBeforeInput(event, model) {
@@ -273,6 +321,12 @@ function maskXprv(value) {
     return `${value.slice(0, 4)}${'*'.repeat(Math.max(0, value.length - 4))}`
 }
 
+function maskPrivateKey(value) {
+    if (!value)
+        return ''
+    return '*'.repeat(value.length)
+}
+
 function renderNoteParts(parts) {
     return parts.map(part => {
         const className = part.highlight ? ' class="output-note-highlight"' : ''
@@ -285,6 +339,14 @@ function syncXprvRevealButton(button, output, card) {
     const secret = card.querySelector('[data-xprv-value]')
     if (secret)
         secret.textContent = reveal ? output.xprv : maskXprv(output.xprv)
+    button.textContent = reveal ? '隐藏' : '显示'
+}
+
+function syncPrivateKeyRevealButton(button, output, card) {
+    const reveal = state.revealPrivateKey.has(output.id)
+    const secret = card.querySelector('[data-k-value]')
+    if (secret)
+        secret.textContent = reveal ? output.k : maskPrivateKey(output.k)
     button.textContent = reveal ? '隐藏' : '显示'
 }
 
@@ -309,6 +371,15 @@ function renderOutputs() {
                     <button class="tiny-button" type="button" data-toggle-xprv="${escapeHtml(output.id)}">${reveal ? '隐藏' : '显示'}</button>
                 </div>`
             : ''
+        const kReveal = state.revealPrivateKey.has(output.id)
+        const kRow = output.requestedKinds.k && output.k
+            ? `
+                <div class="output-row">
+                    <label>k</label>
+                    <div class="secret" data-k-value>${escapeHtml(kReveal ? output.k : maskPrivateKey(output.k))}</div>
+                    <button class="tiny-button" type="button" data-toggle-k="${escapeHtml(output.id)}">${kReveal ? '隐藏' : '显示'}</button>
+                </div>`
+            : ''
         card.innerHTML = `
             <div class="output-top">
                 <div>
@@ -321,6 +392,7 @@ function renderOutputs() {
             </div>
             <div class="output-fields">
                 ${xprvRow}
+                ${kRow}
                 ${output.requestedKinds.xpub ? `<div class="output-row">
                     <label>xpub</label>
                     <div class="value-box">${escapeHtml(output.xpub)}</div>
@@ -329,6 +401,11 @@ function renderOutputs() {
                 ${output.requestedKinds.K ? `<div class="output-row">
                     <label>K</label>
                     <div class="value-box">${escapeHtml(output.K)}</div>
+                    <span></span>
+                </div>` : ''}
+                ${output.requestedKinds.A && output.A ? `<div class="output-row">
+                    <label>A</label>
+                    <div class="value-box">${escapeHtml(output.A)}</div>
                     <span></span>
                 </div>` : ''}
             </div>
@@ -341,6 +418,16 @@ function renderOutputs() {
                 else
                     state.revealXprv.add(output.id)
                 syncXprvRevealButton(toggle, output, card)
+            })
+        }
+        const kToggle = card.querySelector('[data-toggle-k]')
+        if (kToggle) {
+            kToggle.addEventListener('click', () => {
+                if (state.revealPrivateKey.has(output.id))
+                    state.revealPrivateKey.delete(output.id)
+                else
+                    state.revealPrivateKey.add(output.id)
+                syncPrivateKeyRevealButton(kToggle, output, card)
             })
         }
         el.outputs.append(card)
@@ -492,7 +579,10 @@ el.passphraseInput.addEventListener('paste', event => {
 })
 el.passphraseInput.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, passphraseModel))
 
-el.coinType.addEventListener('input', scheduleDerive)
+el.coinType.addEventListener('input', () => {
+    syncKindAvailability()
+    scheduleDerive()
+})
 el.accountInput.addEventListener('input', () => {
     el.accountInput.value = el.accountInput.value.replace(/[^\d]/g, '')
     el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
