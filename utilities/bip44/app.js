@@ -177,10 +177,6 @@ function getProjectedTextInputValue(input, insertedText) {
     return input.value.slice(0, selectionStart) + insertedText + input.value.slice(selectionEnd)
 }
 
-function rejectOverflowingAccountInput() {
-    el.accountError.textContent = `account: 最大值是 ${MAX_UINT31_TEXT}`
-}
-
 function syncAccountInputWidth() {
     el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
 }
@@ -199,8 +195,8 @@ function syncAccountInput() {
     return true
 }
 
-function rejectOverflowingAddressInput() {
-    el.addressError.textContent = `address_index: 最大值是 ${MAX_UINT31_TEXT}`
+function rejectOverflowing(errorEl, label) {
+    errorEl.textContent = `${label}: 最大值是 ${MAX_UINT31_TEXT}`
 }
 
 function syncAddressDraftInput() {
@@ -320,30 +316,17 @@ function syncKindAvailability() {
     const canShowXprv = rootKey
         ? !rootKey.is_public_key()
         : rootModel.mode !== 'xkey' || rootModel.getRawValue().startsWith('xprv')
-    for (const input of document.querySelectorAll('[data-output-kind="xprv"]')) {
+    for (const input of document.querySelectorAll('[data-output-kind="xprv"], [data-output-kind="k"]')) {
         const label = input.closest('.checkline')
         const group = input.dataset.outputGroup
-        const disabled = !canShowXprv
-        input.disabled = disabled
-        label.hidden = disabled
-        if (disabled) {
-            requestedKindsState[group].xprv = false
+        const kind = input.dataset.outputKind
+        input.disabled = !canShowXprv
+        label.hidden = !canShowXprv
+        if (!canShowXprv) {
+            requestedKindsState[group][kind] = false
             input.checked = false
         }
-        label.classList.toggle('disabled', disabled)
-    }
-
-    for (const input of document.querySelectorAll('[data-output-kind="k"]')) {
-        const label = input.closest('.checkline')
-        const group = input.dataset.outputGroup
-        const disabled = !canShowXprv
-        input.disabled = disabled
-        label.hidden = disabled
-        if (disabled) {
-            requestedKindsState[group].k = false
-            input.checked = false
-        }
-        label.classList.toggle('disabled', disabled)
+        label.classList.toggle('disabled', !canShowXprv)
     }
 
     const canShowAddress = canDeriveBitcoinAddress(getSelectedCoinType())
@@ -392,7 +375,7 @@ function handleMaskedBeforeInput(event, model) {
     }
 }
 
-function handleAccountBeforeInput(event) {
+function handleUint31BeforeInput(event, input, errorEl, label) {
     if (!event.inputType.startsWith('insert'))
         return
 
@@ -400,39 +383,30 @@ function handleAccountBeforeInput(event) {
     if (!insertedText)
         return
 
-    if (isUint31TextTooLarge(getProjectedTextInputValue(el.accountInput, insertedText))) {
+    if (isUint31TextTooLarge(getProjectedTextInputValue(input, insertedText))) {
         event.preventDefault()
-        rejectOverflowingAccountInput()
+        rejectOverflowing(errorEl, label)
         return
     }
 
-    el.accountError.textContent = ''
+    errorEl.textContent = ''
 }
 
-function handleAddressBeforeInput(event) {
-    if (!event.inputType.startsWith('insert'))
-        return
-
-    const insertedText = event.data ?? ''
-    if (!insertedText)
-        return
-
-    if (isUint31TextTooLarge(getProjectedTextInputValue(el.addressInput, insertedText))) {
-        event.preventDefault()
-        rejectOverflowingAddressInput()
+function handleUint31Paste(event, input, errorEl, label) {
+    const pastedText = event.clipboardData.getData('text/plain')
+    if (!isUint31TextTooLarge(getProjectedTextInputValue(input, pastedText))) {
+        errorEl.textContent = ''
         return
     }
 
-    el.addressError.textContent = ''
+    event.preventDefault()
+    rejectOverflowing(errorEl, label)
 }
 
 function renderRootInfo() {
     el.rootInfo.replaceChildren()
-    if (!state.rootInfo) {
-        document.documentElement.style.setProperty('--status-panel-width', '420px')
-        el.rootInfo.style.setProperty('--status-columns', '2')
+    if (!state.rootInfo)
         return
-    }
 
     const items = [
         ['depth', String(state.rootInfo.depth)],
@@ -440,10 +414,6 @@ function renderRootInfo() {
         ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
         ['identifier', state.rootInfo.identifierHex],
     ]
-    const columnCount = items.length >= 5 ? 3 : items.length >= 3 ? 2 : 1
-    const panelWidth = columnCount === 1 ? '320px' : columnCount === 2 ? '420px' : '620px'
-    document.documentElement.style.setProperty('--status-panel-width', panelWidth)
-    el.rootInfo.style.setProperty('--status-columns', String(columnCount))
 
     for (const [label, value] of items) {
         const node = document.createElement('div')
@@ -456,16 +426,24 @@ function renderRootInfo() {
     }
 }
 
-function maskXprv(value) {
+function maskSecret(kind, value) {
     if (!value)
         return ''
-    return `${value.slice(0, 4)}${'*'.repeat(Math.max(0, value.length - 4))}`
+    if (kind === 'xprv')
+        return `${value.slice(0, 4)}${'*'.repeat(Math.max(0, value.length - 4))}`
+    return '*'.repeat(value.length)
 }
 
-function maskPrivateKey(value) {
-    if (!value)
-        return ''
-    return '*'.repeat(value.length)
+function getRevealSet(kind) {
+    return kind === 'xprv' ? state.revealXprv : state.revealPrivateKey
+}
+
+function syncSecretRevealButton(kind, button, output, card) {
+    const reveal = getRevealSet(kind).has(output.id)
+    const secret = card.querySelector(`[data-${kind}-value]`)
+    if (secret)
+        secret.textContent = reveal ? output[kind] : maskSecret(kind, output[kind])
+    button.textContent = reveal ? '隐藏' : '显示'
 }
 
 function renderNoteParts(parts) {
@@ -473,22 +451,6 @@ function renderNoteParts(parts) {
         const className = part.highlight ? ' class="output-note-highlight"' : ''
         return `<span${className}>${escapeHtml(part.text)}</span>`
     }).join('')
-}
-
-function syncXprvRevealButton(button, output, card) {
-    const reveal = state.revealXprv.has(output.id)
-    const secret = card.querySelector('[data-xprv-value]')
-    if (secret)
-        secret.textContent = reveal ? output.xprv : maskXprv(output.xprv)
-    button.textContent = reveal ? '隐藏' : '显示'
-}
-
-function syncPrivateKeyRevealButton(button, output, card) {
-    const reveal = state.revealPrivateKey.has(output.id)
-    const secret = card.querySelector('[data-k-value]')
-    if (secret)
-        secret.textContent = reveal ? output.k : maskPrivateKey(output.k)
-    button.textContent = reveal ? '隐藏' : '显示'
 }
 
 function renderOutputs() {
@@ -508,7 +470,7 @@ function renderOutputs() {
             ? `
                 <div class="output-row">
                     <label>xprv</label>
-                    <div class="secret" data-xprv-value>${escapeHtml(reveal ? output.xprv : maskXprv(output.xprv))}</div>
+                    <div class="secret" data-xprv-value>${escapeHtml(reveal ? output.xprv : maskSecret('xprv', output.xprv))}</div>
                     <button class="tiny-button" type="button" data-toggle-xprv="${escapeHtml(output.id)}">${reveal ? '隐藏' : '显示'}</button>
                 </div>`
             : ''
@@ -517,7 +479,7 @@ function renderOutputs() {
             ? `
                 <div class="output-row">
                     <label>k</label>
-                    <div class="secret" data-k-value>${escapeHtml(kReveal ? output.k : maskPrivateKey(output.k))}</div>
+                    <div class="secret" data-k-value>${escapeHtml(kReveal ? output.k : maskSecret('k', output.k))}</div>
                     <button class="tiny-button" type="button" data-toggle-k="${escapeHtml(output.id)}">${kReveal ? '隐藏' : '显示'}</button>
                 </div>`
             : ''
@@ -554,21 +516,23 @@ function renderOutputs() {
         const toggle = card.querySelector('[data-toggle-xprv]')
         if (toggle) {
             toggle.addEventListener('click', () => {
-                if (state.revealXprv.has(output.id))
-                    state.revealXprv.delete(output.id)
+                const set = getRevealSet('xprv')
+                if (set.has(output.id))
+                    set.delete(output.id)
                 else
-                    state.revealXprv.add(output.id)
-                syncXprvRevealButton(toggle, output, card)
+                    set.add(output.id)
+                syncSecretRevealButton('xprv', toggle, output, card)
             })
         }
         const kToggle = card.querySelector('[data-toggle-k]')
         if (kToggle) {
             kToggle.addEventListener('click', () => {
-                if (state.revealPrivateKey.has(output.id))
-                    state.revealPrivateKey.delete(output.id)
+                const set = getRevealSet('k')
+                if (set.has(output.id))
+                    set.delete(output.id)
                 else
-                    state.revealPrivateKey.add(output.id)
-                syncPrivateKeyRevealButton(kToggle, output, card)
+                    set.add(output.id)
+                syncSecretRevealButton('k', kToggle, output, card)
             })
         }
         el.outputs.append(card)
@@ -647,11 +611,11 @@ async function runDerive() {
 
         state.rootInfo = await describeRootKey(state.rootResult.root)
         syncKindAvailability()
-        const derived = await deriveBip44(state.rootResult.root, getFormState(), true)
+        const derived = await deriveBip44(state.rootResult.root, getFormState())
         if (token !== state.pendingToken)
             return
 
-        state.outputs = derived.derived
+        state.outputs = derived
         el.statusLine.textContent = state.rootResult.kind === 'mnemonic'
             ? '助记词有效, 已生成 BIP44 节点。'
             : '导入 key 有效, 已按可用子路径生成节点。'
@@ -725,21 +689,14 @@ el.coinType.addEventListener('input', () => {
     scheduleDerive()
 })
 el.accountInput.addEventListener('beforeinput', event => {
-    handleAccountBeforeInput(event)
+    handleUint31BeforeInput(event, el.accountInput, el.accountError, 'account')
 })
 el.accountInput.addEventListener('paste', event => {
-    const pastedText = event.clipboardData.getData('text/plain')
-    if (!isUint31TextTooLarge(getProjectedTextInputValue(el.accountInput, pastedText))) {
-        el.accountError.textContent = ''
-        return
-    }
-
-    event.preventDefault()
-    rejectOverflowingAccountInput()
+    handleUint31Paste(event, el.accountInput, el.accountError, 'account')
 })
 el.accountInput.addEventListener('input', () => {
     if (!syncAccountInput()) {
-        rejectOverflowingAccountInput()
+        rejectOverflowing(el.accountError, 'account')
         return
     }
 
@@ -753,17 +710,10 @@ el.changeSwitch.addEventListener('click', () => {
 })
 
 el.addressInput.addEventListener('beforeinput', event => {
-    handleAddressBeforeInput(event)
+    handleUint31BeforeInput(event, el.addressInput, el.addressError, 'address_index')
 })
 el.addressInput.addEventListener('paste', event => {
-    const pastedText = event.clipboardData.getData('text/plain')
-    if (!isUint31TextTooLarge(getProjectedTextInputValue(el.addressInput, pastedText))) {
-        el.addressError.textContent = ''
-        return
-    }
-
-    event.preventDefault()
-    rejectOverflowingAddressInput()
+    handleUint31Paste(event, el.addressInput, el.addressError, 'address_index')
 })
 el.referencePathInput.addEventListener('input', () => {
     state.referencePath = el.referencePathInput.value
@@ -772,7 +722,7 @@ el.referencePathInput.addEventListener('input', () => {
 
 el.addressInput.addEventListener('input', () => {
     if (!syncAddressDraftInput()) {
-        rejectOverflowingAddressInput()
+        rejectOverflowing(el.addressError, 'address_index')
         return
     }
 

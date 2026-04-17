@@ -54,41 +54,20 @@ function clampXKey(raw) {
     return raw.slice(0, XKEY_LENGTH)
 }
 
-function trimTrailingSpaces(text) {
-    return text.replace(/\s+$/g, '')
-}
-
-function collapseMnemonic(raw) {
-    const trimmedLeft = raw.replace(/^[^A-Za-z\s]+/g, '')
-    let result = ''
-    let previousWasSpace = true
-    for (const char of trimmedLeft) {
-        if (isAsciiLetter(char)) {
-            result += char.toLowerCase()
-            previousWasSpace = false
-            continue
-        }
-        if (isWhitespace(char) && !previousWasSpace) {
-            result += ' '
-            previousWasSpace = true
-        }
-    }
-    return result
-}
-
 function limitMnemonicWordCount(raw) {
+    const trimmedLeft = raw.replace(/^[^A-Za-z\s]+/g, '')
     let result = ''
     let previousWasSpace = true
     let wordCount = 0
 
-    for (const char of collapseMnemonic(raw)) {
+    for (const char of trimmedLeft) {
         if (isAsciiLetter(char)) {
             if (previousWasSpace) {
                 if (wordCount >= MAX_MNEMONIC_WORDS)
                     break
                 wordCount += 1
             }
-            result += char
+            result += char.toLowerCase()
             previousWasSpace = false
             continue
         }
@@ -118,16 +97,15 @@ export class RootInputModel {
      * @param {string} raw
      */
     setRaw(raw) {
-        const candidate = limitMnemonicWordCount(raw)
-        const prefixCandidate = candidate.replace(/\s+/g, '')
-        if (prefixCandidate.startsWith('xpub') || prefixCandidate.startsWith('xprv'))
+        const mnemonic = limitMnemonicWordCount(raw)
+        const compact = mnemonic.replace(/\s+/g, '')
+        if (compact.startsWith('xpub') || compact.startsWith('xprv')) {
             this.mode = 'xkey'
-        else
+            this.raw = clampXKey(normalizeXKeyPaste(raw))
+        } else {
             this.mode = 'mnemonic'
-
-        this.raw = this.mode === 'xkey'
-            ? clampXKey(normalizeXKeyPaste(raw))
-            : candidate
+            this.raw = mnemonic
+        }
     }
 
     /**
@@ -141,8 +119,6 @@ export class RootInputModel {
             if (this.mode === 'xkey') {
                 if (isBase58Char(char) && this.raw.length < XKEY_LENGTH)
                     this.raw += char
-                if (!(this.raw.startsWith('xpub') || this.raw.startsWith('xprv')))
-                    this.mode = 'mnemonic'
                 continue
             }
 
@@ -162,61 +138,11 @@ export class RootInputModel {
     }
 
     /**
-     * @param {InputEvent} event
-     */
-    applyBeforeInput(event) {
-        if (this.mode === 'xkey') {
-            if (event.inputType === 'insertText' && event.data && ![...event.data].every(isBase58Char))
-                event.preventDefault()
-            if (event.inputType === 'insertFromPaste')
-                event.preventDefault()
-            return
-        }
-
-        if (event.inputType === 'insertText' && event.data) {
-            const valid = [...event.data].every(char => isAsciiLetter(char) || isWhitespace(char))
-            if (!valid)
-                event.preventDefault()
-        }
-        if (event.inputType === 'insertFromPaste')
-            event.preventDefault()
-    }
-
-    /**
-     * @param {string} currentValue
-     * @param {string | null} insertedText
-     */
-    afterNativeInput(currentValue, insertedText = null) {
-        if (this.mode === 'xkey' || /^x(?:pub|prv)/.test(currentValue.trimStart()))
-            this.mode = 'xkey'
-
-        this.raw = this.mode === 'xkey'
-            ? clampXKey(normalizeXKeyPaste(currentValue))
-            : limitMnemonicWordCount(currentValue)
-
-        if (insertedText && this.mode === 'mnemonic') {
-            const prefixCandidate = this.raw.replace(/\s+/g, '')
-            if (prefixCandidate.startsWith('xpub') || prefixCandidate.startsWith('xprv')) {
-                this.mode = 'xkey'
-                this.raw = clampXKey(normalizeXKeyPaste(currentValue))
-            }
-        }
-
-        if (this.mode === 'xkey') {
-            const compact = this.raw
-            if (!(compact.startsWith('xpub') || compact.startsWith('xprv')))
-                this.mode = 'mnemonic'
-        }
-    }
-
-    /**
      * @param {string} pastedText
      */
     applyPaste(pastedText) {
         if (this.mode === 'xkey') {
             this.raw = clampXKey(this.raw + normalizeXKeyPaste(pastedText))
-            if (!(this.raw.startsWith('xpub') || this.raw.startsWith('xprv')))
-                this.mode = 'mnemonic'
             return
         }
 
@@ -244,9 +170,9 @@ export class RootInputModel {
         }
 
         if (this.raw.endsWith(' ')) {
-            this.raw = trimTrailingSpaces(this.raw)
-            const lastSpace = this.raw.lastIndexOf(' ')
-            this.raw = lastSpace === -1 ? '' : `${this.raw.slice(0, lastSpace + 1)}`
+            const trimmed = this.raw.replace(/\s+$/g, '')
+            const lastSpace = trimmed.lastIndexOf(' ')
+            this.raw = lastSpace === -1 ? '' : trimmed.slice(0, lastSpace + 1)
             return
         }
 
@@ -336,23 +262,6 @@ export class PassphraseModel {
 
     backspace() {
         this.raw = this.raw.slice(0, -1)
-    }
-
-    /**
-     * @param {InputEvent} event
-     */
-    applyBeforeInput(event) {
-        if (event.inputType === 'insertText' && event.data && [...event.data].some(char => !isAllowedPassphraseChar(char)))
-            event.preventDefault()
-        if (event.inputType === 'insertFromPaste')
-            event.preventDefault()
-    }
-
-    /**
-     * @param {string} currentValue
-     */
-    afterNativeInput(currentValue) {
-        this.setRaw(currentValue)
     }
 
     /**

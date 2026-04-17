@@ -5,12 +5,9 @@ import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeC
 /**
  * @typedef {{
  *   id: string,
- *   depth: number,
  *   label: string,
  *   noteParts: Array<{ text: string, highlight: boolean }>,
- *   pathFromRoot: string,
  *   absolutePath: string,
- *   key: InstanceType<typeof libbip32.XKey>,
  *   requestedKinds: { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean },
  *   canXprv: boolean,
  *   xprv: string | null,
@@ -30,7 +27,7 @@ export function getCoinTypeOption(value) {
     }
 }
 
-export function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
+function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
     return ['m', ...baseSegments, ...extraSegments].join('')
 }
 
@@ -163,22 +160,12 @@ export async function resolveRootSource(source) {
             throw new Error('助记词校验失败: 请检查单词拼写、词数和 checksum')
         const seed = await libbip39.mnemonicSentenceToSeed(mnemonicSentence, passphrase)
         const root = await libbip32.XPrv.from(seed)
-        return {
-            kind: 'mnemonic',
-            root,
-            seedHex: bytesToHex(seed),
-            masterXprv: await root.serialize(),
-        }
+        return { kind: 'mnemonic', root }
     }
 
     const xkeyText = source.xkeyText ?? ''
     const root = await libbip32.XKey.deserialize(xkeyText)
-    return {
-        kind: 'xkey',
-        root,
-        seedHex: null,
-        masterXprv: null,
-    }
+    return { kind: 'xkey', root }
 }
 
 /**
@@ -191,27 +178,16 @@ export async function resolveRootSource(source) {
  *   requestedKinds: Record<string, { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean }>,
  *   labels: Partial<Record<'coin' | 'account' | 'change', string> & { referencePath: string }>,
  * }} form
- * @returns {Promise<{
- *   derived: DerivedNodeOutput[],
- *   basePath: string,
- *   fixedLevels: Array<{ level: typeof BIP44_LEVELS[number], known: boolean, text: string }>,
- * }>}
+ * @returns {Promise<DerivedNodeOutput[]>}
  */
 export async function deriveBip44(root, form) {
     const outputs = []
-    /** @type {Array<{ level: typeof BIP44_LEVELS[number], known: boolean, text: string }>} */
-    const fixedLevels = []
     const baseSegments = []
 
     let current = root
     const originalDepth = root.depth
     for (const level of BIP44_LEVELS) {
         if (originalDepth >= level.depth) {
-            fixedLevels.push({
-                level,
-                known: level.depth === originalDepth,
-                text: level.depth === originalDepth ? formatChildNumber(root.i) : '?',
-            })
             if (level.depth === 5)
                 break
             continue
@@ -229,33 +205,19 @@ export async function deriveBip44(root, form) {
         else
             break
 
-        if (current.is_public_key() && path.endsWith("'")) {
-            fixedLevels.push({
-                level,
-                known: false,
-                text: 'xpub 无法硬化派生',
-            })
+        if (current.is_public_key() && path.endsWith("'"))
             break
-        }
 
         current = await current.tree(path)
         baseSegments.push(path)
-        fixedLevels.push({
-            level,
-            known: true,
-            text: path.slice(1),
-        })
         const requestedKinds = form.requestedKinds[level.id] ?? { xprv: false, xpub: false, K: false }
         if (hasRequestedKinds(requestedKinds)) {
             outputs.push({
                 id: level.id,
-                depth: current.depth,
                 label: level.label,
                 noteParts: describeOutputNoteParts(level.id, form),
-                pathFromRoot: baseSegments.join(''),
                 requestedKinds,
                 ...(await serializeNode(current, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments), form.labels), form.coinType)),
-                key: current,
             })
         }
     }
@@ -267,23 +229,16 @@ export async function deriveBip44(root, form) {
             if (hasRequestedKinds(requestedKinds)) {
                 outputs.push({
                     id: `address-${index}`,
-                    depth: child.depth,
                     label: `${index}`,
                     noteParts: describeOutputNoteParts('address', form, index),
-                    pathFromRoot: `${baseSegments.join('')}/${index}`,
                     requestedKinds,
                     ...(await serializeNode(child, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments, [`/${index}`]), form.labels), form.coinType)),
-                    key: child,
                 })
             }
         }
     }
 
-    return {
-        derived: outputs,
-        basePath: baseSegments.join(''),
-        fixedLevels,
-    }
+    return outputs
 }
 
 /**
@@ -321,13 +276,10 @@ export function getPathPreview(root, form) {
  */
 export async function describeRootKey(key) {
     const identifier = await key.identifier()
-    const fingerprint = await key.fingerprint()
     return {
-        type: key.is_public_key() ? 'public' : 'private',
         depth: key.depth,
         index: key.depth > 0 ? formatChildNumber(key.i) : null,
         parentFingerprint: key.depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
         identifierHex: bytesToHex(identifier),
-        fingerprintHex: bytesToHex(fingerprint),
     }
 }
