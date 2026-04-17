@@ -47,6 +47,7 @@ const el = {
     changeSwitch: document.querySelector('#change-switch'),
     changeNote: document.querySelector('#change-note'),
     addressInput: document.querySelector('#address-index-input'),
+    addressAdd: document.querySelector('#address-index-add'),
     addressError: document.querySelector('#address-error'),
     addressList: document.querySelector('#address-index-list'),
     pathSummary: document.querySelector('#path-summary'),
@@ -198,6 +199,14 @@ function renderAddressChips() {
         })
         el.addressList.append(chip)
     }
+}
+
+function commitAddressDraft() {
+    const result = addressState.commitDraft()
+    el.addressError.textContent = result.error
+    el.addressInput.value = addressState.draft
+    renderAddressChips()
+    scheduleDerive()
 }
 
 function renderPathText(container, path) {
@@ -639,11 +648,11 @@ el.addressInput.addEventListener('keydown', event => {
     if (event.key !== 'Enter')
         return
     event.preventDefault()
-    const result = addressState.commitDraft()
-    el.addressError.textContent = result.error
-    el.addressInput.value = addressState.draft
-    renderAddressChips()
-    scheduleDerive()
+    commitAddressDraft()
+})
+el.addressAdd.addEventListener('click', () => {
+    commitAddressDraft()
+    el.addressInput.focus()
 })
 
 for (const [group, card] of Object.entries(pathCards)) {
