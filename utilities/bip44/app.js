@@ -2,7 +2,7 @@ import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { escapeHtml, parseUint31, pluralizeWords } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, parseUint31, pluralizeWords } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -152,6 +152,23 @@ function getFormState() {
 function setFieldValue(input, value) {
     if (input.value !== value)
         input.value = value
+}
+
+function normalizeRequiredUint31Text(text) {
+    const digits = clampUint31Text(text)
+    if (!digits)
+        return '0'
+
+    return digits.replace(/^0+(?=\d)/, '')
+}
+
+function syncAccountInputWidth() {
+    el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
+}
+
+function syncAccountInput() {
+    setFieldValue(el.accountInput, normalizeRequiredUint31Text(el.accountInput.value))
+    syncAccountInputWidth()
 }
 
 function fitTextareaToContent(textarea) {
@@ -624,8 +641,7 @@ el.coinType.addEventListener('input', () => {
     scheduleDerive()
 })
 el.accountInput.addEventListener('input', () => {
-    el.accountInput.value = el.accountInput.value.replace(/[^\d]/g, '')
-    el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
+    syncAccountInput()
     scheduleDerive()
 })
 
@@ -666,6 +682,7 @@ for (const [group, card] of Object.entries(pathCards)) {
 syncMaskedInputs()
 syncKindAvailability()
 syncPathCardSelection()
+syncAccountInput()
 renderAddressChips()
 renderPathSummary()
 renderOutputs()
