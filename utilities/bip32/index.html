@@ -255,10 +255,10 @@ svg { -webkit-touch-callout: none; }
 <div id="info-section"></div>
 <div id="tree-container">
   <svg id="tree-svg"></svg>
-  <div id="path-popup"><textarea rows="1" placeholder="/path" spellcheck="false" autocomplete="off"></textarea></div>
-  <div id="context-menu"></div>
-  <div id="node-info"></div>
 </div>
+<div id="path-popup"><textarea rows="1" placeholder="/path" spellcheck="false" autocomplete="off"></textarea></div>
+<div id="context-menu"></div>
+<div id="node-info"></div>
 
 <script type="module">
 import { XKey, XPrv, XPub } from './index.mjs'
@@ -684,17 +684,22 @@ function showNodeInfo(node, circleEl) {
   nodeInfoEl.style.display = 'block'
 }
 
+function svgPageOffset() {
+  const r = svg.getBoundingClientRect()
+  return { x: r.left + window.scrollX, y: r.top + window.scrollY }
+}
+
 function positionNodeInfo() {
+  const off = svgPageOffset()
   const gap = activeInfoNode && activeInfoNode.annotation ? 28 : 6
-  const top = nodeInfoSvgY + NODE_R + gap
+  const top = off.y + nodeInfoSvgY + NODE_R + gap
   nodeInfoEl.style.top = top + 'px'
-  // center horizontally, but need to measure width first
   nodeInfoEl.style.left = '0px'
   nodeInfoEl.style.visibility = 'hidden'
   nodeInfoEl.style.display = 'block'
   const pw = nodeInfoEl.offsetWidth
   nodeInfoEl.style.visibility = ''
-  let left = nodeInfoSvgX - pw / 2
+  let left = off.x + nodeInfoSvgX - pw / 2
   left = Math.max(4, left)
   nodeInfoEl.style.left = left + 'px'
 }
@@ -741,9 +746,10 @@ function closePathPopup(clearDraft) {
 }
 
 function positionPathPopup() {
+  const off = svgPageOffset()
   const ADD_R = isMobile ? 14 : 11
-  pathPopup.style.left = (pathPopupSvgX + ADD_R + 4) + 'px'
-  pathPopup.style.top = (pathPopupSvgY - 4) + 'px'
+  pathPopup.style.left = (off.x + pathPopupSvgX + ADD_R + 4) + 'px'
+  pathPopup.style.top = (off.y + pathPopupSvgY - 4) + 'px'
 }
 
 pathInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault() })
@@ -790,12 +796,13 @@ let ctxMenuSvgY = 0
 document.addEventListener('click', () => { ctxMenu.style.display = 'none'; ctxMenuNode = null })
 
 function positionContextMenu() {
-  let left = ctxMenuSvgX + NODE_R + 4
+  const off = svgPageOffset()
+  let left = off.x + ctxMenuSvgX + NODE_R + 4
   const menuW = ctxMenu.offsetWidth || 140
   const viewW = document.documentElement.clientWidth
   if (left + menuW > viewW - 8) left = Math.max(8, viewW - menuW - 8)
   ctxMenu.style.left = left + 'px'
-  ctxMenu.style.top = (ctxMenuSvgY - 4) + 'px'
+  ctxMenu.style.top = (off.y + ctxMenuSvgY - 4) + 'px'
 }
 
 function showContextMenu(e, node) {
