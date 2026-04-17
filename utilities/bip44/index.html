@@ -65,18 +65,18 @@
                 </div>
 
                 <div class="path-card" data-path-card="coin">
-                    <label class="field inline-field">
-                        <span>coin_type'</span>
-                        <select id="coin-type"></select>
-                    </label>
+                    <div class="field inline-field">
+                        <span id="coin-type-label">coin_type'</span>
+                        <select id="coin-type" aria-labelledby="coin-type-label"></select>
+                    </div>
                     <div class="kind-picks" data-kind-group="coin"></div>
                 </div>
 
                 <div class="path-card" data-path-card="account">
                     <div class="field inline-field account-field">
-                        <label for="account-input">account'</label>
+                        <span id="account-input-label">account'</span>
                         <span class="suffix-input">
-                            <input id="account-input" type="text" inputmode="numeric" value="0" size="1">
+                            <input id="account-input" type="text" inputmode="numeric" value="0" size="1" aria-labelledby="account-input-label">
                             <b>H</b>
                         </span>
                     </div>
@@ -98,9 +98,9 @@
 
                 <div class="path-card address-card" data-path-card="address">
                     <div class="field inline-field">
-                        <label for="address-index-input">address_index</label>
+                        <span id="address-index-label">address_index</span>
                         <div class="address-entry">
-                            <input id="address-index-input" type="text" inputmode="numeric" enterkeyhint="done" value="0">
+                            <input id="address-index-input" type="text" inputmode="numeric" enterkeyhint="done" value="0" aria-labelledby="address-index-label">
                             <button id="address-index-add" class="ghost-button address-add-button" type="button">添加</button>
                         </div>
                     </div>
