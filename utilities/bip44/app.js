@@ -648,8 +648,6 @@ el.addressInput.addEventListener('keydown', event => {
     scheduleDerive()
 })
 
-el.deriveNow.addEventListener('click', runDerive)
-
 for (const [group, card] of Object.entries(pathCards)) {
     card.addEventListener('click', event => {
         if (!shouldTogglePathCardFromClick(event))
