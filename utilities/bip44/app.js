@@ -17,14 +17,14 @@ const state = {
     revealXprv: new Set(),
     revealPrivateKey: new Set(),
     referencePath: '',
-    selectedPathCards: new Set(['account']),
+    selectedPathCards: new Set(['purpose', 'coin', 'account', 'change']),
 }
 
 const DEFAULT_REQUESTED_KINDS = {
-    purpose: { xprv: false, xpub: false, k: false, K: false, A: false },
-    coin: { xprv: false, xpub: false, k: false, K: false, A: false },
-    account: { xprv: true, xpub: true, k: false, K: false, A: false },
-    change: { xprv: false, xpub: false, k: false, K: false, A: false },
+    purpose: { xprv: false, xpub: true, k: false, K: false, A: false },
+    coin: { xprv: false, xpub: true, k: false, K: false, A: false },
+    account: { xprv: false, xpub: true, k: false, K: false, A: false },
+    change: { xprv: false, xpub: true, k: false, K: false, A: false },
     address: { xprv: false, xpub: false, k: false, K: false, A: false },
 }
 const AVAILABLE_OUTPUT_KINDS = {
