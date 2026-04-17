@@ -107,8 +107,6 @@ function createKindControls(group) {
                 setAddressAState(input.checked)
             else
                 requestedKindsState[group][kind] = input.checked
-            if (input.checked)
-                state.selectedPathCards.add(group)
             syncPathCardSelection()
             scheduleDerive()
         })
@@ -283,7 +281,7 @@ function syncKindAvailability() {
 }
 
 function shouldTogglePathCardFromClick(event) {
-    return !event.target.closest('label, input, select, button, textarea, a')
+    return !event.target.closest('label, input, select, button, textarea, a, .chip')
 }
 
 function togglePathCardSelection(group) {
