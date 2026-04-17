@@ -231,9 +231,10 @@ function renderPathSummary() {
 
     const coin = getCoinTypeOption(form.coinType)
     el.changeSwitch.setAttribute('aria-pressed', String(form.change === 1))
+    el.changeSwitch.querySelector('.switch-number').textContent = String(form.change)
     el.changeNote.textContent = form.change === 0
-        ? '0: external / receiving addresses'
-        : '1: internal / change addresses'
+        ? '外部地址（收款）'
+        : '内部地址（找零）'
     el.coinType.title = `${coin.value}': ${coin.name}`
 
     const showReference = Boolean(state.rootResult && state.rootResult.kind === 'xkey' && state.rootResult.root.depth > 0)

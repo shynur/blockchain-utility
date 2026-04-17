@@ -315,29 +315,41 @@ small {
 }
 
 .switch {
-    width: 64px;
+    width: 78px;
     height: 36px;
-    padding: 3px;
+    display: grid;
+    grid-template-columns: 1fr 30px;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px 3px 3px;
     border: 0;
     border-radius: 999px;
     background: #d6c7a8;
 }
 
-.switch span {
-    display: block;
+.switch-number {
+    justify-self: center;
+    color: rgba(20, 59, 53, 0.72);
+    font: 700 0.95rem/1 var(--mono);
+    transition: color 160ms ease;
+}
+
+.switch-thumb {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     background: #fff8e8;
-    transition: transform 160ms ease, background 160ms ease;
+    transition: background 160ms ease;
 }
 
 .switch[aria-pressed="true"] {
+    grid-template-columns: 30px 1fr;
+    padding: 3px 3px 3px 8px;
     background: var(--accent);
 }
 
-.switch[aria-pressed="true"] span {
-    transform: translateX(28px);
+.switch[aria-pressed="true"] .switch-number {
+    color: rgba(255, 248, 232, 0.88);
 }
 
 .path-note {

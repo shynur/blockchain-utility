@@ -88,9 +88,12 @@
                 <div class="path-card" data-path-card="change">
                     <div class="switch-row">
                         <span class="path-label">change</span>
-                        <button id="change-switch" class="switch" type="button" aria-pressed="false"><span></span></button>
+                        <button id="change-switch" class="switch" type="button" aria-pressed="false" aria-describedby="change-note">
+                            <span class="switch-number" aria-hidden="true">0</span>
+                            <span class="switch-thumb" aria-hidden="true"></span>
+                        </button>
                     </div>
-                    <p id="change-note" class="path-note">0: external / receiving addresses</p>
+                    <p id="change-note" class="path-note">外部地址（收款）</p>
                     <div class="kind-picks" data-kind-group="change"></div>
                 </div>
 
