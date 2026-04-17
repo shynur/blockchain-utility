@@ -53,7 +53,6 @@ const el = {
     pathSummary: document.querySelector('#path-summary'),
     referencePathWrap: document.querySelector('#reference-path-wrap'),
     referencePathInput: document.querySelector('#reference-path-input'),
-    deriveNow: document.querySelector('#derive-now'),
     statusLine: document.querySelector('#status-line'),
     rootInfo: document.querySelector('#root-info'),
     outputs: document.querySelector('#outputs'),
