@@ -812,6 +812,23 @@ function showContextMenu(e, node) {
     })
   }
 
+  // show prv
+  if (!key.is_public_key()) {
+    const tag = key.version === 'mainnet' ? 'xprv' : 'tprv'
+    addMenuItem(`显示 ${tag}`, async () => {
+      const s = await key.serialize()
+      prompt(tag, s)
+    })
+  }
+
+  // show pub
+  const pubTag = key.version === 'mainnet' ? 'xpub' : 'tpub'
+  addMenuItem(`显示 ${pubTag}`, async () => {
+    const pub = key.is_public_key() ? key : key.N()
+    const s = await pub.serialize()
+    prompt(pubTag, s)
+  })
+
   // export prv
   if (!key.is_public_key()) {
     const tag = key.version === 'mainnet' ? 'xprv' : 'tprv'
@@ -822,7 +839,6 @@ function showContextMenu(e, node) {
   }
 
   // export pub
-  const pubTag = key.version === 'mainnet' ? 'xpub' : 'tpub'
   addMenuItem(`导出 ${pubTag}`, async () => {
     const pub = key.is_public_key() ? key : key.N()
     const s = await pub.serialize()
