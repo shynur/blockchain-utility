@@ -214,12 +214,12 @@ small {
 }
 
 .path-card {
-    min-height: 150px;
+    min-height: 132px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 14px;
-    padding: 18px;
+    gap: 10px;
+    padding: 15px 16px;
     border: 1px solid rgba(126, 102, 58, 0.22);
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.48);
@@ -256,8 +256,8 @@ small {
 
 .inline-field input,
 .inline-field select {
-    min-height: 50px;
-    padding: 10px 12px;
+    min-height: 44px;
+    padding: 8px 12px;
 }
 
 .suffix-input {
@@ -298,7 +298,7 @@ small {
 }
 
 .kind-picks .checkline {
-    padding: 7px 10px;
+    padding: 6px 10px;
     border-radius: 999px;
     background: rgba(20, 59, 53, 0.07);
 }
@@ -354,7 +354,7 @@ small {
 
 .path-note {
     color: var(--muted);
-    line-height: 1.55;
+    line-height: 1.45;
     margin-bottom: 0;
 }
 
