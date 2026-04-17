@@ -18,6 +18,7 @@ const state = {
     revealPrivateKey: new Set(),
     referencePath: '',
     selectedPathCards: new Set(),
+    lastValidAccountText: '0',
 }
 
 const DEFAULT_REQUESTED_KINDS = {
@@ -78,6 +79,7 @@ const addressAStateByCoinType = new Map([
     [0, false],
     [1, false],
 ])
+const MAX_UINT31_TEXT = '2147483647'
 
 function getSelectedCoinType() {
     return Number(el.coinType.value)
@@ -162,13 +164,38 @@ function normalizeRequiredUint31Text(text) {
     return digits.replace(/^0+(?=\d)/, '')
 }
 
+function isUint31TextTooLarge(text) {
+    const normalized = normalizeRequiredUint31Text(text)
+    return normalized.length > MAX_UINT31_TEXT.length
+        || (normalized.length === MAX_UINT31_TEXT.length && normalized > MAX_UINT31_TEXT)
+}
+
+function getProjectedTextInputValue(input, insertedText) {
+    const selectionStart = input.selectionStart ?? input.value.length
+    const selectionEnd = input.selectionEnd ?? selectionStart
+    return input.value.slice(0, selectionStart) + insertedText + input.value.slice(selectionEnd)
+}
+
+function rejectOverflowingAccountInput() {
+    el.accountError.textContent = `account: 最大值是 ${MAX_UINT31_TEXT}`
+}
+
 function syncAccountInputWidth() {
     el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
 }
 
 function syncAccountInput() {
-    setFieldValue(el.accountInput, normalizeRequiredUint31Text(el.accountInput.value))
+    const normalized = normalizeRequiredUint31Text(el.accountInput.value)
+    if (isUint31TextTooLarge(normalized)) {
+        setFieldValue(el.accountInput, state.lastValidAccountText)
+        syncAccountInputWidth()
+        return false
+    }
+
+    setFieldValue(el.accountInput, normalized)
+    state.lastValidAccountText = el.accountInput.value
     syncAccountInputWidth()
+    return true
 }
 
 function fitTextareaToContent(textarea) {
@@ -342,6 +369,23 @@ function handleMaskedBeforeInput(event, model) {
     }
 }
 
+function handleAccountBeforeInput(event) {
+    if (!event.inputType.startsWith('insert'))
+        return
+
+    const insertedText = event.data ?? ''
+    if (!insertedText)
+        return
+
+    if (isUint31TextTooLarge(getProjectedTextInputValue(el.accountInput, insertedText))) {
+        event.preventDefault()
+        rejectOverflowingAccountInput()
+        return
+    }
+
+    el.accountError.textContent = ''
+}
+
 function renderRootInfo() {
     el.rootInfo.replaceChildren()
     if (!state.rootInfo) {
@@ -507,13 +551,13 @@ function validateLocalInputs() {
     el.addressError.textContent = ''
 
     if (parseUint31(el.accountInput.value) == null) {
-        el.accountError.textContent = 'account: 输入 0 到 2147483647 之间的整数'
+        el.accountError.textContent = `account: 输入 0 到 ${MAX_UINT31_TEXT} 之间的整数`
         return false
     }
 
     const draft = addressState.draft
     if (draft && parseUint31(draft) == null) {
-        el.addressError.textContent = 'address_index: 输入 0 到 2147483647 之间的整数'
+        el.addressError.textContent = `address_index: 输入 0 到 ${MAX_UINT31_TEXT} 之间的整数`
         return false
     }
 
@@ -640,8 +684,26 @@ el.coinType.addEventListener('input', () => {
     syncKindAvailability()
     scheduleDerive()
 })
+el.accountInput.addEventListener('beforeinput', event => {
+    handleAccountBeforeInput(event)
+})
+el.accountInput.addEventListener('paste', event => {
+    const pastedText = event.clipboardData.getData('text/plain')
+    if (!isUint31TextTooLarge(getProjectedTextInputValue(el.accountInput, pastedText))) {
+        el.accountError.textContent = ''
+        return
+    }
+
+    event.preventDefault()
+    rejectOverflowingAccountInput()
+})
 el.accountInput.addEventListener('input', () => {
-    syncAccountInput()
+    if (!syncAccountInput()) {
+        rejectOverflowingAccountInput()
+        return
+    }
+
+    el.accountError.textContent = ''
     scheduleDerive()
 })
 
