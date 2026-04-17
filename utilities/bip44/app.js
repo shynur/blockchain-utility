@@ -19,6 +19,7 @@ const state = {
     referencePath: '',
     selectedPathCards: new Set(),
     lastValidAccountText: '0',
+    lastValidAddressDraftText: '0',
 }
 
 const DEFAULT_REQUESTED_KINDS = {
@@ -198,6 +199,24 @@ function syncAccountInput() {
     return true
 }
 
+function rejectOverflowingAddressInput() {
+    el.addressError.textContent = `address_index: 最大值是 ${MAX_UINT31_TEXT}`
+}
+
+function syncAddressDraftInput() {
+    const normalized = normalizeRequiredUint31Text(el.addressInput.value)
+    if (isUint31TextTooLarge(normalized)) {
+        setFieldValue(el.addressInput, state.lastValidAddressDraftText)
+        addressState.updateDraft(el.addressInput.value)
+        return false
+    }
+
+    setFieldValue(el.addressInput, normalized)
+    addressState.updateDraft(el.addressInput.value)
+    state.lastValidAddressDraftText = addressState.draft
+    return true
+}
+
 function fitTextareaToContent(textarea) {
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
@@ -247,8 +266,12 @@ function renderAddressChips() {
 
 function commitAddressDraft() {
     const result = addressState.commitDraft()
+    if (result.ok)
+        addressState.updateDraft('0')
+
     el.addressError.textContent = result.error
     el.addressInput.value = addressState.draft
+    state.lastValidAddressDraftText = addressState.draft
     renderAddressChips()
     scheduleDerive()
 }
@@ -384,6 +407,23 @@ function handleAccountBeforeInput(event) {
     }
 
     el.accountError.textContent = ''
+}
+
+function handleAddressBeforeInput(event) {
+    if (!event.inputType.startsWith('insert'))
+        return
+
+    const insertedText = event.data ?? ''
+    if (!insertedText)
+        return
+
+    if (isUint31TextTooLarge(getProjectedTextInputValue(el.addressInput, insertedText))) {
+        event.preventDefault()
+        rejectOverflowingAddressInput()
+        return
+    }
+
+    el.addressError.textContent = ''
 }
 
 function renderRootInfo() {
@@ -712,14 +752,31 @@ el.changeSwitch.addEventListener('click', () => {
     scheduleDerive()
 })
 
+el.addressInput.addEventListener('beforeinput', event => {
+    handleAddressBeforeInput(event)
+})
+el.addressInput.addEventListener('paste', event => {
+    const pastedText = event.clipboardData.getData('text/plain')
+    if (!isUint31TextTooLarge(getProjectedTextInputValue(el.addressInput, pastedText))) {
+        el.addressError.textContent = ''
+        return
+    }
+
+    event.preventDefault()
+    rejectOverflowingAddressInput()
+})
 el.referencePathInput.addEventListener('input', () => {
     state.referencePath = el.referencePathInput.value
     scheduleDerive()
 })
 
 el.addressInput.addEventListener('input', () => {
-    addressState.updateDraft(el.addressInput.value)
-    el.addressInput.value = addressState.draft
+    if (!syncAddressDraftInput()) {
+        rejectOverflowingAddressInput()
+        return
+    }
+
+    el.addressError.textContent = ''
     scheduleDerive()
 })
 el.addressInput.addEventListener('keydown', event => {
@@ -745,6 +802,7 @@ syncMaskedInputs()
 syncKindAvailability()
 syncPathCardSelection()
 syncAccountInput()
+syncAddressDraftInput()
 renderAddressChips()
 renderPathSummary()
 renderOutputs()
