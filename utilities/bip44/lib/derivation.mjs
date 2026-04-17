@@ -2,6 +2,15 @@ import { libbip32, libbip39 } from '../deps.mjs'
 import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET } from './constants.mjs'
 import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeCompressedPublicKeyHex, serializePrivateKeyHex } from './utils.mjs'
 
+const EMPTY_REQUESTED_KINDS = { xprv: false, xpub: false, k: false, K: false, A: false }
+const SELECTABLE_SEGMENT_BY_DEPTH = [
+    "44'",
+    form => `${form.coinType}'`,
+    form => `${form.account}'`,
+    form => `${form.change}`,
+    form => formatAddressIndexesPreview(form.addressIndexes),
+]
+
 /**
  * @typedef {{
  *   id: string,
@@ -29,6 +38,18 @@ export function getCoinTypeOption(value) {
 
 function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
     return ['m', ...baseSegments, ...extraSegments].join('')
+}
+
+function getLevelPath(levelId, form) {
+    if (levelId === 'purpose')
+        return "/44'"
+    if (levelId === 'coin')
+        return `/${form.coinType}'`
+    if (levelId === 'account')
+        return `/${form.account}'`
+    if (levelId === 'change')
+        return `/${form.change}`
+    return null
 }
 
 export function formatAddressIndexesPreview(addressIndexes) {
@@ -80,6 +101,10 @@ function resolveAbsolutePath(root, fallbackAbsolutePath, labels) {
 
 function hasRequestedKinds(kinds) {
     return kinds.xprv || kinds.xpub || kinds.k || kinds.K || kinds.A
+}
+
+function getRequestedKinds(form, levelId) {
+    return form.requestedKinds[levelId] ?? EMPTY_REQUESTED_KINDS
 }
 
 function plainNotePart(text) {
@@ -193,16 +218,8 @@ export async function deriveBip44(root, form) {
             continue
         }
 
-        let path = ''
-        if (level.id === 'purpose')
-            path = "/44'"
-        else if (level.id === 'coin')
-            path = `/${form.coinType}'`
-        else if (level.id === 'account')
-            path = `/${form.account}'`
-        else if (level.id === 'change')
-            path = `/${form.change}`
-        else
+        const path = getLevelPath(level.id, form)
+        if (!path)
             break
 
         if (current.is_public_key() && path.endsWith("'"))
@@ -210,7 +227,7 @@ export async function deriveBip44(root, form) {
 
         current = await current.tree(path)
         baseSegments.push(path)
-        const requestedKinds = form.requestedKinds[level.id] ?? { xprv: false, xpub: false, K: false }
+        const requestedKinds = getRequestedKinds(form, level.id)
         if (hasRequestedKinds(requestedKinds)) {
             outputs.push({
                 id: level.id,
@@ -223,9 +240,9 @@ export async function deriveBip44(root, form) {
     }
 
     if (current.depth === 4) {
+        const requestedKinds = getRequestedKinds(form, 'address')
         for (const index of form.addressIndexes) {
             const child = await current.tree(`/${index}`)
-            const requestedKinds = form.requestedKinds.address ?? { xprv: false, xpub: false, k: false, K: false, A: false }
             if (hasRequestedKinds(requestedKinds)) {
                 outputs.push({
                     id: `address-${index}`,
@@ -255,18 +272,9 @@ export function getPathPreview(root, form) {
         ? Array.from({ length: Math.min(root.depth, 5) }, (_, index) =>
             index + 1 === root.depth ? formatChildNumber(root.i) : '?')
         : []
-    const selectableSegments = []
-
-    if (root.depth < 1)
-        selectableSegments.push("44'")
-    if (root.depth < 2)
-        selectableSegments.push(`${form.coinType}'`)
-    if (root.depth < 3)
-        selectableSegments.push(`${form.account}'`)
-    if (root.depth < 4)
-        selectableSegments.push(`${form.change}`)
-    if (root.depth < 5)
-        selectableSegments.push(formatAddressIndexesPreview(form.addressIndexes))
+    const selectableSegments = SELECTABLE_SEGMENT_BY_DEPTH
+        .slice(Math.min(root.depth, SELECTABLE_SEGMENT_BY_DEPTH.length))
+        .map(segment => typeof segment === 'function' ? segment(form) : segment)
 
     return ['m', ...fixedSegments, ...selectableSegments].join('/')
 }

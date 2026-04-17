@@ -1,4 +1,4 @@
-import { dedupeSorted, parseUint31 } from './utils.mjs'
+import { dedupeSorted, MAX_UINT31_TEXT, parseUint31 } from './utils.mjs'
 
 export class AddressIndexState {
     constructor() {
@@ -21,7 +21,7 @@ export class AddressIndexState {
 
         const value = parseUint31(this.draft)
         if (value == null)
-            return { ok: false, error: 'address_index: 输入 0 到 2147483647 之间的整数' }
+            return { ok: false, error: `address_index: 输入 0 到 ${MAX_UINT31_TEXT} 之间的整数` }
 
         this.values = dedupeSorted([...this.values, value])
         this.draft = ''

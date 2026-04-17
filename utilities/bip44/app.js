@@ -2,7 +2,7 @@ import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, parseUint31, pluralizeWords } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -36,6 +36,7 @@ const AVAILABLE_OUTPUT_KINDS = {
     change: ['xprv', 'xpub'],
     address: ['k', 'K', 'A'],
 }
+const PATH_CARD_GROUPS = Object.keys(DEFAULT_REQUESTED_KINDS)
 
 const el = {
     rootInput: document.querySelector('#root-input'),
@@ -80,7 +81,6 @@ const addressAStateByCoinType = new Map([
     [0, false],
     [1, false],
 ])
-const MAX_UINT31_TEXT = '2147483647'
 
 function getSelectedCoinType() {
     return Number(el.coinType.value)
@@ -118,8 +118,11 @@ function createKindControls(group) {
     }
 }
 
-for (const group of Object.keys(DEFAULT_REQUESTED_KINDS))
+for (const group of PATH_CARD_GROUPS)
     createKindControls(group)
+
+const privateKindInputs = [...document.querySelectorAll('[data-output-kind="xprv"], [data-output-kind="k"]')]
+const addressKindInputs = [...document.querySelectorAll('[data-output-kind="A"]')]
 
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
@@ -181,36 +184,38 @@ function syncAccountInputWidth() {
     el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
 }
 
-function syncAccountInput() {
-    const normalized = normalizeRequiredUint31Text(el.accountInput.value)
-    if (isUint31TextTooLarge(normalized)) {
-        setFieldValue(el.accountInput, state.lastValidAccountText)
-        syncAccountInputWidth()
-        return false
-    }
-
-    setFieldValue(el.accountInput, normalized)
-    state.lastValidAccountText = el.accountInput.value
-    syncAccountInputWidth()
-    return true
-}
-
 function rejectOverflowing(errorEl, label) {
     errorEl.textContent = `${label}: 最大值是 ${MAX_UINT31_TEXT}`
 }
 
-function syncAddressDraftInput() {
-    const normalized = normalizeRequiredUint31Text(el.addressInput.value)
-    if (isUint31TextTooLarge(normalized)) {
-        setFieldValue(el.addressInput, state.lastValidAddressDraftText)
-        addressState.updateDraft(el.addressInput.value)
-        return false
-    }
+function syncRequiredUint31Input(input, lastValidText, onValueSynced, afterSync = () => {}) {
+    const normalized = normalizeRequiredUint31Text(input.value)
+    const accepted = !isUint31TextTooLarge(normalized)
+    const nextText = accepted ? normalized : lastValidText
 
-    setFieldValue(el.addressInput, normalized)
-    addressState.updateDraft(el.addressInput.value)
-    state.lastValidAddressDraftText = addressState.draft
-    return true
+    setFieldValue(input, nextText)
+    onValueSynced(nextText)
+    afterSync(nextText)
+
+    return accepted
+}
+
+function syncAccountInput() {
+    return syncRequiredUint31Input(
+        el.accountInput,
+        state.lastValidAccountText,
+        value => {
+            state.lastValidAccountText = value
+        },
+        syncAccountInputWidth,
+    )
+}
+
+function syncAddressDraftInput() {
+    return syncRequiredUint31Input(el.addressInput, state.lastValidAddressDraftText, value => {
+        addressState.updateDraft(value)
+        state.lastValidAddressDraftText = addressState.draft
+    })
 }
 
 function fitTextareaToContent(textarea) {
@@ -316,7 +321,7 @@ function syncKindAvailability() {
     const canShowXprv = rootKey
         ? !rootKey.is_public_key()
         : rootModel.mode !== 'xkey' || rootModel.getRawValue().startsWith('xprv')
-    for (const input of document.querySelectorAll('[data-output-kind="xprv"], [data-output-kind="k"]')) {
+    for (const input of privateKindInputs) {
         const label = input.closest('.checkline')
         const group = input.dataset.outputGroup
         const kind = input.dataset.outputKind
@@ -330,7 +335,7 @@ function syncKindAvailability() {
     }
 
     const canShowAddress = canDeriveBitcoinAddress(getSelectedCoinType())
-    for (const input of document.querySelectorAll('[data-output-kind="A"]')) {
+    for (const input of addressKindInputs) {
         const label = input.closest('.checkline')
         input.disabled = !canShowAddress
         label.hidden = !canShowAddress
@@ -343,12 +348,22 @@ function shouldTogglePathCardFromClick(event) {
     return !event.target.closest('label, input, select, button, textarea, a, .chip')
 }
 
-function togglePathCardSelection(group) {
-    if (state.selectedPathCards.has(group))
-        state.selectedPathCards.delete(group)
+function toggleSetMembership(set, value) {
+    if (set.has(value))
+        set.delete(value)
     else
-        state.selectedPathCards.add(group)
+        set.add(value)
+}
+
+function togglePathCardSelection(group) {
+    toggleSetMembership(state.selectedPathCards, group)
     syncPathCardSelection()
+    scheduleDerive()
+}
+
+function commitMaskedModelChange(change) {
+    change()
+    syncMaskedInputs()
     scheduleDerive()
 }
 
@@ -360,18 +375,17 @@ function handleMaskedBeforeInput(event, model) {
 
     if (event.inputType === 'insertText' && event.data) {
         event.preventDefault()
-        model.insertText(event.data)
-        syncMaskedInputs()
-        scheduleDerive()
+        commitMaskedModelChange(() => {
+            model.insertText(event.data)
+        })
         return
     }
 
     if (event.inputType === 'deleteContentBackward') {
         event.preventDefault()
-        model.backspace()
-        syncMaskedInputs()
-        scheduleDerive()
-        return
+        commitMaskedModelChange(() => {
+            model.backspace()
+        })
     }
 }
 
@@ -438,12 +452,50 @@ function getRevealSet(kind) {
     return kind === 'xprv' ? state.revealXprv : state.revealPrivateKey
 }
 
+function renderValueRow(label, value) {
+    return `<div class="output-row">
+        <label>${label}</label>
+        <div class="value-box">${escapeHtml(value)}</div>
+        <span></span>
+    </div>`
+}
+
+function shouldRenderSecret(kind, output) {
+    if (kind === 'xprv')
+        return output.canXprv && output.requestedKinds.xprv
+    return output.requestedKinds.k && output.k
+}
+
+function renderSecretRow(kind, output) {
+    if (!shouldRenderSecret(kind, output))
+        return ''
+
+    const reveal = getRevealSet(kind).has(output.id)
+    const value = reveal ? output[kind] : maskSecret(kind, output[kind])
+    return `<div class="output-row">
+        <label>${kind}</label>
+        <div class="secret" data-${kind}-value>${escapeHtml(value)}</div>
+        <button class="tiny-button" type="button" data-toggle-${kind}="${escapeHtml(output.id)}">${reveal ? '隐藏' : '显示'}</button>
+    </div>`
+}
+
 function syncSecretRevealButton(kind, button, output, card) {
     const reveal = getRevealSet(kind).has(output.id)
     const secret = card.querySelector(`[data-${kind}-value]`)
     if (secret)
         secret.textContent = reveal ? output[kind] : maskSecret(kind, output[kind])
     button.textContent = reveal ? '隐藏' : '显示'
+}
+
+function attachSecretToggle(kind, output, card) {
+    const button = card.querySelector(`[data-toggle-${kind}]`)
+    if (!button)
+        return
+
+    button.addEventListener('click', () => {
+        toggleSetMembership(getRevealSet(kind), output.id)
+        syncSecretRevealButton(kind, button, output, card)
+    })
 }
 
 function renderNoteParts(parts) {
@@ -464,25 +516,13 @@ function renderOutputs() {
     for (const output of state.outputs) {
         const card = document.createElement('article')
         card.className = 'output-card'
-        const reveal = state.revealXprv.has(output.id)
-        const xprvRow = output.canXprv
-            && output.requestedKinds.xprv
-            ? `
-                <div class="output-row">
-                    <label>xprv</label>
-                    <div class="secret" data-xprv-value>${escapeHtml(reveal ? output.xprv : maskSecret('xprv', output.xprv))}</div>
-                    <button class="tiny-button" type="button" data-toggle-xprv="${escapeHtml(output.id)}">${reveal ? '隐藏' : '显示'}</button>
-                </div>`
-            : ''
-        const kReveal = state.revealPrivateKey.has(output.id)
-        const kRow = output.requestedKinds.k && output.k
-            ? `
-                <div class="output-row">
-                    <label>k</label>
-                    <div class="secret" data-k-value>${escapeHtml(kReveal ? output.k : maskSecret('k', output.k))}</div>
-                    <button class="tiny-button" type="button" data-toggle-k="${escapeHtml(output.id)}">${kReveal ? '隐藏' : '显示'}</button>
-                </div>`
-            : ''
+        const rows = [
+            renderSecretRow('xprv', output),
+            renderSecretRow('k', output),
+            output.requestedKinds.xpub ? renderValueRow('xpub', output.xpub) : '',
+            output.requestedKinds.K ? renderValueRow('K', output.K) : '',
+            output.requestedKinds.A && output.A ? renderValueRow('A', output.A) : '',
+        ].join('')
         card.innerHTML = `
             <div class="output-top">
                 <div>
@@ -494,47 +534,11 @@ function renderOutputs() {
                 </div>
             </div>
             <div class="output-fields">
-                ${xprvRow}
-                ${kRow}
-                ${output.requestedKinds.xpub ? `<div class="output-row">
-                    <label>xpub</label>
-                    <div class="value-box">${escapeHtml(output.xpub)}</div>
-                    <span></span>
-                </div>` : ''}
-                ${output.requestedKinds.K ? `<div class="output-row">
-                    <label>K</label>
-                    <div class="value-box">${escapeHtml(output.K)}</div>
-                    <span></span>
-                </div>` : ''}
-                ${output.requestedKinds.A && output.A ? `<div class="output-row">
-                    <label>A</label>
-                    <div class="value-box">${escapeHtml(output.A)}</div>
-                    <span></span>
-                </div>` : ''}
+                ${rows}
             </div>
         `
-        const toggle = card.querySelector('[data-toggle-xprv]')
-        if (toggle) {
-            toggle.addEventListener('click', () => {
-                const set = getRevealSet('xprv')
-                if (set.has(output.id))
-                    set.delete(output.id)
-                else
-                    set.add(output.id)
-                syncSecretRevealButton('xprv', toggle, output, card)
-            })
-        }
-        const kToggle = card.querySelector('[data-toggle-k]')
-        if (kToggle) {
-            kToggle.addEventListener('click', () => {
-                const set = getRevealSet('k')
-                if (set.has(output.id))
-                    set.delete(output.id)
-                else
-                    set.add(output.id)
-                syncSecretRevealButton('k', kToggle, output, card)
-            })
-        }
+        attachSecretToggle('xprv', output, card)
+        attachSecretToggle('k', output, card)
         el.outputs.append(card)
     }
 }
@@ -647,9 +651,9 @@ function handleMaskedKeydown(event, model) {
 
     if (event.key === 'Backspace') {
         event.preventDefault()
-        model.backspace()
-        syncMaskedInputs()
-        scheduleDerive()
+        commitMaskedModelChange(() => {
+            model.backspace()
+        })
         return
     }
 
@@ -660,48 +664,64 @@ function handleMaskedKeydown(event, model) {
 
     if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault()
-        model.insertText(event.key)
-        syncMaskedInputs()
-        scheduleDerive()
+        commitMaskedModelChange(() => {
+            model.insertText(event.key)
+        })
     }
 }
 
-el.rootInput.addEventListener('keydown', event => handleMaskedKeydown(event, rootModel))
-el.rootInput.addEventListener('paste', event => {
-    event.preventDefault()
-    rootModel.applyPaste(event.clipboardData.getData('text/plain'))
-    syncMaskedInputs()
-    scheduleDerive()
-})
-el.rootInput.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, rootModel))
+function bindMaskedInput(input, model) {
+    input.addEventListener('keydown', event => handleMaskedKeydown(event, model))
+    input.addEventListener('paste', event => {
+        event.preventDefault()
+        commitMaskedModelChange(() => {
+            model.applyPaste(event.clipboardData.getData('text/plain'))
+        })
+    })
+    input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
+}
 
-el.passphraseInput.addEventListener('keydown', event => handleMaskedKeydown(event, passphraseModel))
-el.passphraseInput.addEventListener('paste', event => {
-    event.preventDefault()
-    passphraseModel.applyPaste(event.clipboardData.getData('text/plain'))
-    syncMaskedInputs()
-    scheduleDerive()
-})
-el.passphraseInput.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, passphraseModel))
+function bindUint31Input({ input, errorEl, label, syncInput, onValidInput, onEnter }) {
+    input.addEventListener('beforeinput', event => {
+        handleUint31BeforeInput(event, input, errorEl, label)
+    })
+    input.addEventListener('paste', event => {
+        handleUint31Paste(event, input, errorEl, label)
+    })
+    input.addEventListener('input', () => {
+        if (!syncInput()) {
+            rejectOverflowing(errorEl, label)
+            return
+        }
+
+        errorEl.textContent = ''
+        onValidInput()
+    })
+
+    if (!onEnter)
+        return
+
+    input.addEventListener('keydown', event => {
+        if (event.key !== 'Enter')
+            return
+        event.preventDefault()
+        onEnter()
+    })
+}
+
+bindMaskedInput(el.rootInput, rootModel)
+bindMaskedInput(el.passphraseInput, passphraseModel)
 
 el.coinType.addEventListener('input', () => {
     syncKindAvailability()
     scheduleDerive()
 })
-el.accountInput.addEventListener('beforeinput', event => {
-    handleUint31BeforeInput(event, el.accountInput, el.accountError, 'account')
-})
-el.accountInput.addEventListener('paste', event => {
-    handleUint31Paste(event, el.accountInput, el.accountError, 'account')
-})
-el.accountInput.addEventListener('input', () => {
-    if (!syncAccountInput()) {
-        rejectOverflowing(el.accountError, 'account')
-        return
-    }
-
-    el.accountError.textContent = ''
-    scheduleDerive()
+bindUint31Input({
+    input: el.accountInput,
+    errorEl: el.accountError,
+    label: 'account',
+    syncInput: syncAccountInput,
+    onValidInput: scheduleDerive,
 })
 
 el.changeSwitch.addEventListener('click', () => {
@@ -709,31 +729,18 @@ el.changeSwitch.addEventListener('click', () => {
     scheduleDerive()
 })
 
-el.addressInput.addEventListener('beforeinput', event => {
-    handleUint31BeforeInput(event, el.addressInput, el.addressError, 'address_index')
-})
-el.addressInput.addEventListener('paste', event => {
-    handleUint31Paste(event, el.addressInput, el.addressError, 'address_index')
-})
 el.referencePathInput.addEventListener('input', () => {
     state.referencePath = el.referencePathInput.value
     scheduleDerive()
 })
 
-el.addressInput.addEventListener('input', () => {
-    if (!syncAddressDraftInput()) {
-        rejectOverflowing(el.addressError, 'address_index')
-        return
-    }
-
-    el.addressError.textContent = ''
-    scheduleDerive()
-})
-el.addressInput.addEventListener('keydown', event => {
-    if (event.key !== 'Enter')
-        return
-    event.preventDefault()
-    commitAddressDraft()
+bindUint31Input({
+    input: el.addressInput,
+    errorEl: el.addressError,
+    label: 'address_index',
+    syncInput: syncAddressDraftInput,
+    onValidInput: scheduleDerive,
+    onEnter: commitAddressDraft,
 })
 el.addressAdd.addEventListener('click', () => {
     commitAddressDraft()

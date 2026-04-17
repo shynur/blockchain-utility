@@ -4,6 +4,10 @@ import { isAsciiLetter, isBase58Char, isWhitespace } from './utils.mjs'
 const MAX_MNEMONIC_WORDS = WORD_MARKERS.length
 const XKEY_LENGTH = 111
 
+function isXKeyPrefix(text) {
+    return text.startsWith('xpub') || text.startsWith('xprv')
+}
+
 function isAllowedPassphraseChar(char) {
     return char === ' ' || !isWhitespace(char)
 }
@@ -99,7 +103,7 @@ export class RootInputModel {
     setRaw(raw) {
         const mnemonic = limitMnemonicWordCount(raw)
         const compact = mnemonic.replace(/\s+/g, '')
-        if (compact.startsWith('xpub') || compact.startsWith('xprv')) {
+        if (isXKeyPrefix(compact)) {
             this.mode = 'xkey'
             this.raw = clampXKey(normalizeXKeyPaste(raw))
         } else {
@@ -125,7 +129,7 @@ export class RootInputModel {
             if (isAsciiLetter(char)) {
                 this.raw = limitMnemonicWordCount(`${this.raw}${char.toLowerCase()}`)
                 const compact = this.raw.replace(/\s+/g, '')
-                if (compact.startsWith('xpub') || compact.startsWith('xprv')) {
+                if (isXKeyPrefix(compact)) {
                     this.mode = 'xkey'
                     this.raw = compact
                 }
@@ -148,7 +152,7 @@ export class RootInputModel {
 
         const mnemonicText = normalizeMnemonicPaste(pastedText)
         const compactMnemonic = `${this.raw}${mnemonicText}`.replace(/\s+/g, '')
-        if (compactMnemonic.startsWith('xpub') || compactMnemonic.startsWith('xprv')) {
+        if (isXKeyPrefix(compactMnemonic)) {
             this.mode = 'xkey'
             this.raw = clampXKey(normalizeXKeyPaste(`${this.raw}${pastedText}`))
             return
@@ -164,7 +168,7 @@ export class RootInputModel {
 
         if (this.mode === 'xkey') {
             this.raw = this.raw.slice(0, -1)
-            if (!(this.raw.startsWith('xpub') || this.raw.startsWith('xprv')))
+            if (!isXKeyPrefix(this.raw))
                 this.mode = 'mnemonic'
             return
         }

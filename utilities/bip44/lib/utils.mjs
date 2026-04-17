@@ -1,5 +1,8 @@
 import { BASE58_ALPHABET, HARDENED_OFFSET } from './constants.mjs'
 
+export const MAX_UINT31 = HARDENED_OFFSET - 1
+export const MAX_UINT31_TEXT = String(MAX_UINT31)
+
 export function isAsciiLetter(char) {
     return /^[A-Za-z]$/.test(char)
 }
@@ -45,7 +48,7 @@ export function parseUint31(text) {
         return null
 
     const value = Number(text)
-    if (!Number.isInteger(value) || value < 0 || value >= HARDENED_OFFSET)
+    if (!Number.isInteger(value) || value < 0 || value > MAX_UINT31)
         return null
 
     return value
