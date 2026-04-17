@@ -317,35 +317,44 @@ small {
 .switch {
     width: 78px;
     height: 36px;
-    display: grid;
-    grid-template-columns: 1fr 30px;
+    position: relative;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 8px 3px 3px;
+    justify-content: center;
+    padding: 3px 8px 3px 36px;
     border: 0;
     border-radius: 999px;
     background: #d6c7a8;
+    transition: background 160ms ease, padding 160ms ease;
 }
 
 .switch-number {
-    justify-self: center;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    text-align: center;
     color: rgba(20, 59, 53, 0.72);
     font: 700 0.95rem/1 var(--mono);
     transition: color 160ms ease;
 }
 
 .switch-thumb {
+    position: absolute;
+    inset: 3px auto 3px 3px;
     width: 30px;
     height: 30px;
     border-radius: 50%;
     background: #fff8e8;
-    transition: background 160ms ease;
+    transition: transform 160ms ease, background 160ms ease;
 }
 
 .switch[aria-pressed="true"] {
-    grid-template-columns: 30px 1fr;
-    padding: 3px 3px 3px 8px;
+    padding: 3px 36px 3px 8px;
     background: var(--accent);
+}
+
+.switch[aria-pressed="true"] .switch-thumb {
+    transform: translateX(42px);
 }
 
 .switch[aria-pressed="true"] .switch-number {
