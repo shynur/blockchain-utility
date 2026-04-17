@@ -171,7 +171,8 @@ textarea {
     line-height: 1.6;
 }
 
-#root-input {
+#root-input,
+#passphrase-input {
     min-height: calc(1em * 1.6 + 28px);
     overflow-x: hidden;
     overflow-y: hidden;

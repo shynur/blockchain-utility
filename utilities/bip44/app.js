@@ -176,7 +176,9 @@ function syncMaskedInputs() {
     el.inputModeBadge.textContent = rootModel.mode
     el.passphraseWrap.classList.toggle('hidden', rootModel.mode === 'xkey')
     el.rootInput.setAttribute('wrap', 'soft')
+    el.passphraseInput.setAttribute('wrap', 'soft')
     fitTextareaToContent(el.rootInput)
+    fitTextareaToContent(el.passphraseInput)
 
     if (rootModel.mode === 'xkey') {
         el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')
