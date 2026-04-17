@@ -17,6 +17,7 @@ const state = {
     revealXprv: new Set(),
     revealPrivateKey: new Set(),
     referencePath: '',
+    selectedPathCards: new Set(['account']),
 }
 
 const DEFAULT_REQUESTED_KINDS = {
@@ -57,6 +58,10 @@ const el = {
     rootInfo: document.querySelector('#root-info'),
     outputs: document.querySelector('#outputs'),
 }
+
+const pathCards = Object.fromEntries(
+    [...document.querySelectorAll('[data-path-card]')].map(card => [card.dataset.pathCard, card]),
+)
 
 for (const option of COIN_TYPES) {
     const node = document.createElement('option')
@@ -104,6 +109,9 @@ function createKindControls(group) {
                 setAddressAState(input.checked)
             else
                 requestedKindsState[group][kind] = input.checked
+            if (input.checked)
+                state.selectedPathCards.add(group)
+            syncPathCardSelection()
             scheduleDerive()
         })
         wrap.append(label)
@@ -116,12 +124,13 @@ for (const group of Object.keys(DEFAULT_REQUESTED_KINDS))
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
     const canAddress = group === 'address' && canDeriveBitcoinAddress(getSelectedCoinType())
+    const isSelected = state.selectedPathCards.has(group)
     return {
-        xprv: allowedKinds.has('xprv') && kinds.xprv,
-        xpub: allowedKinds.has('xpub') && kinds.xpub,
-        k: allowedKinds.has('k') && kinds.k,
-        K: allowedKinds.has('K') && kinds.K,
-        A: allowedKinds.has('A') && canAddress && getAddressAState(),
+        xprv: isSelected && allowedKinds.has('xprv') && kinds.xprv,
+        xpub: isSelected && allowedKinds.has('xpub') && kinds.xpub,
+        k: isSelected && allowedKinds.has('k') && kinds.k,
+        K: isSelected && allowedKinds.has('K') && kinds.K,
+        A: isSelected && allowedKinds.has('A') && canAddress && getAddressAState(),
     }
 }
 
@@ -146,6 +155,11 @@ function getFormState() {
 function setFieldValue(input, value) {
     if (input.value !== value)
         input.value = value
+}
+
+function syncPathCardSelection() {
+    for (const [group, card] of Object.entries(pathCards))
+        card.classList.toggle('selected', state.selectedPathCards.has(group))
 }
 
 function syncMaskedInputs() {
@@ -260,6 +274,19 @@ function syncKindAvailability() {
         label.classList.toggle('disabled', !canShowAddress)
         input.checked = getAddressAState()
     }
+}
+
+function shouldTogglePathCardFromClick(event) {
+    return !event.target.closest('label, input, select, button, textarea, a')
+}
+
+function togglePathCardSelection(group) {
+    if (state.selectedPathCards.has(group))
+        state.selectedPathCards.delete(group)
+    else
+        state.selectedPathCards.add(group)
+    syncPathCardSelection()
+    scheduleDerive()
 }
 
 function handleMaskedBeforeInput(event, model) {
@@ -617,8 +644,17 @@ el.addressInput.addEventListener('keydown', event => {
 
 el.deriveNow.addEventListener('click', runDerive)
 
+for (const [group, card] of Object.entries(pathCards)) {
+    card.addEventListener('click', event => {
+        if (!shouldTogglePathCardFromClick(event))
+            return
+        togglePathCardSelection(group)
+    })
+}
+
 syncMaskedInputs()
 syncKindAvailability()
+syncPathCardSelection()
 renderAddressChips()
 renderPathSummary()
 renderOutputs()
