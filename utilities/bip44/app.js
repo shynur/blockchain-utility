@@ -457,7 +457,7 @@ function renderRootInfo() {
         return
 
     const items = [
-        ['depth', String(state.rootInfo.depth)],
+        ['level', state.rootInfo.level],
         ['index', state.rootInfo.index ?? '-'],
         ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
         ['identifier', state.rootInfo.identifierHex],

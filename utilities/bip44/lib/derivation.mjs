@@ -64,6 +64,24 @@ export function canDeriveBitcoinAddress(coinType) {
     return coinType === 0 || coinType === 1
 }
 
+function describeBip44Level(depth) {
+    if (depth === 0)
+        return 'master'
+
+    if (depth === 1)
+        return 'purpose'
+    if (depth === 2)
+        return '币种'
+    if (depth === 3)
+        return '账户'
+    if (depth === 4)
+        return '交易链'
+    if (depth === 5)
+        return '地址索引'
+
+    return `超出 BIP44 范围（第 ${depth} 层）`
+}
+
 /**
  * @param {InstanceType<typeof libbip32.XKey>} key
  * @param {string} absolutePath
@@ -285,7 +303,7 @@ export function getPathPreview(root, form) {
 export async function describeRootKey(key) {
     const identifier = await key.identifier()
     return {
-        depth: key.depth,
+        level: describeBip44Level(key.depth),
         index: key.depth > 0 ? formatChildNumber(key.i) : null,
         parentFingerprint: key.depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
         identifierHex: bytesToHex(identifier),
