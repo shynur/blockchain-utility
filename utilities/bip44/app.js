@@ -1,5 +1,5 @@
 import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
-import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource } from './lib/derivation.mjs'
+import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
 import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords } from './lib/utils.mjs'
@@ -56,6 +56,7 @@ const el = {
     pathSummary: document.querySelector('#path-summary'),
     referencePathWrap: document.querySelector('#reference-path-wrap'),
     referencePathInput: document.querySelector('#reference-path-input'),
+    statusError: document.querySelector('#status-error'),
     statusLine: document.querySelector('#status-line'),
     rootInfo: document.querySelector('#root-info'),
     outputs: document.querySelector('#outputs'),
@@ -80,6 +81,14 @@ const requestedKindsState = cloneRequestedKinds()
 const addressAStateByCoinType = new Map([
     [0, false],
     [1, false],
+])
+const STATUS_ERROR_HIGHLIGHTS = new Map([
+    ['未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app', ['未知协议类型']],
+    ['未知币种, 考虑更换钱包 app', ['未知币种']],
+    ['密钥违反 BIP 44: 账户须使用硬化派生', ['违反 BIP 44']],
+    ['未知的转账链类型: BIP 44 仅允许收款链和找零链', ['未知的转账链类型']],
+    ['密钥违反 BIP 44: 地址索引必须使用 normal 派生', ['违反 BIP 44']],
+    ['密钥违反 BIP 44: 层级太深', ['违反 BIP 44']],
 ])
 
 function getSelectedCoinType() {
@@ -482,7 +491,9 @@ function renderRootIndexDescription(rootInfo) {
         return ''
 
     if (rootInfo.depth === 1) {
-        return renderInfoDescription(['BIP 44'])
+        return rootInfo.isHardened && rootInfo.indexValue === 44
+            ? renderInfoDescription(['BIP 44'])
+            : ''
     }
 
     if (rootInfo.depth === 2) {
@@ -491,7 +502,11 @@ function renderRootIndexDescription(rootInfo) {
     }
 
     if (rootInfo.depth === 4) {
-        return renderInfoDescription([rootInfo.indexValue === 0 ? '收款' : '找零'])
+        if (!rootInfo.isHardened && rootInfo.indexValue === 0)
+            return renderInfoDescription(['收款'])
+        if (!rootInfo.isHardened && rootInfo.indexValue === 1)
+            return renderInfoDescription(['找零'])
+        return ''
     }
 
     return ''
@@ -568,6 +583,38 @@ function renderNoteParts(parts) {
     }).join('')
 }
 
+function splitHighlightedText(text, highlights) {
+    if (!text || highlights.length === 0)
+        return [{ text, highlight: false }]
+
+    const matchedHighlights = highlights
+        .map(value => ({ value, index: text.indexOf(value) }))
+        .filter(match => match.index >= 0)
+        .sort((left, right) => left.index - right.index || right.value.length - left.value.length)
+
+    if (matchedHighlights.length === 0)
+        return [{ text, highlight: false }]
+
+    const parts = []
+    let cursor = 0
+    for (const match of matchedHighlights) {
+        const start = match.index
+        const end = start + match.value.length
+        if (start < cursor)
+            continue
+
+        if (start > cursor)
+            parts.push({ text: text.slice(cursor, start), highlight: false })
+        parts.push({ text: match.value, highlight: true })
+        cursor = end
+    }
+
+    if (cursor < text.length)
+        parts.push({ text: text.slice(cursor), highlight: false })
+
+    return parts
+}
+
 function renderOutputs() {
     el.outputs.replaceChildren()
     el.outputs.classList.toggle('empty', state.outputs.length === 0)
@@ -610,11 +657,24 @@ function clearResults(message) {
     state.rootResult = null
     state.rootInfo = null
     state.outputs = []
+    el.statusError.textContent = ''
     el.statusLine.textContent = message
     syncKindAvailability()
     renderRootInfo()
     renderOutputs()
     renderPathSummary()
+}
+
+function clearOutputs(message) {
+    state.outputs = []
+    el.statusLine.textContent = message
+    renderOutputs()
+    renderPathSummary()
+}
+
+function showStatusError(message) {
+    const parts = splitHighlightedText(message, STATUS_ERROR_HIGHLIGHTS.get(message) ?? [])
+    el.statusError.innerHTML = renderNoteParts(parts)
 }
 
 function validateLocalInputs() {
@@ -642,6 +702,7 @@ async function runDerive() {
 
     const token = ++state.pendingToken
     el.rootError.textContent = ''
+    showStatusError('')
 
     if (!validateLocalInputs())
         return
@@ -666,7 +727,8 @@ async function runDerive() {
         } else {
             const xkey = rootModel.getRawValue()
             if (xkey.length !== 111) {
-                clearResults(`xpub/xprv 需要 111 个 base58 字符, 当前 ${xkey.length} 个。`)
+                clearResults('等待完整的 xpub/xprv。')
+                showStatusError(`导入内容还没输完整, 目前已输入 ${xkey.length} 个字符。`)
                 return
             }
             el.statusLine.textContent = '校验 xpub/xprv...'
@@ -677,6 +739,16 @@ async function runDerive() {
             return
 
         state.rootInfo = await describeRootKey(state.rootResult.root)
+        if (state.rootResult.kind === 'xkey') {
+            const importValidation = validateBip44Import(state.rootResult.root)
+            if (!importValidation.ok) {
+                syncKindAvailability()
+                renderRootInfo()
+                clearOutputs('')
+                showStatusError(importValidation.error)
+                return
+            }
+        }
         syncKindAvailability()
         const derived = await deriveBip44(state.rootResult.root, getFormState())
         if (token !== state.pendingToken)
@@ -693,10 +765,14 @@ async function runDerive() {
         if (token !== state.pendingToken)
             return
         const message = error instanceof Error ? error.message : String(error)
-        el.rootError.textContent = message.includes('CKDpub')
-            ? 'xpub 不能进行硬化派生; 请导入 account/change 层级的 xpub, 或改用 xprv。'
-            : `${message}; 请检查输入格式、词数、单词拼写或 xkey 长度。`
         clearResults('输入校验失败。')
+        showStatusError(
+            message.includes('CKDpub')
+                ? '这个 xpub 不能继续生成你当前选择的位置。请改用更靠后的 xpub, 或直接导入 xprv。'
+                : rootModel.mode === 'xkey'
+                    ? '导入内容无法识别。请检查是否完整, 以及是否粘贴了正确的 xpub / xprv。'
+                    : '助记词无效。请检查单词、顺序和词数。',
+        )
     }
 }
 

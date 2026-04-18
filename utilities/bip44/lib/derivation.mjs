@@ -36,6 +36,14 @@ export function getCoinTypeOption(value) {
     }
 }
 
+function isKnownCoinType(value) {
+    return COIN_TYPES.some(option => option.value === value)
+}
+
+function isHardenedChildNumber(index) {
+    return index >= HARDENED_OFFSET
+}
+
 function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
     return ['m', ...baseSegments, ...extraSegments].join('')
 }
@@ -213,6 +221,55 @@ export async function resolveRootSource(source) {
 
 /**
  * @param {InstanceType<typeof libbip32.XKey>} root
+ * @returns {{ ok: boolean, error: string }}
+ */
+export function validateBip44Import(root) {
+    const depth = root.depth
+    if (depth > 5) {
+        return {
+            ok: false,
+            error: '密钥违反 BIP 44: 层级太深',
+        }
+    }
+
+    if (depth === 0)
+        return { ok: true, error: '' }
+
+    const childNumber = root.i
+    const isHardened = isHardenedChildNumber(childNumber)
+    const indexValue = isHardened ? childNumber - HARDENED_OFFSET : childNumber
+
+    if (depth === 1) {
+        return isHardened && indexValue === 44
+            ? { ok: true, error: '' }
+            : { ok: false, error: '未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app' }
+    }
+
+    if (depth === 2) {
+        return isKnownCoinType(indexValue)
+            ? { ok: true, error: '' }
+            : { ok: false, error: '未知币种, 考虑更换钱包 app' }
+    }
+
+    if (depth === 3) {
+        return isHardened
+            ? { ok: true, error: '' }
+            : { ok: false, error: '密钥违反 BIP 44: 账户须使用硬化派生' }
+    }
+
+    if (depth === 4) {
+        return indexValue === 0 || indexValue === 1
+            ? { ok: true, error: '' }
+            : { ok: false, error: '未知的转账链类型: BIP 44 仅允许收款链和找零链' }
+    }
+
+    return !isHardened
+        ? { ok: true, error: '' }
+        : { ok: false, error: '密钥违反 BIP 44: 地址索引必须使用 normal 派生' }
+}
+
+/**
+ * @param {InstanceType<typeof libbip32.XKey>} root
  * @param {{
  *   coinType: number,
  *   account: number,
@@ -307,6 +364,7 @@ export async function describeRootKey(key) {
         depth,
         level: describeBip44Level(depth),
         index: depth > 0 ? formatChildNumber(key.i) : null,
+        isHardened: depth > 0 ? isHardenedChildNumber(key.i) : false,
         indexValue: depth > 0
             ? (key.i >= HARDENED_OFFSET ? key.i - HARDENED_OFFSET : key.i)
             : null,

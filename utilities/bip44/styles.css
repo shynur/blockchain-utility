@@ -113,6 +113,10 @@ h2 {
     line-height: 1.6;
 }
 
+.section-head .error {
+    margin-bottom: 6px;
+}
+
 .path-summary {
     font-family: var(--mono);
     overflow-wrap: normal;
