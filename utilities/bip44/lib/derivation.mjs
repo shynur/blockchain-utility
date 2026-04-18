@@ -302,10 +302,15 @@ export function getPathPreview(root, form) {
  */
 export async function describeRootKey(key) {
     const identifier = await key.identifier()
+    const depth = key.depth
     return {
-        level: describeBip44Level(key.depth),
-        index: key.depth > 0 ? formatChildNumber(key.i) : null,
-        parentFingerprint: key.depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
+        depth,
+        level: describeBip44Level(depth),
+        index: depth > 0 ? formatChildNumber(key.i) : null,
+        indexValue: depth > 0
+            ? (key.i >= HARDENED_OFFSET ? key.i - HARDENED_OFFSET : key.i)
+            : null,
+        parentFingerprint: depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
         identifierHex: bytesToHex(identifier),
     }
 }

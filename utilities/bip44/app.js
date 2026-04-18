@@ -466,12 +466,41 @@ function renderRootInfo() {
     for (const [label, value] of items) {
         const node = document.createElement('div')
         node.className = 'info-item'
+        const descriptionHtml = label === 'index'
+            ? renderRootIndexDescription(state.rootInfo)
+            : ''
         const renderedValue = label === 'identifier'
             ? `<strong><span class="identifier-fingerprint">${escapeHtml(value.slice(0, 8))}</span>${escapeHtml(value.slice(8))}</strong>`
             : `<strong>${escapeHtml(value)}</strong>`
-        node.innerHTML = `<span class="info-item-label">${escapeHtml(label)}</span>${renderedValue}`
+        node.innerHTML = `<span class="info-item-label">${escapeHtml(label)}</span>${renderedValue}${descriptionHtml}`
         el.rootInfo.append(node)
     }
+}
+
+function renderRootIndexDescription(rootInfo) {
+    if (rootInfo.indexValue == null)
+        return ''
+
+    if (rootInfo.depth === 1) {
+        return renderInfoDescription(['BIP 44'])
+    }
+
+    if (rootInfo.depth === 2) {
+        const coin = getCoinTypeOption(rootInfo.indexValue)
+        return renderInfoDescription([`${coin.name} (${coin.localName})`])
+    }
+
+    if (rootInfo.depth === 4) {
+        return renderInfoDescription([rootInfo.indexValue === 0 ? '收款' : '找零'])
+    }
+
+    return ''
+}
+
+function renderInfoDescription(entries) {
+    return `<div class="info-description">${entries
+        .map(value => `<span>${escapeHtml(value)}</span>`)
+        .join('')}</div>`
 }
 
 function maskSecret(kind, value) {

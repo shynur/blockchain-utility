@@ -480,6 +480,15 @@ small {
     font-family: var(--mono);
 }
 
+.info-description {
+    display: grid;
+    gap: 4px;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
 .identifier-fingerprint {
     color: var(--accent-2);
 }
