@@ -75,7 +75,7 @@ function describeBip44Level(depth) {
     if (depth === 3)
         return '账户'
     if (depth === 4)
-        return '交易链'
+        return '转账链'
     if (depth === 5)
         return '地址索引'
 
