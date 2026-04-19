@@ -42,6 +42,7 @@ const PATH_CARD_DEPTHS = Object.fromEntries(BIP44_LEVELS.map(level => [level.id,
 
 const el = {
     rootInput: document.querySelector('#root-input'),
+    rootInputOverlay: document.querySelector('#root-input-overlay'),
     rootHelp: document.querySelector('#root-help'),
     rootError: document.querySelector('#root-error'),
     passphraseWrap: document.querySelector('#passphrase-wrap'),
@@ -295,6 +296,17 @@ function syncMaskedInputs() {
     el.passphraseInput.setAttribute('wrap', 'soft')
     fitTextareaToContent(el.rootInput)
     fitTextareaToContent(el.passphraseInput)
+
+    if (isImportMode) {
+        const displayText = rootModel.getDisplayValue()
+        const spacer = document.createTextNode(displayText)
+        const pipe = document.createElement('span')
+        pipe.className = 'xkey-pipe'
+        pipe.textContent = '|'
+        el.rootInputOverlay.replaceChildren(spacer, pipe)
+    } else {
+        el.rootInputOverlay.replaceChildren()
+    }
 
     if (isImportMode) {
         el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')

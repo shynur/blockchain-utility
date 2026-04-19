@@ -220,10 +220,10 @@ export class RootInputModel {
     getXKeyMaskedValue() {
         if (this.raw.startsWith('xprv')) {
             const masked = `xprv${'*'.repeat(Math.max(0, this.raw.length - 4))}`
-            return `${masked.padEnd(XKEY_LENGTH, ' ')}|`
+            return masked.padEnd(XKEY_LENGTH, ' ')
         }
 
-        return `${this.raw.padEnd(XKEY_LENGTH, ' ')}|`
+        return this.raw.padEnd(XKEY_LENGTH, ' ')
     }
 
     getDisplayValue() {
