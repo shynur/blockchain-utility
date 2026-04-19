@@ -497,6 +497,9 @@ function renderRootIndexDescription(rootInfo) {
     }
 
     if (rootInfo.depth === 2) {
+        if (!rootInfo.isHardened)
+            return ''
+
         const coin = getCoinTypeOption(rootInfo.indexValue)
         return renderInfoDescription([`${coin.name} (${coin.localName})`])
     }
