@@ -54,8 +54,6 @@ const el = {
     addressError: document.querySelector('#address-error'),
     addressList: document.querySelector('#address-index-list'),
     pathSummary: document.querySelector('#path-summary'),
-    referencePathWrap: document.querySelector('#reference-path-wrap'),
-    referencePathInput: document.querySelector('#reference-path-input'),
     statusError: document.querySelector('#status-error'),
     statusLine: document.querySelector('#status-line'),
     rootInfo: document.querySelector('#root-info'),
@@ -354,9 +352,6 @@ function renderPathSummary() {
         ? '外部地址（收款）'
         : '内部地址（找零）'
     el.coinType.title = `${coin.value}': ${coin.name}`
-
-    const showReference = Boolean(state.rootResult && state.rootResult.kind === 'xkey' && state.rootResult.root.depth > 0)
-    el.referencePathWrap.classList.toggle('hidden', !showReference)
 }
 
 function syncKindAvailability() {
@@ -872,11 +867,6 @@ bindUint31Input({
 
 el.changeSwitch.addEventListener('click', () => {
     state.change = state.change === 0 ? 1 : 0
-    scheduleDerive()
-})
-
-el.referencePathInput.addEventListener('input', () => {
-    state.referencePath = el.referencePathInput.value
     scheduleDerive()
 })
 
