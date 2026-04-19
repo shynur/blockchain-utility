@@ -45,6 +45,7 @@ wget-log.[0-9][0-9][0-9][0-9][0-9][0-9]
 
 gcm.cache/
 compile_commands.json
+tmp/
 
 ?*.deb
 
