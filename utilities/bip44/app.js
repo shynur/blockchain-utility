@@ -236,6 +236,19 @@ function fitTextareaToContent(textarea) {
     textarea.style.height = `${textarea.scrollHeight}px`
 }
 
+function clampMaskedInputSelection(input, model) {
+    const maxSelectionEnd = model.getDisplayCursorPosition()
+    const selectionStart = input.selectionStart ?? maxSelectionEnd
+    const selectionEnd = input.selectionEnd ?? selectionStart
+    const nextSelectionStart = Math.min(selectionStart, maxSelectionEnd)
+    const nextSelectionEnd = Math.min(selectionEnd, maxSelectionEnd)
+
+    if (selectionStart === nextSelectionStart && selectionEnd === nextSelectionEnd)
+        return
+
+    input.setSelectionRange(nextSelectionStart, nextSelectionEnd, input.selectionDirection ?? 'none')
+}
+
 function syncPathCardSelection() {
     for (const [group, card] of Object.entries(pathCards)) {
         const locked = isPathCardLocked(group)
@@ -871,6 +884,19 @@ function bindMaskedInput(input, model) {
         })
     })
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
+    input.addEventListener('mouseup', () => {
+        window.requestAnimationFrame(() => {
+            clampMaskedInputSelection(input, model)
+        })
+    })
+    input.addEventListener('focus', () => {
+        window.requestAnimationFrame(() => {
+            clampMaskedInputSelection(input, model)
+        })
+    })
+    input.addEventListener('select', () => {
+        clampMaskedInputSelection(input, model)
+    })
 }
 
 function bindUint31Input({ input, errorEl, label, syncInput, onValidInput, onEnter }) {
