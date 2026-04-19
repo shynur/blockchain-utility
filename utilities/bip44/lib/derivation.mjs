@@ -246,6 +246,13 @@ export function validateBip44Import(root) {
     }
 
     if (depth === 2) {
+        if (!isHardened) {
+            return {
+                ok: false,
+                error: '未知币种, 考虑更换钱包 app',
+            }
+        }
+
         return isKnownCoinType(indexValue)
             ? { ok: true, error: '' }
             : { ok: false, error: '未知币种, 考虑更换钱包 app' }
@@ -258,6 +265,13 @@ export function validateBip44Import(root) {
     }
 
     if (depth === 4) {
+        if (isHardened) {
+            return {
+                ok: false,
+                error: '未知的转账链类型: BIP 44 仅允许收款链和找零链',
+            }
+        }
+
         return indexValue === 0 || indexValue === 1
             ? { ok: true, error: '' }
             : { ok: false, error: '未知的转账链类型: BIP 44 仅允许收款链和找零链' }
