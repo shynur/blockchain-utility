@@ -358,8 +358,13 @@ export async function deriveBip44(root, form) {
  */
 export function getPathPreview(root, form) {
     const fixedSegments = root.depth > 0
-        ? Array.from({ length: Math.min(root.depth, 5) }, (_, index) =>
-            index + 1 === root.depth ? formatChildNumber(root.i) : '?')
+        ? Array.from({ length: Math.min(root.depth, 5) }, (_, index) => {
+            if (index + 1 === root.depth)
+                return formatChildNumber(root.i)
+            const segment = SELECTABLE_SEGMENT_BY_DEPTH[index]
+            const value = typeof segment === 'function' ? segment(form) : segment
+            return `~${value}~`
+        })
         : []
     const selectableSegments = SELECTABLE_SEGMENT_BY_DEPTH
         .slice(Math.min(root.depth, SELECTABLE_SEGMENT_BY_DEPTH.length))

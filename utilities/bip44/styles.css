@@ -133,6 +133,11 @@ h2 {
     white-space: nowrap;
 }
 
+.path-uncertain {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .badge {
     flex: none;
     padding: 7px 12px;

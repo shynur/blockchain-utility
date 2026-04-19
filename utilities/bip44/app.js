@@ -357,7 +357,23 @@ function appendPathBreak(container) {
     container.append(document.createElement('wbr'))
 }
 
+function renderUncertainSegment(container, text) {
+    const hardenedMatch = text.match(/^(.+)'$/)
+    if (hardenedMatch) {
+        appendPathTextPart(container, hardenedMatch[1], 'path-segment path-uncertain')
+        appendPathTextPart(container, "'", 'path-segment')
+    } else {
+        appendPathTextPart(container, text, 'path-segment path-uncertain')
+    }
+}
+
 function renderPathSegment(container, segment) {
+    const uncertainMatch = segment.match(/^~(.+)~$/)
+    if (uncertainMatch) {
+        renderUncertainSegment(container, uncertainMatch[1])
+        return
+    }
+
     const match = segment.match(/^\{(\d+(?:,\d+)*)\}$/)
     if (!match) {
         appendPathTextPart(container, segment, 'path-segment')
