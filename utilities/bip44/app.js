@@ -279,7 +279,7 @@ function getImportedPathDepth() {
 }
 
 function isPathCardLocked(group) {
-    return (PATH_CARD_DEPTHS[group] ?? Infinity) <= getImportedPathDepth()
+    return (PATH_CARD_DEPTHS[group] ?? Infinity) < getImportedPathDepth()
 }
 
 function syncXkeyLockedValues(root) {

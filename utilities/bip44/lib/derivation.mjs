@@ -300,6 +300,24 @@ export async function deriveBip44(root, form) {
 
     let current = root
     const originalDepth = root.depth
+
+    if (originalDepth >= 1 && originalDepth <= 5) {
+        const selfLevel = BIP44_LEVELS[originalDepth - 1]
+        const requestedKinds = getRequestedKinds(form, selfLevel.id)
+        if (hasRequestedKinds(requestedKinds)) {
+            const selfPath = resolveAbsolutePath(root, 'm(?)', form.labels)
+            outputs.push({
+                id: selfLevel.id === 'address' ? `address-${root.i}` : selfLevel.id,
+                label: selfLevel.label,
+                noteParts: selfLevel.id === 'address'
+                    ? describeOutputNoteParts('address', form, root.i)
+                    : describeOutputNoteParts(selfLevel.id, form),
+                requestedKinds,
+                ...(await serializeNode(root, selfPath, form.coinType)),
+            })
+        }
+    }
+
     for (const level of BIP44_LEVELS) {
         if (originalDepth >= level.depth) {
             if (level.depth === 5)
