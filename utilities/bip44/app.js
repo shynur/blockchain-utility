@@ -11,6 +11,7 @@ const addressState = new AddressIndexState()
 const state = {
     rootResult: null,
     rootInfo: null,
+    entryValidated: false,
     outputs: [],
     pendingToken: 0,
     change: 0,
@@ -59,6 +60,7 @@ const el = {
     statusLine: document.querySelector('#status-line'),
     rootInfo: document.querySelector('#root-info'),
     outputs: document.querySelector('#outputs'),
+    gatedPanels: [...document.querySelectorAll('[data-gated-panel]')],
 }
 
 const pathCards = Object.fromEntries(
@@ -420,8 +422,19 @@ function togglePathCardSelection(group) {
     scheduleDerive()
 }
 
+function invalidateEntryValidation() {
+    state.pendingToken += 1
+
+    if (!state.entryValidated)
+        return
+
+    state.entryValidated = false
+    syncGatedPanels()
+}
+
 function commitMaskedModelChange(change) {
     change()
+    invalidateEntryValidation()
     syncMaskedInputs()
     scheduleDerive()
 }
@@ -672,12 +685,19 @@ function renderOutputs() {
     }
 }
 
+function syncGatedPanels() {
+    for (const panel of el.gatedPanels)
+        panel.hidden = !state.entryValidated
+}
+
 function clearResults(message) {
     state.rootResult = null
     state.rootInfo = null
+    state.entryValidated = false
     state.outputs = []
     showStatusError('')
     setStatusLine(message)
+    syncGatedPanels()
     syncKindAvailability()
     renderRootInfo()
     renderOutputs()
@@ -764,9 +784,14 @@ async function runDerive() {
             return
 
         state.rootInfo = await describeRootKey(state.rootResult.root)
+        if (token !== state.pendingToken)
+            return
+
         if (state.rootResult.kind === 'xkey') {
             const importValidation = validateBip44Import(state.rootResult.root)
             if (!importValidation.ok) {
+                state.entryValidated = false
+                syncGatedPanels()
                 syncKindAvailability()
                 renderRootInfo()
                 clearOutputs('')
@@ -774,6 +799,8 @@ async function runDerive() {
                 return
             }
         }
+        state.entryValidated = true
+        syncGatedPanels()
         syncKindAvailability()
         const derived = await deriveBip44(state.rootResult.root, getFormState())
         if (token !== state.pendingToken)
