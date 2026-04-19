@@ -657,8 +657,8 @@ function clearResults(message) {
     state.rootResult = null
     state.rootInfo = null
     state.outputs = []
-    el.statusError.textContent = ''
-    el.statusLine.textContent = message
+    showStatusError('')
+    setStatusLine(message)
     syncKindAvailability()
     renderRootInfo()
     renderOutputs()
@@ -667,13 +667,19 @@ function clearResults(message) {
 
 function clearOutputs(message) {
     state.outputs = []
-    el.statusLine.textContent = message
+    setStatusLine(message)
     renderOutputs()
     renderPathSummary()
 }
 
+function setStatusLine(message) {
+    el.statusLine.hidden = !message
+    el.statusLine.textContent = message
+}
+
 function showStatusError(message) {
     const parts = splitHighlightedText(message, STATUS_ERROR_HIGHLIGHTS.get(message) ?? [])
+    el.statusError.hidden = !message
     el.statusError.innerHTML = renderNoteParts(parts)
 }
 
@@ -718,7 +724,7 @@ async function runDerive() {
                 clearResults(`当前 ${wordState.candidateCount} 个 word; 需要 12/15/18/21/24 个 word。`)
                 return
             }
-            el.statusLine.textContent = '校验助记词并生成 master key...'
+            setStatusLine('')
             state.rootResult = await resolveRootSource({
                 importMode: 'mnemonic',
                 mnemonicSentence: wordState.normalizedSentence,
@@ -731,7 +737,7 @@ async function runDerive() {
                 showStatusError(`导入内容还没输完整, 目前已输入 ${xkey.length} 个字符。`)
                 return
             }
-            el.statusLine.textContent = '校验 xpub/xprv...'
+            setStatusLine('')
             state.rootResult = await resolveRootSource({ importMode: 'xkey', xkeyText: xkey })
         }
 
@@ -755,9 +761,7 @@ async function runDerive() {
             return
 
         state.outputs = derived
-        el.statusLine.textContent = state.rootResult.kind === 'mnemonic'
-            ? '助记词有效, 已生成 BIP44 节点。'
-            : '导入 key 有效, 已按可用子路径生成节点。'
+        setStatusLine('')
         renderRootInfo()
         renderOutputs()
         renderPathSummary()
