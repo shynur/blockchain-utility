@@ -84,8 +84,8 @@ function cloneRequestedKinds() {
 
 const requestedKindsState = cloneRequestedKinds()
 const addressAStateByCoinType = new Map([
-    [0, false],
-    [1, false],
+    [0, true],
+    [1, true],
 ])
 const STATUS_ERROR_HIGHLIGHTS = new Map([
     ['未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app', ['未知协议类型']],
