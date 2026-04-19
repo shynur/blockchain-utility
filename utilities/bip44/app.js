@@ -1,4 +1,4 @@
-import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
+import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
@@ -282,6 +282,42 @@ function isPathCardLocked(group) {
     return (PATH_CARD_DEPTHS[group] ?? Infinity) <= getImportedPathDepth()
 }
 
+function syncXkeyLockedValues(root) {
+    const depth = root.depth
+    if (depth < 2) return
+
+    const childNumber = root.i
+    const indexValue = childNumber >= HARDENED_OFFSET ? childNumber - HARDENED_OFFSET : childNumber
+
+    if (depth === 2) {
+        el.coinType.value = String(indexValue)
+        el.coinType.disabled = true
+    } else if (depth === 3) {
+        el.accountInput.value = String(indexValue)
+        syncAccountInput()
+        el.accountInput.disabled = true
+    } else if (depth === 4) {
+        state.change = /** @type {0 | 1} */ (indexValue)
+        el.changeSwitch.disabled = true
+    } else if (depth === 5) {
+        addressState.values = []
+        addressState.updateDraft(String(indexValue))
+        addressState.commitDraft()
+        addressState.updateDraft('0')
+        el.addressInput.disabled = true
+        el.addressAdd.disabled = true
+        renderAddressChips()
+    }
+}
+
+function resetXkeyLockedValues() {
+    el.coinType.disabled = false
+    el.accountInput.disabled = false
+    el.changeSwitch.disabled = false
+    el.addressInput.disabled = false
+    el.addressAdd.disabled = false
+}
+
 function syncMaskedInputs() {
     const isImportMode = rootModel.mode === 'xkey'
 
@@ -318,17 +354,26 @@ function syncMaskedInputs() {
     }
 }
 
+function isAddressCardLocked() {
+    return getImportedPathDepth() >= 5
+}
+
 function renderAddressChips() {
+    const locked = isAddressCardLocked()
     el.addressList.replaceChildren()
     for (const value of addressState.values) {
         const chip = document.createElement('span')
         chip.className = 'chip'
-        chip.innerHTML = `<span>${value}</span><button type="button" aria-label="移除 ${value}">x</button>`
-        chip.querySelector('button').addEventListener('click', () => {
-            addressState.remove(value)
-            renderAddressChips()
-            scheduleDerive()
-        })
+        if (locked) {
+            chip.innerHTML = `<span>${value}</span>`
+        } else {
+            chip.innerHTML = `<span>${value}</span><button type="button" aria-label="移除 ${value}">x</button>`
+            chip.querySelector('button').addEventListener('click', () => {
+                addressState.remove(value)
+                renderAddressChips()
+                scheduleDerive()
+            })
+        }
         el.addressList.append(chip)
     }
 }
@@ -753,6 +798,7 @@ function clearResults(message) {
     state.rootInfo = null
     state.entryValidated = false
     state.outputs = []
+    resetXkeyLockedValues()
     showStatusError('')
     setStatusLine(message)
     syncGatedPanels()
@@ -856,6 +902,7 @@ async function runDerive() {
                 showStatusError(importValidation.error)
                 return
             }
+            syncXkeyLockedValues(state.rootResult.root)
         }
         state.entryValidated = true
         syncGatedPanels()

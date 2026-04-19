@@ -302,6 +302,10 @@ small {
     cursor: default;
 }
 
+.path-card button:disabled {
+    cursor: default;
+}
+
 .path-card.locked.selected {
     background: linear-gradient(135deg, rgba(15, 107, 92, 0.22), rgba(255, 255, 255, 0.72));
 }
