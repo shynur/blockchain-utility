@@ -260,12 +260,14 @@ small {
     box-shadow: inset 0 0 0 1px rgba(15, 107, 92, 0.14), 0 18px 40px rgba(15, 107, 92, 0.08);
 }
 
-.path-card:hover {
+.path-card:not(.locked):hover {
     transform: translateY(-1px);
 }
 
 .path-card.locked {
     background: linear-gradient(135deg, rgba(15, 107, 92, 0.12), rgba(255, 255, 255, 0.46));
+    box-shadow: none;
+    cursor: default;
 }
 
 .path-card.locked.selected {
@@ -323,6 +325,10 @@ small {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+}
+
+.kind-picks[hidden] {
+    display: none;
 }
 
 .kind-picks .checkline {

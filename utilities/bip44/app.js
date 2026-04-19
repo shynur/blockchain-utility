@@ -1,4 +1,4 @@
-import { COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
+import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
@@ -37,6 +37,7 @@ const AVAILABLE_OUTPUT_KINDS = {
     address: ['k', 'K', 'A'],
 }
 const PATH_CARD_GROUPS = Object.keys(DEFAULT_REQUESTED_KINDS)
+const PATH_CARD_DEPTHS = Object.fromEntries(BIP44_LEVELS.map(level => [level.id, level.depth]))
 
 const el = {
     rootInput: document.querySelector('#root-input'),
@@ -62,6 +63,9 @@ const el = {
 
 const pathCards = Object.fromEntries(
     [...document.querySelectorAll('[data-path-card]')].map(card => [card.dataset.pathCard, card]),
+)
+const kindPickWraps = Object.fromEntries(
+    [...document.querySelectorAll('[data-kind-group]')].map(wrap => [wrap.dataset.kindGroup, wrap]),
 )
 
 for (const option of COIN_TYPES) {
@@ -134,7 +138,7 @@ const addressKindInputs = [...document.querySelectorAll('[data-output-kind="A"]'
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
     const canAddress = group === 'address' && canDeriveBitcoinAddress(getSelectedCoinType())
-    const isSelected = state.selectedPathCards.has(group)
+    const isSelected = !isPathCardLocked(group) && state.selectedPathCards.has(group)
     return {
         xprv: isSelected && allowedKinds.has('xprv') && kinds.xprv,
         xpub: isSelected && allowedKinds.has('xpub') && kinds.xpub,
@@ -231,8 +235,21 @@ function fitTextareaToContent(textarea) {
 }
 
 function syncPathCardSelection() {
-    for (const [group, card] of Object.entries(pathCards))
-        card.classList.toggle('selected', state.selectedPathCards.has(group))
+    for (const [group, card] of Object.entries(pathCards)) {
+        const locked = isPathCardLocked(group)
+        card.classList.toggle('locked', locked)
+        card.classList.toggle('selected', !locked && state.selectedPathCards.has(group))
+        card.setAttribute('aria-disabled', String(locked))
+        kindPickWraps[group].hidden = locked
+    }
+}
+
+function getImportedPathDepth() {
+    return state.rootResult?.kind === 'xkey' ? state.rootResult.root.depth : 0
+}
+
+function isPathCardLocked(group) {
+    return (PATH_CARD_DEPTHS[group] ?? Infinity) <= getImportedPathDepth()
 }
 
 function syncMaskedInputs() {
@@ -380,6 +397,8 @@ function syncKindAvailability() {
         label.classList.toggle('disabled', !canShowAddress)
         input.checked = getAddressAState()
     }
+
+    syncPathCardSelection()
 }
 
 function shouldTogglePathCardFromClick(event) {
@@ -394,6 +413,8 @@ function toggleSetMembership(set, value) {
 }
 
 function togglePathCardSelection(group) {
+    if (isPathCardLocked(group))
+        return
     toggleSetMembership(state.selectedPathCards, group)
     syncPathCardSelection()
     scheduleDerive()
