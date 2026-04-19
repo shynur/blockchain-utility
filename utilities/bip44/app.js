@@ -236,12 +236,26 @@ function fitTextareaToContent(textarea) {
     textarea.style.height = `${textarea.scrollHeight}px`
 }
 
-function clampMaskedInputSelection(input, model) {
-    const maxSelectionEnd = model.getDisplayCursorPosition()
-    const selectionStart = input.selectionStart ?? maxSelectionEnd
+function clampMaskedInputSelection(input, model, dragAnchor) {
+    const maxPos = model.getDisplayCursorPosition()
+
+    if (dragAnchor != null) {
+        const rawStart = input.selectionStart ?? maxPos
+        const rawEnd = input.selectionEnd ?? rawStart
+        const focus = rawStart === dragAnchor ? rawEnd : rawStart
+        const clampedFocus = Math.min(focus, maxPos)
+        const lo = Math.min(dragAnchor, clampedFocus)
+        const hi = Math.max(dragAnchor, clampedFocus)
+        const dir = clampedFocus <= dragAnchor ? 'backward' : 'forward'
+        if (rawStart !== lo || rawEnd !== hi)
+            input.setSelectionRange(lo, hi, dir)
+        return
+    }
+
+    const selectionStart = input.selectionStart ?? maxPos
     const selectionEnd = input.selectionEnd ?? selectionStart
-    const nextSelectionStart = Math.min(selectionStart, maxSelectionEnd)
-    const nextSelectionEnd = Math.min(selectionEnd, maxSelectionEnd)
+    const nextSelectionStart = Math.min(selectionStart, maxPos)
+    const nextSelectionEnd = Math.min(selectionEnd, maxPos)
 
     if (selectionStart === nextSelectionStart && selectionEnd === nextSelectionEnd)
         return
@@ -883,19 +897,35 @@ function bindMaskedInput(input, model) {
             model.applyPaste(event.clipboardData.getData('text/plain'))
         })
     })
+    input.addEventListener('drop', event => event.preventDefault())
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
-    input.addEventListener('mouseup', () => {
+    let dragAnchor = null
+    input.addEventListener('mousedown', () => {
+        const maxPos = model.getDisplayCursorPosition()
         window.requestAnimationFrame(() => {
-            clampMaskedInputSelection(input, model)
+            const rawPos = input.selectionStart ?? maxPos
+            dragAnchor = Math.min(rawPos, maxPos)
+            clampMaskedInputSelection(input, model, dragAnchor)
+            const clampLoop = () => {
+                if (dragAnchor == null)
+                    return
+                clampMaskedInputSelection(input, model, dragAnchor)
+                window.requestAnimationFrame(clampLoop)
+            }
+            window.requestAnimationFrame(clampLoop)
         })
+    })
+    document.addEventListener('mouseup', () => {
+        dragAnchor = null
+    })
+    document.addEventListener('selectionchange', () => {
+        if (document.activeElement === input)
+            clampMaskedInputSelection(input, model)
     })
     input.addEventListener('focus', () => {
         window.requestAnimationFrame(() => {
             clampMaskedInputSelection(input, model)
         })
-    })
-    input.addEventListener('select', () => {
-        clampMaskedInputSelection(input, model)
     })
 }
 
