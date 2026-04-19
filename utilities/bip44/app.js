@@ -255,18 +255,21 @@ function isPathCardLocked(group) {
 }
 
 function syncMaskedInputs() {
+    const isImportMode = rootModel.mode === 'xkey'
+
     setFieldValue(el.rootInput, rootModel.getDisplayValue())
     setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
     el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
     el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
-
-    el.passphraseWrap.classList.toggle('hidden', rootModel.mode === 'xkey')
+    
+    el.passphraseWrap.classList.toggle('hidden', isImportMode)
+    el.rootError.classList.toggle('compact-gap', isImportMode)
     el.rootInput.setAttribute('wrap', 'soft')
     el.passphraseInput.setAttribute('wrap', 'soft')
     fitTextareaToContent(el.rootInput)
     fitTextareaToContent(el.passphraseInput)
 
-    if (rootModel.mode === 'xkey') {
+    if (isImportMode) {
         el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')
             ? 'xprv: 前缀保留明文, 后续字符隐藏; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'
             : 'xpub: 只接受 base58 字符; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'

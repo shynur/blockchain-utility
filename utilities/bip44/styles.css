@@ -215,6 +215,10 @@ small {
     font-weight: 700;
 }
 
+#root-error.compact-gap:empty {
+    display: none;
+}
+
 .compact-field {
     margin-top: 18px;
 }
