@@ -742,6 +742,8 @@ function splitHighlightedText(text, highlights) {
 }
 
 function renderOutputs() {
+    state.revealXprv.clear()
+    state.revealPrivateKey.clear()
     el.outputs.replaceChildren()
     el.outputs.classList.toggle('empty', state.outputs.length === 0)
     if (!state.outputs.length) {
