@@ -292,7 +292,7 @@ small {
 }
 
 .path-card:not(.locked):hover {
-    transform: translateY(-1px);
+    transform: translateY(-6px);
 }
 
 .path-card.locked {
