@@ -741,7 +741,7 @@ function splitHighlightedText(text, highlights) {
     return parts
 }
 
-function renderOutputs() {
+function renderOutputsImmediate() {
     state.revealXprv.clear()
     state.revealPrivateKey.clear()
     el.outputs.replaceChildren()
@@ -754,6 +754,7 @@ function renderOutputs() {
     for (const output of state.outputs) {
         const card = document.createElement('article')
         card.className = 'output-card'
+        card.style.viewTransitionName = `oc-${output.id}`
         const rows = [
             renderSecretRow('xprv', output),
             renderSecretRow('k', output),
@@ -779,6 +780,15 @@ function renderOutputs() {
         attachSecretToggle('k', output, card)
         el.outputs.append(card)
     }
+}
+
+function renderOutputs() {
+    const canAnimate = typeof document.startViewTransition === 'function'
+        && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (canAnimate)
+        document.startViewTransition(renderOutputsImmediate)
+    else
+        renderOutputsImmediate()
 }
 
 function syncGatedPanels() {
