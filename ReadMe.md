@@ -9,11 +9,11 @@
 > [!WARNING]
 > 如果要使用该工具生成密钥, 请用浏览器提供的无痕模式, 并关闭任何不信赖的浏览器插件.
 
-[助记句生成器 (BIP 39)](utilities/bip39)
+[助记句生成器 (BIP 39)](apps/bip39)
 
-[HD 密钥树生成 (BIP 32)](utilities/bip32)
+[HD 密钥树生成 (BIP 32)](apps/bip32)
 
-[助记词钱包 (BIP 44)](utilities/bip44)
+[助记词钱包 (BIP 44)](apps/bip44)
 
 ____
 
