@@ -1,6 +1,6 @@
 import { libbip32, libbip39 } from '../deps.mjs'
 import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET } from './constants.mjs'
-import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeCompressedPublicKeyHex, serializePrivateKeyHex } from './utils.mjs'
+import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeCompressedPublicKeyHex, serializePrivateKeyHex, unhardenIndex } from './utils.mjs'
 
 const EMPTY_REQUESTED_KINDS = { xprv: false, xpub: false, k: false, K: false, A: false }
 const SELECTABLE_SEGMENT_BY_DEPTH = [
@@ -38,10 +38,6 @@ export function getCoinTypeOption(value) {
 
 function isKnownCoinType(value) {
     return COIN_TYPES.some(option => option.value === value)
-}
-
-function isHardenedChildNumber(index) {
-    return index >= HARDENED_OFFSET
 }
 
 function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
@@ -236,8 +232,8 @@ export function validateBip44Import(root) {
         return { ok: true, error: '' }
 
     const childNumber = root.i
-    const isHardened = isHardenedChildNumber(childNumber)
-    const indexValue = isHardened ? childNumber - HARDENED_OFFSET : childNumber
+    const isHardened = childNumber >= HARDENED_OFFSET
+    const indexValue = unhardenIndex(childNumber)
 
     if (depth === 1) {
         return isHardened && indexValue === 44
@@ -348,9 +344,9 @@ export async function deriveBip44(root, form) {
 
     if (current.depth === 4) {
         const requestedKinds = getRequestedKinds(form, 'address')
-        for (const index of form.addressIndexes) {
-            const child = await current.tree(`/${index}`)
-            if (hasRequestedKinds(requestedKinds)) {
+        if (hasRequestedKinds(requestedKinds)) {
+            for (const index of form.addressIndexes) {
+                const child = await current.tree(`/${index}`)
                 outputs.push({
                     id: `address-${index}`,
                     label: `${index}`,
@@ -401,10 +397,8 @@ export async function describeRootKey(key) {
         depth,
         level: describeBip44Level(depth),
         index: depth > 0 ? formatChildNumber(key.i) : null,
-        isHardened: depth > 0 ? isHardenedChildNumber(key.i) : false,
-        indexValue: depth > 0
-            ? (key.i >= HARDENED_OFFSET ? key.i - HARDENED_OFFSET : key.i)
-            : null,
+        isHardened: depth > 0 ? key.i >= HARDENED_OFFSET : false,
+        indexValue: depth > 0 ? unhardenIndex(key.i) : null,
         parentFingerprint: depth > 0 ? bytesToHex(key.parent_fingerprint) : null,
         identifierHex: bytesToHex(identifier),
     }

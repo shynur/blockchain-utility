@@ -2,7 +2,7 @@ import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET, VALID_MNEMONIC_COUNTS } from
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords, unhardenIndex } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -78,15 +78,12 @@ for (const option of COIN_TYPES) {
     el.coinType.append(node)
 }
 
-function cloneRequestedKinds() {
-    return Object.fromEntries(Object.entries(DEFAULT_REQUESTED_KINDS).map(([key, value]) => [key, { ...value }]))
-}
-
-const requestedKindsState = cloneRequestedKinds()
-const addressAStateByCoinType = new Map([
-    [0, true],
-    [1, true],
-])
+const requestedKindsState = Object.fromEntries(
+    Object.entries(DEFAULT_REQUESTED_KINDS).map(([key, value]) => [key, { ...value }]),
+)
+const addressAStateByCoinType = new Map(
+    COIN_TYPES.filter(c => canDeriveBitcoinAddress(c.value)).map(c => [c.value, true]),
+)
 const STATUS_ERROR_HIGHLIGHTS = new Map([
     ['未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app', ['未知协议类型']],
     ['未知币种, 考虑更换钱包 app', ['未知币种']],
@@ -287,7 +284,7 @@ function syncXkeyLockedValues(root) {
     if (depth < 2) return
 
     const childNumber = root.i
-    const indexValue = childNumber >= HARDENED_OFFSET ? childNumber - HARDENED_OFFSET : childNumber
+    const indexValue = unhardenIndex(childNumber)
 
     if (depth === 2) {
         el.coinType.value = String(indexValue)
@@ -354,12 +351,8 @@ function syncMaskedInputs() {
     }
 }
 
-function isAddressCardLocked() {
-    return getImportedPathDepth() >= 5
-}
-
 function renderAddressChips() {
-    const locked = isAddressCardLocked()
+    const locked = getImportedPathDepth() >= 5
     el.addressList.replaceChildren()
     for (const value of addressState.values) {
         const chip = document.createElement('span')
@@ -390,25 +383,23 @@ function commitAddressDraft() {
     scheduleDerive()
 }
 
-function appendPathTextPart(container, text, className = '') {
+function appendSpan(container, text, className = '') {
     const node = document.createElement('span')
     if (className)
         node.className = className
-    node.textContent = text
+    if (text)
+        node.textContent = text
     container.append(node)
-}
-
-function appendPathBreak(container) {
-    container.append(document.createElement('wbr'))
+    return node
 }
 
 function renderUncertainSegment(container, text) {
     const hardenedMatch = text.match(/^(.+)'$/)
     if (hardenedMatch) {
-        appendPathTextPart(container, hardenedMatch[1], 'path-segment path-uncertain')
-        appendPathTextPart(container, "'", 'path-segment')
+        appendSpan(container, hardenedMatch[1], 'path-segment path-uncertain')
+        appendSpan(container, "'", 'path-segment')
     } else {
-        appendPathTextPart(container, text, 'path-segment path-uncertain')
+        appendSpan(container, text, 'path-segment path-uncertain')
     }
 }
 
@@ -421,25 +412,25 @@ function renderPathSegment(container, segment) {
 
     const match = segment.match(/^\{(\d+(?:,\d+)*)\}$/)
     if (!match) {
-        appendPathTextPart(container, segment, 'path-segment')
+        appendSpan(container, segment, 'path-segment')
         return
     }
 
-    appendPathTextPart(container, '{', 'path-address-token')
-    appendPathBreak(container)
+    appendSpan(container, '{', 'path-address-token')
+    container.append(document.createElement('wbr'))
 
     const values = match[1].split(',')
     for (const [index, value] of values.entries()) {
-        appendPathTextPart(container, value, 'path-address-token')
+        appendSpan(container, value, 'path-address-token')
         if (index >= values.length - 1)
             continue
 
-        appendPathTextPart(container, ',', 'path-address-token')
-        appendPathBreak(container)
+        appendSpan(container, ',', 'path-address-token')
+        container.append(document.createElement('wbr'))
     }
 
-    appendPathBreak(container)
-    appendPathTextPart(container, '}', 'path-address-token')
+    container.append(document.createElement('wbr'))
+    appendSpan(container, '}', 'path-address-token')
 }
 
 function renderPathText(container, path) {
@@ -975,15 +966,20 @@ function bindMaskedInput(input, model) {
     input.addEventListener('drop', event => event.preventDefault())
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
     let dragAnchor = null
+    let loopRunning = false
     input.addEventListener('mousedown', () => {
+        if (loopRunning) return
         const maxPos = model.getDisplayCursorPosition()
         window.requestAnimationFrame(() => {
             const rawPos = input.selectionStart ?? maxPos
             dragAnchor = Math.min(rawPos, maxPos)
+            loopRunning = true
             clampMaskedInputSelection(input, model, dragAnchor)
             const clampLoop = () => {
-                if (dragAnchor == null)
+                if (dragAnchor == null) {
+                    loopRunning = false
                     return
+                }
                 clampMaskedInputSelection(input, model, dragAnchor)
                 window.requestAnimationFrame(clampLoop)
             }

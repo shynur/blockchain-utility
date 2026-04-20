@@ -19,8 +19,12 @@ export function bytesToHex(bytes) {
     return Array.from(bytes).map(byte => byte.toString(16).padStart(2, '0')).join('')
 }
 
+export function unhardenIndex(index) {
+    return index >= HARDENED_OFFSET ? index - HARDENED_OFFSET : index
+}
+
 export function formatChildNumber(index) {
-    return index >= HARDENED_OFFSET ? `${index - HARDENED_OFFSET}'` : String(index)
+    return index >= HARDENED_OFFSET ? `${unhardenIndex(index)}'` : String(index)
 }
 
 export function serializeCompressedPublicKey(key) {
