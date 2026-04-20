@@ -687,14 +687,37 @@ function handleUint31BeforeInput(event, input, errorEl, label) {
 }
 
 function handleUint31Paste(event, input, errorEl, label) {
+    event.preventDefault()
+
     const pastedText = event.clipboardData.getData('text/plain')
-    if (!isUint31TextTooLarge(getProjectedTextInputValue(input, pastedText))) {
-        errorEl.textContent = ''
-        return
+    const projected = getProjectedTextInputValue(input, pastedText)
+    const overflow = isUint31TextTooLarge(projected)
+
+    // Find the longest prefix of the pasted text that keeps the value in range.
+    let end = overflow ? 0 : pastedText.length
+    if (overflow) {
+        for (let i = 1; i <= pastedText.length; i++) {
+            if (!isUint31TextTooLarge(getProjectedTextInputValue(input, pastedText.slice(0, i))))
+                end = i
+        }
     }
 
-    event.preventDefault()
-    rejectOverflowing(errorEl, label)
+    const textToInsert = pastedText.slice(0, end)
+    const selStart = input.selectionStart ?? input.value.length
+    const selEnd = input.selectionEnd ?? selStart
+    const rawBeforeCursor = input.value.slice(0, selStart) + textToInsert
+    const rawValue = rawBeforeCursor + input.value.slice(selEnd)
+
+    const normalized = normalizeRequiredUint31Text(rawValue)
+    const leadingZerosRemoved = clampUint31Text(rawValue).length - normalized.length
+    const cursorPos = Math.max(0, clampUint31Text(rawBeforeCursor).length - leadingZerosRemoved)
+
+    input.value = normalized
+    input.setSelectionRange(cursorPos, cursorPos)
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+
+    if (overflow)
+        rejectOverflowing(errorEl, label)
 }
 
 function renderRootInfo() {
