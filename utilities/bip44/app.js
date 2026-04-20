@@ -432,7 +432,7 @@ function renderAddressChips() {
         if (locked) {
             chip.innerHTML = `<span>${value}</span>`
         } else {
-            chip.innerHTML = `<span>${value}</span><button type="button" aria-label="移除 ${value}">x</button>`
+            chip.innerHTML = `<span>${value}</span><button type="button" aria-label="移除 ${value}">❌</button>`
             chip.querySelector('button').addEventListener('click', () => {
                 addressState.remove(value)
                 renderAddressChips()
