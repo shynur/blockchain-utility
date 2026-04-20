@@ -5,7 +5,7 @@
 - `index.html`: Entry point for the Web app.
 - `deps.mjs`: 导出可供本项目使用的外部依赖.  (禁止私自修改它以添加依赖; 禁止绕过它使用其它依赖.)
 - `docs/bip-44.mediawiki`: BIP 44 paper.
-- `Design.md`: Product specification (business logic and UI/UX).
+- `Design.md`: Product specification (business logic and UI/UX).  **For reference only, subject to actual implementation.**
 
 ## Build
 
