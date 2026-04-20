@@ -29,4 +29,4 @@ The app (i.e., this entire directory) will ultimately be deployed to the server 
 
 ## Git
 
-See <https://gist.githubusercontent.com/shynur/49d402f4540eab51b2e777277b455615/raw/e2e269023893fd5641b433ccec60459d334f939f/CONTRIBUTE.md>’s section `## Commit Message` for the Git commit message guidelines.
+See <CONTRIBUTE.md>’s section `### Commit Message` for the Git commit message guidelines.
