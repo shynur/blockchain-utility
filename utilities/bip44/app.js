@@ -309,10 +309,12 @@ function clampMaskedInputSelection(input, model, dragAnchor) {
 function syncPathCardSelection() {
     for (const [group, card] of Object.entries(pathCards)) {
         const locked = isPathCardLocked(group)
+        const blocked = isPathCardBlockedByXpub(group)
+        card.hidden = blocked
         card.classList.toggle('locked', locked)
-        card.classList.toggle('selected', !locked && state.selectedPathCards.has(group))
-        card.setAttribute('aria-disabled', String(locked))
-        kindPickWraps[group].hidden = locked
+        card.classList.toggle('selected', !locked && !blocked && state.selectedPathCards.has(group))
+        card.setAttribute('aria-disabled', String(locked || blocked))
+        kindPickWraps[group].hidden = locked || blocked
     }
 }
 
@@ -322,6 +324,25 @@ function getImportedPathDepth() {
 
 function isPathCardLocked(group) {
     return (PATH_CARD_DEPTHS[group] ?? Infinity) < getImportedPathDepth()
+}
+
+// BIP 44 depths 1–3 (purpose', coin_type', account') use hardened derivation.
+// An xpub cannot perform hardened derivation, so any card whose path
+// passes through a remaining hardened level is unreachable and should be hidden.
+const HARDENED_DEPTHS = new Set(
+    BIP44_LEVELS.filter(l => l.label.endsWith("'")).map(l => l.depth),
+)
+
+function isPathCardBlockedByXpub(group) {
+    const root = state.rootResult?.root
+    if (!root || state.rootResult.kind !== 'xkey' || !root.is_public_key())
+        return false
+    const cardDepth = PATH_CARD_DEPTHS[group] ?? Infinity
+    if (cardDepth <= root.depth) return false
+    for (let d = root.depth + 1; d <= cardDepth; d++) {
+        if (HARDENED_DEPTHS.has(d)) return true
+    }
+    return false
 }
 
 function syncXkeyLockedValues(root) {
@@ -554,7 +575,7 @@ function toggleSetMembership(set, value) {
 }
 
 function togglePathCardSelection(group) {
-    if (isPathCardLocked(group))
+    if (isPathCardLocked(group) || isPathCardBlockedByXpub(group))
         return
     toggleSetMembership(state.selectedPathCards, group)
     syncPathCardSelection()

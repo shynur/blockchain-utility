@@ -272,6 +272,10 @@ small {
     }
 }
 
+.path-card[hidden] {
+    display: none;
+}
+
 .path-card {
     min-height: 112px;
     display: flex;
