@@ -14,10 +14,6 @@
 
 不需要大标题.
 
-### 部署徽章
-
-GitHub Pages 部署进度徽章, 半透明悬浮在页面右上角.
-
 ### 输入框: 用于生成子树的根节点
 
 有一个输入框, 提示用户输入 "种子 / [xt]{pub,prv}".
@@ -150,18 +146,6 @@ non-master 根节点和其余节点一样, 提供自己的 index number (硬化�
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Courier New', monospace; background: var(--bg); color: var(--fg); min-height: 100vh; padding: 16px; }
 
-#deploy-badge {
-  position: fixed; top: 4px; right: 4px; opacity: 0.5; z-index: 900;
-  overflow: hidden; display: inline-block; border-radius: 3px;
-}
-#deploy-badge img { display: block; height: 14px; }
-#deploy-badge::after {
-  content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
-  pointer-events: none;
-}
-#deploy-badge:hover::after { left: 150%; transition: left 0.5s ease-in-out; }
-
 #input-section { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
 #seed-input {
   flex: 1; padding: 8px 12px; font-family: inherit; font-size: 24px;
@@ -242,10 +226,6 @@ svg { -webkit-touch-callout: none; }
 </style>
 </head>
 <body>
-
-<a id="deploy-badge" href="https://github.com/shynur/mycrypto/actions/workflows/pages/pages-build-deployment" target="_blank" rel="noopener noreferrer">
-  <img src="https://github.com/shynur/mycrypto/actions/workflows/pages/pages-build-deployment/badge.svg" alt="pages-build-deployment">
-</a>
 
 <div id="input-section">
   <textarea id="seed-input" rows="1" placeholder="种子 (hex) / xprv / xpub / tprv / tpub" spellcheck="false" autocomplete="off" autofocus></textarea>
