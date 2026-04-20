@@ -1,7 +1,7 @@
 ## 在线测试工具
 
 > [!NOTE]
-> 需要在 <https://shynur.github.io/blockchain-utility> 页面打开使用.
+> 需要在 <https://shynur.github.io/mycrypto> 页面打开使用.
 
 > [!TIP]
 > 测试工具可离线使用.
