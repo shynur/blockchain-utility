@@ -74,3 +74,7 @@ export function escapeHtml(text) {
 export function pluralizeWords(count) {
     return `${count} word${count === 1 ? '' : 's'}`
 }
+
+export function stripUncertaintyMarkers(text) {
+    return text.replace(/^~|~$/g, '')
+}

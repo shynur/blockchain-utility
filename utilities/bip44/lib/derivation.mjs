@@ -373,33 +373,34 @@ export async function deriveBip44(root, form) {
  *   addressIndexes: number[],
  * }} form
  */
+function resolveSegment(index, form) {
+    const segment = SELECTABLE_SEGMENT_BY_DEPTH[index]
+    return typeof segment === 'function' ? segment(form) : segment
+}
+
+// Segments 0..depth-1 reflect the imported xkey's known prefix; the segment
+// at depth-1 is the xkey's own child number, others are marked as uncertain.
+function buildFixedSegments(root, form) {
+    return Array.from({ length: Math.min(root.depth, 5) }, (_, index) =>
+        index + 1 === root.depth
+            ? formatChildNumber(root.i)
+            : `~${resolveSegment(index, form)}~`,
+    )
+}
+
 /**
  * @param {InstanceType<typeof libbip32.XKey>} root
- * @param {{
- *   coinType: number,
- *   account: number,
- *   change: 0 | 1,
- *   addressIndexes: number[],
- * }} form
  * @returns {{ insideN: string[], outsideN: string[] } | null}
  *   `null` when depth is 0 (master public key).
  *   Segments use the same `~value~` convention as {@link getPathPreview}
  *   for intermediate (uncertain) values.
  */
 export function getXpubPathSegments(root, form) {
-    const depth = root.depth
-    if (depth === 0) return null
+    if (root.depth === 0) return null
 
     const LAST_HARDENED_DEPTH = 3
-    const nDepth = Math.min(depth, LAST_HARDENED_DEPTH)
-
-    const segments = Array.from({ length: Math.min(depth, 5) }, (_, index) => {
-        if (index + 1 === depth)
-            return formatChildNumber(root.i)
-        const segment = SELECTABLE_SEGMENT_BY_DEPTH[index]
-        const value = typeof segment === 'function' ? segment(form) : segment
-        return `~${value}~`
-    })
+    const nDepth = Math.min(root.depth, LAST_HARDENED_DEPTH)
+    const segments = buildFixedSegments(root, form)
 
     return {
         insideN: segments.slice(0, nDepth),
@@ -408,18 +409,11 @@ export function getXpubPathSegments(root, form) {
 }
 
 export function getPathPreview(root, form) {
-    const fixedSegments = root.depth > 0
-        ? Array.from({ length: Math.min(root.depth, 5) }, (_, index) => {
-            if (index + 1 === root.depth)
-                return formatChildNumber(root.i)
-            const segment = SELECTABLE_SEGMENT_BY_DEPTH[index]
-            const value = typeof segment === 'function' ? segment(form) : segment
-            return `~${value}~`
-        })
-        : []
+    const fixedSegments = buildFixedSegments(root, form)
+    const start = Math.min(root.depth, SELECTABLE_SEGMENT_BY_DEPTH.length)
     const selectableSegments = SELECTABLE_SEGMENT_BY_DEPTH
-        .slice(Math.min(root.depth, SELECTABLE_SEGMENT_BY_DEPTH.length))
-        .map(segment => typeof segment === 'function' ? segment(form) : segment)
+        .slice(start)
+        .map((_, offset) => resolveSegment(start + offset, form))
 
     return ['m', ...fixedSegments, ...selectableSegments].join('/')
 }

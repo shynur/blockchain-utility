@@ -1,8 +1,8 @@
-import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
+import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords, unhardenIndex } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -79,9 +79,7 @@ for (const option of COIN_TYPES) {
     el.coinType.append(node)
 }
 
-const requestedKindsState = Object.fromEntries(
-    Object.entries(DEFAULT_REQUESTED_KINDS).map(([key, value]) => [key, { ...value }]),
-)
+const requestedKindsState = structuredClone(DEFAULT_REQUESTED_KINDS)
 const addressAStateByCoinType = new Map(
     COIN_TYPES.filter(c => canDeriveBitcoinAddress(c.value)).map(c => [c.value, true]),
 )
@@ -397,8 +395,6 @@ function syncMaskedInputs() {
     
     el.passphraseWrap.classList.toggle('hidden', isImportMode)
     el.rootError.classList.toggle('compact-gap', isImportMode)
-    el.rootInput.setAttribute('wrap', 'soft')
-    el.passphraseInput.setAttribute('wrap', 'soft')
     fitTextareaToContent(el.rootInput)
     fitTextareaToContent(el.passphraseInput)
 
@@ -505,17 +501,20 @@ function renderPathSegment(container, segment) {
     appendSpan(container, '}', 'path-address-token')
 }
 
+function appendSeparatedSegments(container, segments) {
+    for (const segment of segments) {
+        appendSeparator(container)
+        renderPathSegment(container, segment)
+    }
+}
+
 function renderPathText(container, path) {
     container.replaceChildren()
     container.setAttribute('aria-label', path)
 
-    const segments = path.split('/')
-    for (const [index, segment] of segments.entries()) {
-        if (index > 0)
-            appendSeparator(container)
-
-        renderPathSegment(container, segment)
-    }
+    const [first, ...rest] = path.split('/')
+    renderPathSegment(container, first)
+    appendSeparatedSegments(container, rest)
 }
 
 function renderXpubPathNotation(container, root, form) {
@@ -528,9 +527,8 @@ function renderXpubPathNotation(container, root, form) {
         return
     }
 
-    const strip = s => s.replace(/^~|~$/g, '')
-    const nParts = ['m', ...result.insideN.map(strip)]
-    const outerParts = result.outsideN.map(strip)
+    const nParts = ['m', ...result.insideN.map(stripUncertaintyMarkers)]
+    const outerParts = result.outsideN.map(stripUncertaintyMarkers)
     let ariaLabel = `N(${nParts.join(' / ')})`
     if (outerParts.length > 0)
         ariaLabel += ' / ' + outerParts.join(' / ')
@@ -538,16 +536,9 @@ function renderXpubPathNotation(container, root, form) {
 
     appendSpan(container, 'N(', 'path-notation')
     renderPathSegment(container, 'm')
-    for (const seg of result.insideN) {
-        appendSeparator(container)
-        renderPathSegment(container, seg)
-    }
+    appendSeparatedSegments(container, result.insideN)
     appendSpan(container, ')', 'path-notation')
-
-    for (const seg of result.outsideN) {
-        appendSeparator(container)
-        renderPathSegment(container, seg)
-    }
+    appendSeparatedSegments(container, result.outsideN)
 }
 
 function appendSeparator(container) {
@@ -901,15 +892,11 @@ function renderOutputAbsolutePath(container, output) {
         : []
 
     const allSegments = [...xpubSegs.insideN, ...xpubSegs.outsideN, ...outsideSuffix]
-    const strip = s => s.replace(/^~|~$/g, '')
-    const plainSegments = allSegments.map(strip)
+    const plainSegments = allSegments.map(stripUncertaintyMarkers)
     container.setAttribute('aria-label', ['m', ...plainSegments].join(' / '))
 
     renderPathSegment(container, 'm')
-    for (const seg of plainSegments) {
-        appendSeparator(container)
-        renderPathSegment(container, seg)
-    }
+    appendSeparatedSegments(container, plainSegments)
 }
 
 function renderOutputsImmediate() {
@@ -1115,6 +1102,7 @@ async function runDerive() {
 
 let deriveTimer = 0
 function scheduleDerive() {
+    state.pendingToken += 1
     window.clearTimeout(deriveTimer)
     deriveTimer = window.setTimeout(runDerive, 120)
 }
@@ -1145,6 +1133,8 @@ function handleMaskedKeydown(event, model) {
         })
     }
 }
+
+const maskedInputBindings = []
 
 function bindMaskedInput(input, model) {
     input.addEventListener('keydown', event => handleMaskedKeydown(event, model))
@@ -1177,13 +1167,10 @@ function bindMaskedInput(input, model) {
             window.requestAnimationFrame(clampLoop)
         })
     })
-    document.addEventListener('mouseup', () => {
-        dragAnchor = null
-    })
-    document.addEventListener('selectionchange', () => {
-        if (document.activeElement === input)
-            clampMaskedInputSelection(input, model)
-    })
+    const endDrag = () => { dragAnchor = null }
+    window.addEventListener('mouseup', endDrag)
+    window.addEventListener('pointercancel', endDrag)
+    maskedInputBindings.push({ input, model })
     input.addEventListener('focus', () => {
         window.requestAnimationFrame(() => {
             clampMaskedInputSelection(input, model)
@@ -1256,6 +1243,13 @@ document.addEventListener('pointermove', handlePathCardPointerEvent)
 document.addEventListener('pointerdown', handlePathCardPointerEvent)
 document.documentElement.addEventListener('pointerleave', clearPointerHoveredPathCard)
 window.addEventListener('blur', clearPointerHoveredPathCard)
+
+document.addEventListener('selectionchange', () => {
+    const active = document.activeElement
+    const binding = maskedInputBindings.find(b => b.input === active)
+    if (binding)
+        clampMaskedInputSelection(binding.input, binding.model)
+})
 
 for (const [group, card] of Object.entries(pathCards)) {
     card.addEventListener('click', event => {
