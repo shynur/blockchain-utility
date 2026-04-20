@@ -134,6 +134,51 @@ for (const group of PATH_CARD_GROUPS)
 
 const privateKindInputs = [...document.querySelectorAll('[data-output-kind="xprv"], [data-output-kind="k"]')]
 const addressKindInputs = [...document.querySelectorAll('[data-output-kind="A"]')]
+const hoverState = {
+    activePathCard: null,
+    lastPointerX: null,
+    lastPointerY: null,
+}
+
+function setPointerHoveredPathCard(card) {
+    if (hoverState.activePathCard === card)
+        return
+
+    hoverState.activePathCard?.classList.remove('pointer-hover')
+    hoverState.activePathCard = card
+    hoverState.activePathCard?.classList.add('pointer-hover')
+}
+
+function clearPointerHoveredPathCard() {
+    hoverState.lastPointerX = null
+    hoverState.lastPointerY = null
+    setPointerHoveredPathCard(null)
+}
+
+function getPathCardFromNode(node) {
+    return node instanceof Element ? node.closest('[data-path-card]') : null
+}
+
+function syncPointerHoveredPathCard() {
+    if (hoverState.lastPointerX == null || hoverState.lastPointerY == null) {
+        setPointerHoveredPathCard(null)
+        return
+    }
+
+    const node = document.elementFromPoint(hoverState.lastPointerX, hoverState.lastPointerY)
+    setPointerHoveredPathCard(getPathCardFromNode(node))
+}
+
+function handlePathCardPointerEvent(event) {
+    if (event.pointerType === 'touch') {
+        clearPointerHoveredPathCard()
+        return
+    }
+
+    hoverState.lastPointerX = event.clientX
+    hoverState.lastPointerY = event.clientY
+    setPointerHoveredPathCard(getPathCardFromNode(event.target))
+}
 
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
@@ -785,10 +830,15 @@ function renderOutputsImmediate() {
 function renderOutputs() {
     const canAnimate = typeof document.startViewTransition === 'function'
         && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (canAnimate)
-        document.startViewTransition(renderOutputsImmediate)
-    else
+    if (canAnimate) {
+        const transition = document.startViewTransition(renderOutputsImmediate)
+        transition.finished.finally(() => {
+            syncPointerHoveredPathCard()
+        })
+    } else {
         renderOutputsImmediate()
+        syncPointerHoveredPathCard()
+    }
 }
 
 function syncGatedPanels() {
@@ -1072,6 +1122,11 @@ el.addressAdd.addEventListener('click', () => {
     commitAddressDraft()
     el.addressInput.focus()
 })
+
+document.addEventListener('pointermove', handlePathCardPointerEvent)
+document.addEventListener('pointerdown', handlePathCardPointerEvent)
+document.documentElement.addEventListener('pointerleave', clearPointerHoveredPathCard)
+window.addEventListener('blur', clearPointerHoveredPathCard)
 
 for (const [group, card] of Object.entries(pathCards)) {
     card.addEventListener('click', event => {
