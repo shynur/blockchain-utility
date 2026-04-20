@@ -373,6 +373,40 @@ export async function deriveBip44(root, form) {
  *   addressIndexes: number[],
  * }} form
  */
+/**
+ * @param {InstanceType<typeof libbip32.XKey>} root
+ * @param {{
+ *   coinType: number,
+ *   account: number,
+ *   change: 0 | 1,
+ *   addressIndexes: number[],
+ * }} form
+ * @returns {{ insideN: string[], outsideN: string[] } | null}
+ *   `null` when depth is 0 (master public key).
+ *   Segments use the same `~value~` convention as {@link getPathPreview}
+ *   for intermediate (uncertain) values.
+ */
+export function getXpubPathSegments(root, form) {
+    const depth = root.depth
+    if (depth === 0) return null
+
+    const LAST_HARDENED_DEPTH = 3
+    const nDepth = Math.min(depth, LAST_HARDENED_DEPTH)
+
+    const segments = Array.from({ length: Math.min(depth, 5) }, (_, index) => {
+        if (index + 1 === depth)
+            return formatChildNumber(root.i)
+        const segment = SELECTABLE_SEGMENT_BY_DEPTH[index]
+        const value = typeof segment === 'function' ? segment(form) : segment
+        return `~${value}~`
+    })
+
+    return {
+        insideN: segments.slice(0, nDepth),
+        outsideN: segments.slice(nDepth),
+    }
+}
+
 export function getPathPreview(root, form) {
     const fixedSegments = root.depth > 0
         ? Array.from({ length: Math.min(root.depth, 5) }, (_, index) => {
@@ -398,7 +432,7 @@ export async function describeRootKey(key) {
     const depth = key.depth
     return {
         depth,
-        level: describeBip44Level(depth),
+        level: depth === 0 && key.is_public_key() ? 'Master' : describeBip44Level(depth),
         index: depth > 0 ? formatChildNumber(key.i) : null,
         isHardened: depth > 0 ? key.i >= HARDENED_OFFSET : false,
         indexValue: depth > 0 ? unhardenIndex(key.i) : null,

@@ -1,5 +1,5 @@
 import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
-import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
+import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
 import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords, unhardenIndex } from './lib/utils.mjs'
@@ -61,6 +61,7 @@ const el = {
     statusLine: document.querySelector('#status-line'),
     rootInfo: document.querySelector('#root-info'),
     outputs: document.querySelector('#outputs'),
+    outputPanel: document.querySelector('#output-panel'),
     gatedPanels: [...document.querySelectorAll('[data-gated-panel]')],
 }
 
@@ -322,6 +323,11 @@ function getImportedPathDepth() {
     return state.rootResult?.kind === 'xkey' ? state.rootResult.root.depth : 0
 }
 
+function isImportedMasterXpub() {
+    const root = state.rootResult?.root
+    return root && state.rootResult.kind === 'xkey' && root.is_public_key() && root.depth === 0
+}
+
 function isPathCardLocked(group) {
     return (PATH_CARD_DEPTHS[group] ?? Infinity) < getImportedPathDepth()
 }
@@ -505,24 +511,66 @@ function renderPathText(container, path) {
 
     const segments = path.split('/')
     for (const [index, segment] of segments.entries()) {
-        if (index > 0) {
-            const separator = document.createElement('span')
-            separator.className = 'path-separator'
-            separator.textContent = '/'
-            separator.setAttribute('aria-hidden', 'true')
-            container.append(separator)
-        }
+        if (index > 0)
+            appendSeparator(container)
 
         renderPathSegment(container, segment)
     }
 }
 
+function renderXpubPathNotation(container, root, form) {
+    container.replaceChildren()
+
+    const result = getXpubPathSegments(root, form)
+    if (!result) {
+        container.setAttribute('aria-label', 'M')
+        appendSpan(container, 'M', 'path-segment')
+        return
+    }
+
+    const strip = s => s.replace(/^~|~$/g, '')
+    const nParts = ['m', ...result.insideN.map(strip)]
+    const outerParts = result.outsideN.map(strip)
+    let ariaLabel = `N(${nParts.join(' / ')})`
+    if (outerParts.length > 0)
+        ariaLabel += ' / ' + outerParts.join(' / ')
+    container.setAttribute('aria-label', ariaLabel)
+
+    appendSpan(container, 'N(', 'path-notation')
+    renderPathSegment(container, 'm')
+    for (const seg of result.insideN) {
+        appendSeparator(container)
+        renderPathSegment(container, seg)
+    }
+    appendSpan(container, ')', 'path-notation')
+
+    for (const seg of result.outsideN) {
+        appendSeparator(container)
+        renderPathSegment(container, seg)
+    }
+}
+
+function appendSeparator(container) {
+    const sep = document.createElement('span')
+    sep.className = 'path-separator'
+    sep.textContent = '/'
+    sep.setAttribute('aria-hidden', 'true')
+    container.append(sep)
+}
+
 function renderPathSummary() {
     const form = getFormState()
-    const path = state.rootResult?.root
-        ? getPathPreview(state.rootResult.root, form)
-        : `m/44'/${form.coinType}'/${form.account}'/${form.change}/${formatAddressIndexesPreview(form.addressIndexes)}`
-    renderPathText(el.pathSummary, path)
+    const root = state.rootResult?.root
+    const isXpub = root && state.rootResult.kind === 'xkey' && root.is_public_key()
+
+    if (isXpub) {
+        renderXpubPathNotation(el.pathSummary, root, form)
+    } else {
+        const path = root
+            ? getPathPreview(root, form)
+            : `m/44'/${form.coinType}'/${form.account}'/${form.change}/${formatAddressIndexesPreview(form.addressIndexes)}`
+        renderPathText(el.pathSummary, path)
+    }
 
     const coin = getCoinTypeOption(form.coinType)
     el.changeSwitch.setAttribute('aria-pressed', String(form.change === 1))
@@ -865,6 +913,8 @@ function renderOutputs() {
 function syncGatedPanels() {
     for (const panel of el.gatedPanels)
         panel.hidden = !state.entryValidated
+    if (state.entryValidated && isImportedMasterXpub())
+        el.outputPanel.hidden = true
 }
 
 function clearResults(message) {
