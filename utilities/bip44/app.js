@@ -878,6 +878,40 @@ function splitHighlightedText(text, highlights) {
     return parts
 }
 
+function renderOutputAbsolutePath(container, output) {
+    const root = state.rootResult?.root
+    const isXpub = root && state.rootResult.kind === 'xkey' && root.is_public_key()
+    if (!isXpub || root.depth === 0) {
+        renderPathText(container, output.absolutePath)
+        return
+    }
+
+    const form = getFormState()
+    const xpubSegs = getXpubPathSegments(root, form)
+    if (!xpubSegs) {
+        renderPathText(container, output.absolutePath)
+        return
+    }
+
+    const afterM = output.absolutePath.startsWith('m')
+        ? output.absolutePath.slice(1)
+        : ''
+    const outsideSuffix = afterM.startsWith('/')
+        ? afterM.slice(1).split('/')
+        : []
+
+    const allSegments = [...xpubSegs.insideN, ...xpubSegs.outsideN, ...outsideSuffix]
+    const strip = s => s.replace(/^~|~$/g, '')
+    const plainSegments = allSegments.map(strip)
+    container.setAttribute('aria-label', ['m', ...plainSegments].join(' / '))
+
+    renderPathSegment(container, 'm')
+    for (const seg of plainSegments) {
+        appendSeparator(container)
+        renderPathSegment(container, seg)
+    }
+}
+
 function renderOutputsImmediate() {
     state.revealXprv.clear()
     state.revealPrivateKey.clear()
@@ -904,7 +938,7 @@ function renderOutputsImmediate() {
                 <div>
                     <h3>${escapeHtml(output.label)}</h3>
                     <div class="output-meta">
-                        <p>${escapeHtml(output.absolutePath)}</p>
+                        <p></p>
                         <span class="output-note">${renderNoteParts(output.noteParts)}</span>
                     </div>
                 </div>
@@ -913,6 +947,7 @@ function renderOutputsImmediate() {
                 ${rows}
             </div>
         `
+        renderOutputAbsolutePath(card.querySelector('.output-meta p'), output)
         attachSecretToggle('xprv', output, card)
         attachSecretToggle('k', output, card)
         el.outputs.append(card)
