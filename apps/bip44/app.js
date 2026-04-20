@@ -871,15 +871,15 @@ function splitHighlightedText(text, highlights) {
 
 function renderOutputAbsolutePath(container, output) {
     const root = state.rootResult?.root
-    const isXpub = root && state.rootResult.kind === 'xkey' && root.is_public_key()
-    if (!isXpub || root.depth === 0) {
+    const isXkey = root && state.rootResult.kind === 'xkey'
+    if (!isXkey || root.depth === 0) {
         renderPathText(container, output.absolutePath)
         return
     }
 
     const form = getFormState()
-    const xpubSegs = getXpubPathSegments(root, form)
-    if (!xpubSegs) {
+    const rootSegs = getXpubPathSegments(root, form)
+    if (!rootSegs) {
         renderPathText(container, output.absolutePath)
         return
     }
@@ -891,7 +891,7 @@ function renderOutputAbsolutePath(container, output) {
         ? afterM.slice(1).split('/')
         : []
 
-    const allSegments = [...xpubSegs.insideN, ...xpubSegs.outsideN, ...outsideSuffix]
+    const allSegments = [...rootSegs.insideN, ...rootSegs.outsideN, ...outsideSuffix]
     const plainSegments = allSegments.map(stripUncertaintyMarkers)
     container.setAttribute('aria-label', ['m', ...plainSegments].join(' / '))
 
