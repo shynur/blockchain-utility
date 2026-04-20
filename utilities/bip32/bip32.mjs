@@ -369,6 +369,20 @@ export async function AddressOfK(serialized_K, version = 'mainnet') {
     return bip32math.base58checkEncode(bip32math.cat(version_byte, identifier))
 }
 
+/**
+ * Wallet Import Format (WIF) encoding for a private key.
+ * @param {bigint} k - 256-bit private key
+ * @param {number} versionByte - network version byte (e.g., 0x80 for BTC mainnet, 0xEF for testnet)
+ * @returns {Promise<string>} 52-char Base58Check-encoded compressed WIF
+ */
+export async function PrivateKeyToWIF(k, versionByte = 0x80) {
+    const payload = bip32math.cat(
+        new Uint8Array([versionByte]),
+        bip32math.cat(bip32math.ser_256(k), new Uint8Array([0x01])),
+    )
+    return bip32math.base58checkEncode(payload)
+}
+
 export {
     ExtendedKey as XKey,
     ExtendedPrivateKey as XPrv,

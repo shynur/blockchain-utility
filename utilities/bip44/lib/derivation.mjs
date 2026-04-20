@@ -1,5 +1,5 @@
 import { libbip32, libbip39 } from '../deps.mjs'
-import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET } from './constants.mjs'
+import { BIP44_LEVELS, COIN_TYPES, HARDENED_OFFSET, WIF_VERSION_BY_COIN_TYPE } from './constants.mjs'
 import { bytesToHex, formatChildNumber, serializeCompressedPublicKey, serializeCompressedPublicKeyHex, serializePrivateKeyHex, unhardenIndex } from './utils.mjs'
 
 const EMPTY_REQUESTED_KINDS = { xprv: false, xpub: false, k: false, K: false, A: false }
@@ -94,12 +94,15 @@ function describeBip44Level(depth) {
 async function serializeNode(key, absolutePath, coinType) {
     const canXprv = !key.is_public_key()
     const publicKey = serializeCompressedPublicKey(key)
+    const wifVersion = WIF_VERSION_BY_COIN_TYPE.get(coinType)
     return {
         absolutePath,
         canXprv,
         xprv: canXprv ? await /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).serialize() : null,
         xpub: await (key.is_public_key() ? key : /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).N()).serialize(),
-        k: serializePrivateKeyHex(key),
+        k: canXprv && wifVersion !== undefined
+            ? await libbip32.PrivateKeyToWIF(key.k, wifVersion)
+            : serializePrivateKeyHex(key),
         K: serializeCompressedPublicKeyHex(key),
         A: canDeriveBitcoinAddress(coinType) ? await libbip32.AddressOfK(publicKey, coinType === 1 ? 'testnet' : 'mainnet') : null,
     }

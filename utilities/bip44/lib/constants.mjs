@@ -36,3 +36,12 @@ export const BIP44_LEVELS = [
     { depth: 4, id: 'change', label: 'change' },
     { depth: 5, id: 'address', label: 'address_index' },
 ]
+
+export const WIF_VERSION_BY_COIN_TYPE = new Map([
+    [0, 0x80],   // BTC
+    [1, 0xEF],   // TBTC
+    [2, 0xB0],   // LTC
+    [3, 0x9E],   // DOGE
+    [133, 0x80], // ZEC
+    [145, 0x80], // BCH
+])
