@@ -13,16 +13,12 @@
                 <div class="section-head">
                     <div>
                         <h2 id="input-heading">入口</h2>
-                        <p>助记词仅支持英文; 如果输入以完整 xpub/xprv 开头, 会自动切换到导入模式。</p>
                     </div>
                 </div>
 
                 <label class="field">
                     <span>助记词 / xpub / xprv</span>
-                    <div class="textarea-wrap">
-                        <textarea id="root-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="abandon ability ... 或 xpub/xprv"></textarea>
-                        <div id="root-input-overlay" class="textarea-overlay" aria-hidden="true"></div>
-                    </div>
+                    <textarea id="root-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="abandon ability ... 或 xpub/xprv"></textarea>
                     <small id="root-help">输入空白会隐藏刚完成的 word; 追加一个空格可隐藏最后一个 word。</small>
                     <small id="root-error" class="error" role="alert"></small>
                 </label>
@@ -37,8 +33,8 @@
                 <div class="section-head">
                     <div>
                         <h2 id="status-heading">状态</h2>
-                        <p id="status-error" class="error" role="alert"></p>
-                        <p id="status-line">等待输入。</p>
+                        <p id="status-error" class="error" role="alert" hidden></p>
+                        <p id="status-line">等待输入ing...</p>
                     </div>
                 </div>
                 <div id="root-info" class="info-grid"></div>

@@ -1,4 +1,4 @@
-import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS } from './lib/constants.mjs'
+import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './lib/constants.mjs'
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
@@ -7,6 +7,7 @@ import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWor
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
 const addressState = new AddressIndexState()
+const WAITING_INPUT_STATUS = '等待输入ing...'
 
 const state = {
     rootResult: null,
@@ -41,9 +42,9 @@ const PATH_CARD_DEPTHS = Object.fromEntries(BIP44_LEVELS.map(level => [level.id,
 
 const el = {
     rootInput: document.querySelector('#root-input'),
-    rootInputOverlay: document.querySelector('#root-input-overlay'),
     rootHelp: document.querySelector('#root-help'),
     rootError: document.querySelector('#root-error'),
+    statusPanel: document.querySelector('.status-panel'),
     passphraseWrap: document.querySelector('#passphrase-wrap'),
     passphraseInput: document.querySelector('#passphrase-input'),
     coinType: document.querySelector('#coin-type'),
@@ -277,33 +278,6 @@ function fitTextareaToContent(textarea) {
     textarea.style.height = `${textarea.scrollHeight}px`
 }
 
-function clampMaskedInputSelection(input, model, dragAnchor) {
-    const maxPos = model.getDisplayCursorPosition()
-
-    if (dragAnchor != null) {
-        const rawStart = input.selectionStart ?? maxPos
-        const rawEnd = input.selectionEnd ?? rawStart
-        const focus = rawStart === dragAnchor ? rawEnd : rawStart
-        const clampedFocus = Math.min(focus, maxPos)
-        const lo = Math.min(dragAnchor, clampedFocus)
-        const hi = Math.max(dragAnchor, clampedFocus)
-        const dir = clampedFocus <= dragAnchor ? 'backward' : 'forward'
-        if (rawStart !== lo || rawEnd !== hi)
-            input.setSelectionRange(lo, hi, dir)
-        return
-    }
-
-    const selectionStart = input.selectionStart ?? maxPos
-    const selectionEnd = input.selectionEnd ?? selectionStart
-    const nextSelectionStart = Math.min(selectionStart, maxPos)
-    const nextSelectionEnd = Math.min(selectionEnd, maxPos)
-
-    if (selectionStart === nextSelectionStart && selectionEnd === nextSelectionEnd)
-        return
-
-    input.setSelectionRange(nextSelectionStart, nextSelectionEnd, input.selectionDirection ?? 'none')
-}
-
 function syncPathCardSelection() {
     for (const [group, card] of Object.entries(pathCards)) {
         const locked = isPathCardLocked(group)
@@ -387,38 +361,39 @@ function resetXkeyLockedValues() {
     syncAddressIndexEntryVisibility()
 }
 
+function isRootEntryComplete() {
+    if (rootModel.mode === 'xkey')
+        return rootModel.getRawValue().length === XKEY_LENGTH
+
+    const wordState = rootModel.getWordState()
+    return Boolean(wordState.normalizedSentence) && wordState.hasValidCount
+}
+
+function syncStatusPanelVisibility() {
+    el.statusPanel.classList.toggle('pending-entry', !isRootEntryComplete())
+}
+
 function syncMaskedInputs() {
     const isImportMode = rootModel.mode === 'xkey'
+    const rootRawValue = rootModel.getRawValue()
 
     setFieldValue(el.rootInput, rootModel.getDisplayValue())
     setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
-    el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
+    el.rootInput.selectionStart = el.rootInput.selectionEnd = el.rootInput.value.length
     el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
     
     el.passphraseWrap.classList.toggle('hidden', isImportMode)
-    el.rootError.classList.toggle('compact-gap', isImportMode)
     fitTextareaToContent(el.rootInput)
     fitTextareaToContent(el.passphraseInput)
 
     if (isImportMode) {
-        const displayText = rootModel.getDisplayValue()
-        const spacer = document.createTextNode(displayText)
-        const pipe = document.createElement('span')
-        pipe.className = 'xkey-pipe'
-        pipe.textContent = '|'
-        el.rootInputOverlay.replaceChildren(spacer, pipe)
-    } else {
-        el.rootInputOverlay.replaceChildren()
-    }
-
-    if (isImportMode) {
-        el.rootHelp.textContent = rootModel.getRawValue().startsWith('xprv')
-            ? 'xprv: 前缀保留明文, 后续字符隐藏; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'
-            : 'xpub: 只接受 base58 字符; | 固定标记第 111 个字符位置, 满 111 后自动校验且不再继续输入。'
+        el.rootHelp.textContent = `已输入 ${rootRawValue.length}/${XKEY_LENGTH}`
     } else {
         const words = rootModel.getWordState()
         el.rootHelp.textContent = `${pluralizeWords(words.candidateCount)}; 合法词数: ${VALID_MNEMONIC_COUNTS.join('/')}。输入空白会隐藏刚完成的 word。`
     }
+
+    syncStatusPanelVisibility()
 }
 
 function renderAddressChips() {
@@ -640,10 +615,12 @@ function invalidateEntryValidation() {
     syncGatedPanels()
 }
 
-function commitMaskedModelChange(change) {
+function commitMaskedModelChange(model, change) {
     change()
     invalidateEntryValidation()
     syncMaskedInputs()
+    if (model === rootModel && !isRootEntryComplete())
+        clearResults(WAITING_INPUT_STATUS)
     scheduleDerive()
 }
 
@@ -655,7 +632,7 @@ function handleMaskedBeforeInput(event, model) {
 
     if (event.inputType === 'insertText' && event.data) {
         event.preventDefault()
-        commitMaskedModelChange(() => {
+        commitMaskedModelChange(model, () => {
             model.insertText(event.data)
         })
         return
@@ -663,7 +640,7 @@ function handleMaskedBeforeInput(event, model) {
 
     if (event.inputType === 'deleteContentBackward') {
         event.preventDefault()
-        commitMaskedModelChange(() => {
+        commitMaskedModelChange(model, () => {
             model.backspace()
         })
     }
@@ -726,22 +703,28 @@ function renderRootInfo() {
         return
 
     const items = [
-        ['level', state.rootInfo.level],
-        ['index', state.rootInfo.index ?? '-'],
-        ['parent fingerprint', state.rootInfo.parentFingerprint ?? '-'],
-        ['identifier', state.rootInfo.identifierHex],
+        { label: 'level', value: state.rootInfo.level, hasValue: true },
+        { label: 'index', value: state.rootInfo.index ?? '-', hasValue: state.rootInfo.index != null },
+        {
+            label: 'parent fingerprint',
+            value: state.rootInfo.parentFingerprint ?? '-',
+            hasValue: state.rootInfo.parentFingerprint != null,
+        },
+        { label: 'identifier', value: state.rootInfo.identifierHex, hasValue: true },
     ]
 
-    for (const [label, value] of items) {
+    for (const item of items) {
         const node = document.createElement('div')
         node.className = 'info-item'
-        const descriptionHtml = label === 'index'
+        if (!item.hasValue)
+            node.classList.add('empty-value')
+        const descriptionHtml = item.label === 'index'
             ? renderRootIndexDescription(state.rootInfo)
             : ''
-        const renderedValue = label === 'identifier'
-            ? `<strong><span class="identifier-fingerprint">${escapeHtml(value.slice(0, 8))}</span>${escapeHtml(value.slice(8))}</strong>`
-            : `<strong>${escapeHtml(value)}</strong>`
-        node.innerHTML = `<span class="info-item-label">${escapeHtml(label)}</span>${renderedValue}${descriptionHtml}`
+        const renderedValue = item.label === 'identifier'
+            ? `<strong><span class="identifier-fingerprint">${escapeHtml(item.value.slice(0, 8))}</span>${escapeHtml(item.value.slice(8))}</strong>`
+            : `<strong>${escapeHtml(item.value)}</strong>`
+        node.innerHTML = `<span class="info-item-label">${escapeHtml(item.label)}</span>${renderedValue}${descriptionHtml}`
         el.rootInfo.append(node)
     }
 }
@@ -1029,11 +1012,11 @@ async function runDerive() {
         if (rootModel.mode === 'mnemonic') {
             const wordState = rootModel.getWordState()
             if (!wordState.normalizedSentence) {
-                clearResults('等待助记词或 xpub/xprv。')
+                clearResults(WAITING_INPUT_STATUS)
                 return
             }
             if (!wordState.hasValidCount) {
-                clearResults(`当前 ${wordState.candidateCount} 个 word; 需要 12/15/18/21/24 个 word。`)
+                clearResults(WAITING_INPUT_STATUS)
                 return
             }
             setStatusLine('')
@@ -1044,9 +1027,8 @@ async function runDerive() {
             })
         } else {
             const xkey = rootModel.getRawValue()
-            if (xkey.length !== 111) {
-                clearResults('等待完整的 xpub/xprv。')
-                showStatusError(`导入内容还没输完整, 目前已输入 ${xkey.length} 个字符。`)
+            if (xkey.length !== XKEY_LENGTH) {
+                clearResults(WAITING_INPUT_STATUS)
                 return
             }
             setStatusLine('')
@@ -1089,7 +1071,7 @@ async function runDerive() {
         if (token !== state.pendingToken)
             return
         const message = error instanceof Error ? error.message : String(error)
-        clearResults('输入校验失败。')
+        clearResults('')
         showStatusError(
             message.includes('CKDpub')
                 ? '这个 xpub 不能继续生成你当前选择的位置。请改用更靠后的 xpub, 或直接导入 xprv。'
@@ -1115,7 +1097,7 @@ function handleMaskedKeydown(event, model) {
 
     if (event.key === 'Backspace') {
         event.preventDefault()
-        commitMaskedModelChange(() => {
+        commitMaskedModelChange(model, () => {
             model.backspace()
         })
         return
@@ -1128,54 +1110,22 @@ function handleMaskedKeydown(event, model) {
 
     if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault()
-        commitMaskedModelChange(() => {
+        commitMaskedModelChange(model, () => {
             model.insertText(event.key)
         })
     }
 }
 
-const maskedInputBindings = []
-
 function bindMaskedInput(input, model) {
     input.addEventListener('keydown', event => handleMaskedKeydown(event, model))
     input.addEventListener('paste', event => {
         event.preventDefault()
-        commitMaskedModelChange(() => {
+        commitMaskedModelChange(model, () => {
             model.applyPaste(event.clipboardData.getData('text/plain'))
         })
     })
     input.addEventListener('drop', event => event.preventDefault())
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
-    let dragAnchor = null
-    let loopRunning = false
-    input.addEventListener('mousedown', () => {
-        if (loopRunning) return
-        const maxPos = model.getDisplayCursorPosition()
-        window.requestAnimationFrame(() => {
-            const rawPos = input.selectionStart ?? maxPos
-            dragAnchor = Math.min(rawPos, maxPos)
-            loopRunning = true
-            clampMaskedInputSelection(input, model, dragAnchor)
-            const clampLoop = () => {
-                if (dragAnchor == null) {
-                    loopRunning = false
-                    return
-                }
-                clampMaskedInputSelection(input, model, dragAnchor)
-                window.requestAnimationFrame(clampLoop)
-            }
-            window.requestAnimationFrame(clampLoop)
-        })
-    })
-    const endDrag = () => { dragAnchor = null }
-    window.addEventListener('mouseup', endDrag)
-    window.addEventListener('pointercancel', endDrag)
-    maskedInputBindings.push({ input, model })
-    input.addEventListener('focus', () => {
-        window.requestAnimationFrame(() => {
-            clampMaskedInputSelection(input, model)
-        })
-    })
 }
 
 function bindUint31Input({ input, errorEl, label, syncInput, onValidInput, onEnter }) {
@@ -1244,13 +1194,6 @@ document.addEventListener('pointerdown', handlePathCardPointerEvent)
 document.documentElement.addEventListener('pointerleave', clearPointerHoveredPathCard)
 window.addEventListener('blur', clearPointerHoveredPathCard)
 
-document.addEventListener('selectionchange', () => {
-    const active = document.activeElement
-    const binding = maskedInputBindings.find(b => b.input === active)
-    if (binding)
-        clampMaskedInputSelection(binding.input, binding.model)
-})
-
 for (const [group, card] of Object.entries(pathCards)) {
     card.addEventListener('click', event => {
         if (!shouldTogglePathCardFromClick(event))
@@ -1270,5 +1213,5 @@ renderPathSummary()
 renderOutputs()
 window.requestAnimationFrame(() => {
     el.rootInput.focus()
-    el.rootInput.selectionStart = el.rootInput.selectionEnd = rootModel.getDisplayCursorPosition()
+    el.rootInput.selectionStart = el.rootInput.selectionEnd = el.rootInput.value.length
 })

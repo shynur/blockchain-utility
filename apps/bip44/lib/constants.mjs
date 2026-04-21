@@ -9,6 +9,7 @@ export const WORD_MARKERS = [
 export const HARDENED_OFFSET = 2 ** 31
 
 export const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+export const XKEY_LENGTH = 111
 
 export const COIN_TYPES = [
     { value: 0, symbol: 'BTC', localName: '比特币', name: 'Bitcoin' },

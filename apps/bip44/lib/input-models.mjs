@@ -1,8 +1,7 @@
-import { VALID_MNEMONIC_COUNTS, WORD_MARKERS } from './constants.mjs'
+import { VALID_MNEMONIC_COUNTS, WORD_MARKERS, XKEY_LENGTH } from './constants.mjs'
 import { isAsciiLetter, isBase58Char, isWhitespace } from './utils.mjs'
 
 const MAX_MNEMONIC_WORDS = WORD_MARKERS.length
-const XKEY_LENGTH = 111
 
 function isXKeyPrefix(text) {
     return text.startsWith('xpub') || text.startsWith('xprv')
@@ -219,23 +218,16 @@ export class RootInputModel {
 
     getXKeyMaskedValue() {
         if (this.raw.startsWith('xprv')) {
-            const masked = `xprv${'*'.repeat(Math.max(0, this.raw.length - 4))}`
-            return masked.padEnd(XKEY_LENGTH, ' ')
+            return `xprv${'*'.repeat(Math.max(0, this.raw.length - 4))}`
         }
 
-        return this.raw.padEnd(XKEY_LENGTH, ' ')
+        return this.raw
     }
 
     getDisplayValue() {
         return this.mode === 'xkey'
             ? this.getXKeyMaskedValue()
             : this.getMnemonicMaskedValue()
-    }
-
-    getDisplayCursorPosition() {
-        if (this.mode === 'xkey')
-            return this.raw.length
-        return this.getDisplayValue().length
     }
 
     getRawValue() {
