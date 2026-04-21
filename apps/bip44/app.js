@@ -1075,11 +1075,10 @@ async function runDerive() {
         if (token !== state.pendingToken)
             return
         clearResults('')
-        showStatusError(
-            rootModel.mode === 'xkey'
-                ? '导入内容无法识别。请检查是否粘贴了正确的 xpub / xprv。'
-                : '助记词无效。请检查单词和顺序。',
-        )
+        el.statusError.hidden = false
+        el.statusError.innerHTML = rootModel.mode === 'xkey'
+            ? '<span style="color: var(--danger); font-weight: 700;">密钥无效</span><span style="color: var(--muted); font-weight: 400;">: xpub / xprv 不合法</span>'
+            : '<span style="color: var(--danger); font-weight: 700;">助记词无效</span><span style="color: var(--muted); font-weight: 400;">: 请检查单词和顺序</span>'
     }
 }
 
