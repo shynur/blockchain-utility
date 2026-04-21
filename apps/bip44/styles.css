@@ -579,10 +579,7 @@ small {
 }
 
 .output-meta {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 16px;
-    align-items: baseline;
+    display: block;
     color: var(--muted);
     font-size: 0.9rem;
     width: 100%;
@@ -592,10 +589,6 @@ small {
     margin: 0;
     font-family: var(--mono);
     overflow-wrap: anywhere;
-}
-
-.output-note {
-    text-align: right;
 }
 
 .output-note-highlight {

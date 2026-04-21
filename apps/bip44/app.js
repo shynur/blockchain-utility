@@ -775,10 +775,9 @@ function renderOutputsImmediate() {
         card.innerHTML = `
             <div class="output-top">
                 <div>
-                    <h3>${escapeHtml(output.label)}</h3>
+                    <h3>${renderNoteParts(output.noteParts)}</h3>
                     <div class="output-meta">
                         <p></p>
-                        <span class="output-note">${renderNoteParts(output.noteParts)}</span>
                     </div>
                 </div>
             </div>
