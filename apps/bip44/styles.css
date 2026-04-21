@@ -716,6 +716,15 @@ small {
         font-size: 3.2rem;
     }
 
+    .inline-field input,
+    .inline-field select {
+        font-size: 16px;
+    }
+
+    .suffix-input input {
+        width: calc(10ch + 42px);
+    }
+
     .address-entry {
         flex-direction: row;
         align-items: center;

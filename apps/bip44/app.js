@@ -283,8 +283,11 @@ function moveCaretToEndIfFocused(input) {
     input.selectionStart = input.selectionEnd = end
 }
 
-function isMaskedInputEditing() {
-    return document.activeElement === el.rootInput || document.activeElement === el.passphraseInput
+function isTextInputEditing() {
+    return document.activeElement === el.rootInput
+        || document.activeElement === el.passphraseInput
+        || document.activeElement === el.accountInput
+        || document.activeElement === el.addressInput
 }
 
 function syncPathCardSelection() {
@@ -985,7 +988,7 @@ function renderOutputsImmediate() {
 function renderOutputs() {
     const canAnimate = typeof document.startViewTransition === 'function'
         && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        && !isMaskedInputEditing()
+        && !isTextInputEditing()
     if (canAnimate) {
         const transition = document.startViewTransition(renderOutputsImmediate)
         transition.finished.finally(() => {
@@ -1250,7 +1253,7 @@ el.changeSwitch.addEventListener('click', () => {
 bindUint31Input({
     input: el.addressInput,
     syncInput: syncAddressDraftInput,
-    onValidInput: scheduleDerive,
+    onValidInput: () => {},
     onEnter: commitAddressDraft,
 })
 el.addressAdd.addEventListener('click', () => {
