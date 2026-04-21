@@ -16,7 +16,7 @@ const SELECTABLE_SEGMENT_BY_DEPTH = [
  *   id: string,
  *   label: string,
  *   noteParts: Array<{ text: string, highlight: boolean }>,
- *   absolutePath: string,
+ *   pathSuffix: string,
  *   requestedKinds: { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean },
  *   canXprv: boolean,
  *   xprv: string | null,
@@ -38,10 +38,6 @@ export function getCoinTypeOption(value) {
 
 function isKnownCoinType(value) {
     return COIN_TYPES.some(option => option.value === value)
-}
-
-function makeAbsolutePathLabel(baseSegments, extraSegments = []) {
-    return ['m', ...baseSegments, ...extraSegments].join('')
 }
 
 function getLevelPath(levelId, form) {
@@ -88,15 +84,15 @@ function describeBip44Level(depth) {
 
 /**
  * @param {InstanceType<typeof libbip32.XKey>} key
- * @param {string} absolutePath
+ * @param {string} pathSuffix
  * @param {number} coinType
  */
-async function serializeNode(key, absolutePath, coinType) {
+async function serializeNode(key, pathSuffix, coinType) {
     const canXprv = !key.is_public_key()
     const publicKey = serializeCompressedPublicKey(key)
     const wifVersion = WIF_VERSION_BY_COIN_TYPE.get(coinType)
     return {
-        absolutePath,
+        pathSuffix,
         canXprv,
         xprv: canXprv ? await /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).serialize() : null,
         xpub: await (key.is_public_key() ? key : /** @type {InstanceType<typeof libbip32.XPrv>} */ (key).N()).serialize(),
@@ -106,22 +102,6 @@ async function serializeNode(key, absolutePath, coinType) {
         K: serializeCompressedPublicKeyHex(key),
         A: canDeriveBitcoinAddress(coinType) ? await libbip32.AddressOfK(publicKey, coinType === 1 ? 'testnet' : 'mainnet') : null,
     }
-}
-
-function resolveAbsolutePath(root, fallbackAbsolutePath, labels) {
-    if (root.depth === 0 || !labels.referencePath)
-        return fallbackAbsolutePath
-
-    const normalized = labels.referencePath.trim()
-    if (!normalized)
-        return fallbackAbsolutePath
-    if (fallbackAbsolutePath === 'm(?)')
-        return normalized
-
-    const suffix = fallbackAbsolutePath.startsWith('m') ? fallbackAbsolutePath.slice(1) : fallbackAbsolutePath
-    if (!suffix)
-        return normalized
-    return `${normalized}${suffix}`
 }
 
 function hasRequestedKinds(kinds) {
@@ -289,7 +269,6 @@ export function validateBip44Import(root) {
  *   change: 0 | 1,
  *   addressIndexes: number[],
  *   requestedKinds: Record<string, { xprv: boolean, xpub: boolean, k: boolean, K: boolean, A: boolean }>,
- *   labels: Partial<Record<'coin' | 'account' | 'change', string> & { referencePath: string }>,
  * }} form
  * @returns {Promise<DerivedNodeOutput[]>}
  */
@@ -304,7 +283,6 @@ export async function deriveBip44(root, form) {
         const selfLevel = BIP44_LEVELS[originalDepth - 1]
         const requestedKinds = getRequestedKinds(form, selfLevel.id)
         if (hasRequestedKinds(requestedKinds)) {
-            const selfPath = resolveAbsolutePath(root, 'm(?)', form.labels)
             outputs.push({
                 id: selfLevel.id === 'address' ? `address-${root.i}` : selfLevel.id,
                 label: selfLevel.label,
@@ -312,7 +290,7 @@ export async function deriveBip44(root, form) {
                     ? describeOutputNoteParts('address', form, root.i)
                     : describeOutputNoteParts(selfLevel.id, form),
                 requestedKinds,
-                ...(await serializeNode(root, selfPath, form.coinType)),
+                ...(await serializeNode(root, '', form.coinType)),
             })
         }
     }
@@ -340,7 +318,7 @@ export async function deriveBip44(root, form) {
                 label: level.label,
                 noteParts: describeOutputNoteParts(level.id, form),
                 requestedKinds,
-                ...(await serializeNode(current, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments), form.labels), form.coinType)),
+                ...(await serializeNode(current, baseSegments.join(''), form.coinType)),
             })
         }
     }
@@ -355,7 +333,7 @@ export async function deriveBip44(root, form) {
                     label: `${index}`,
                     noteParts: describeOutputNoteParts('address', form, index),
                     requestedKinds,
-                    ...(await serializeNode(child, resolveAbsolutePath(root, makeAbsolutePathLabel(baseSegments, [`/${index}`]), form.labels), form.coinType)),
+                    ...(await serializeNode(child, [...baseSegments, `/${index}`].join(''), form.coinType)),
                 })
             }
         }

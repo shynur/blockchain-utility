@@ -17,7 +17,6 @@ const state = {
     change: 0,
     revealXprv: new Set(),
     revealPrivateKey: new Set(),
-    referencePath: '',
     selectedPathCards: new Set(),
     lastValidAccountText: '0',
     lastValidAddressDraftText: '0',
@@ -206,7 +205,6 @@ function getFormState() {
         change: /** @type {0 | 1} */ (state.change),
         addressIndexes: [...addressState.values],
         requestedKinds: getGenerateAt(),
-        labels: { referencePath: state.referencePath },
     }
 }
 
@@ -871,28 +869,18 @@ function splitHighlightedText(text, highlights) {
 
 function renderOutputAbsolutePath(container, output) {
     const root = state.rootResult?.root
-    const isXkey = root && state.rootResult.kind === 'xkey'
-    if (!isXkey || root.depth === 0) {
-        renderPathText(container, output.absolutePath)
+    if (!root) {
+        renderPathText(container, `m${output.pathSuffix}`)
         return
     }
 
     const form = getFormState()
-    const rootSegs = getXpubPathSegments(root, form)
-    if (!rootSegs) {
-        renderPathText(container, output.absolutePath)
-        return
-    }
-
-    const afterM = output.absolutePath.startsWith('m')
-        ? output.absolutePath.slice(1)
-        : ''
-    const outsideSuffix = afterM.startsWith('/')
-        ? afterM.slice(1).split('/')
+    const importedPath = getPathPreview(root, form).split('/')
+    const baseSegments = importedPath.slice(1, root.depth + 1)
+    const suffixSegments = output.pathSuffix
+        ? output.pathSuffix.slice(1).split('/')
         : []
-
-    const allSegments = [...rootSegs.insideN, ...rootSegs.outsideN, ...outsideSuffix]
-    const plainSegments = allSegments.map(stripUncertaintyMarkers)
+    const plainSegments = [...baseSegments, ...suffixSegments].map(stripUncertaintyMarkers)
     container.setAttribute('aria-label', ['m', ...plainSegments].join(' / '))
 
     renderPathSegment(container, 'm')
