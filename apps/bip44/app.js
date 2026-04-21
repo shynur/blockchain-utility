@@ -381,7 +381,7 @@ function syncMaskedInputs() {
     setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
     el.rootInput.selectionStart = el.rootInput.selectionEnd = el.rootInput.value.length
     el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
-    
+
     el.passphraseWrap.classList.toggle('hidden', isImportMode)
     fitTextareaToContent(el.rootInput)
     fitTextareaToContent(el.passphraseInput)
@@ -1076,8 +1076,8 @@ async function runDerive() {
             message.includes('CKDpub')
                 ? '这个 xpub 不能继续生成你当前选择的位置。请改用更靠后的 xpub, 或直接导入 xprv。'
                 : rootModel.mode === 'xkey'
-                    ? '导入内容无法识别。请检查是否完整, 以及是否粘贴了正确的 xpub / xprv。'
-                    : '助记词无效。请检查单词、顺序和词数。',
+                    ? '导入内容无法识别。请检查是否粘贴了正确的 xpub / xprv。'
+                    : '助记词无效。请检查单词和顺序。',
         )
     }
 }
