@@ -112,6 +112,12 @@ function getRequestedKinds(form, levelId) {
     return form.requestedKinds[levelId] ?? EMPTY_REQUESTED_KINDS
 }
 
+function getRequestedLevelDepths(form) {
+    return BIP44_LEVELS
+        .filter(level => hasRequestedKinds(getRequestedKinds(form, level.id)))
+        .map(level => level.depth)
+}
+
 function plainNotePart(text) {
     return { text: String(text), highlight: false }
 }
@@ -278,6 +284,7 @@ export async function deriveBip44(root, form) {
 
     let current = root
     const originalDepth = root.depth
+    const deepestRequestedDepth = Math.max(originalDepth, ...getRequestedLevelDepths(form))
 
     if (originalDepth >= 1 && originalDepth <= 5) {
         const selfLevel = BIP44_LEVELS[originalDepth - 1]
@@ -302,11 +309,11 @@ export async function deriveBip44(root, form) {
             continue
         }
 
-        const path = getLevelPath(level.id, form)
-        if (!path)
+        if (level.depth > deepestRequestedDepth)
             break
 
-        if (current.is_public_key() && path.endsWith("'"))
+        const path = getLevelPath(level.id, form)
+        if (!path)
             break
 
         current = await current.tree(path)

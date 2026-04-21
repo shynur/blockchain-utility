@@ -183,7 +183,7 @@ function handlePathCardPointerEvent(event) {
 function sanitizeRequestedKinds(group, kinds) {
     const allowedKinds = new Set(AVAILABLE_OUTPUT_KINDS[group] ?? [])
     const canAddress = group === 'address' && canDeriveBitcoinAddress(getSelectedCoinType())
-    const isSelected = !isPathCardLocked(group) && state.selectedPathCards.has(group)
+    const isSelected = isPathCardSelectable(group) && state.selectedPathCards.has(group)
     return {
         xprv: isSelected && allowedKinds.has('xprv') && kinds.xprv,
         xpub: isSelected && allowedKinds.has('xpub') && kinds.xpub,
@@ -326,6 +326,10 @@ function isPathCardBlockedByXpub(group) {
     return false
 }
 
+function isPathCardSelectable(group) {
+    return !isPathCardLocked(group) && !isPathCardBlockedByXpub(group)
+}
+
 function syncXkeyLockedValues(root) {
     const depth = root.depth
     if (depth < 2) return
@@ -390,7 +394,7 @@ function syncMaskedInputs() {
         el.rootHelp.textContent = `已输入 ${rootRawValue.length}/${XKEY_LENGTH}`
     } else {
         const words = rootModel.getWordState()
-        el.rootHelp.textContent = `${pluralizeWords(words.candidateCount)}; 合法词数: ${VALID_MNEMONIC_COUNTS.join('/')}。输入空白会隐藏刚完成的 word。`
+        el.rootHelp.textContent = `${pluralizeWords(words.candidateCount)}; 合法词数: ${VALID_MNEMONIC_COUNTS.join('/')}。`
     }
 
     syncStatusPanelVisibility()
@@ -598,7 +602,7 @@ function toggleSetMembership(set, value) {
 }
 
 function togglePathCardSelection(group) {
-    if (isPathCardLocked(group) || isPathCardBlockedByXpub(group))
+    if (!isPathCardSelectable(group))
         return
     toggleSetMembership(state.selectedPathCards, group)
     syncPathCardSelection()
@@ -1070,14 +1074,11 @@ async function runDerive() {
     } catch (error) {
         if (token !== state.pendingToken)
             return
-        const message = error instanceof Error ? error.message : String(error)
         clearResults('')
         showStatusError(
-            message.includes('CKDpub')
-                ? '这个 xpub 不能继续生成你当前选择的位置。请改用更靠后的 xpub, 或直接导入 xprv。'
-                : rootModel.mode === 'xkey'
-                    ? '导入内容无法识别。请检查是否粘贴了正确的 xpub / xprv。'
-                    : '助记词无效。请检查单词和顺序。',
+            rootModel.mode === 'xkey'
+                ? '导入内容无法识别。请检查是否粘贴了正确的 xpub / xprv。'
+                : '助记词无效。请检查单词和顺序。',
         )
     }
 }
