@@ -773,7 +773,12 @@ const ctxMenu = document.getElementById('context-menu')
 let ctxMenuNode = null
 let ctxMenuSvgX = 0
 let ctxMenuSvgY = 0
-document.addEventListener('click', () => { ctxMenu.style.display = 'none'; ctxMenuNode = null })
+let ctxMenuBuildSeq = 0
+document.addEventListener('click', () => {
+  ctxMenu.style.display = 'none'
+  ctxMenuNode = null
+  ctxMenuBuildSeq++
+})
 
 function positionContextMenu() {
   const off = svgPageOffset()
@@ -785,11 +790,66 @@ function positionContextMenu() {
   ctxMenu.style.top = (off.y + ctxMenuSvgY - 4) + 'px'
 }
 
-function showContextMenu(e, node) {
+function copyTextFallback(text) {
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.setAttribute('readonly', '')
+  ta.style.position = 'fixed'
+  ta.style.top = '0'
+  ta.style.left = '-9999px'
+  ta.style.opacity = '0'
+  document.body.appendChild(ta)
+
+  const selection = document.getSelection()
+  const ranges = []
+  if (selection) {
+    for (let i = 0; i < selection.rangeCount; i++) ranges.push(selection.getRangeAt(i).cloneRange())
+  }
+
+  ta.focus()
+  ta.select()
+  ta.setSelectionRange(0, ta.value.length)
+
+  let copied = false
+  try {
+    copied = document.execCommand('copy')
+  } catch {}
+
+  document.body.removeChild(ta)
+
+  if (selection) {
+    selection.removeAllRanges()
+    for (const range of ranges) selection.addRange(range)
+  }
+  return copied
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {}
+  }
+  return copyTextFallback(text)
+}
+
+async function showContextMenu(e, node) {
   if (e.preventDefault) e.preventDefault()
+  const buildSeq = ++ctxMenuBuildSeq
+  ctxMenu.style.display = 'none'
   ctxMenu.innerHTML = ''
   ctxMenuNode = node
   const key = node.key
+  const pub = key.is_public_key() ? key : key.N()
+  const pubTag = key.version === 'mainnet' ? 'xpub' : 'tpub'
+  const prvTag = key.version === 'mainnet' ? 'xprv' : 'tprv'
+  const [serializedPrv, serializedPub] = await Promise.all([
+    key.is_public_key() ? Promise.resolve(null) : key.serialize(),
+    pub.serialize(),
+  ])
+
+  if (buildSeq !== ctxMenuBuildSeq || ctxMenuNode !== node) return
 
   // delete (not for root)
   if (node.parent) {
@@ -801,35 +861,26 @@ function showContextMenu(e, node) {
 
   // export prv
   if (!key.is_public_key()) {
-    const tag = key.version === 'mainnet' ? 'xprv' : 'tprv'
-    addMenuItem(`导出 ${tag}`, async () => {
-      const s = await key.serialize()
-      download(buildFilename(node, 'prv') + '.txt', s)
+    addMenuItem(`导出 ${prvTag}`, () => {
+      download(buildFilename(node, 'prv') + '.txt', serializedPrv)
     })
   }
 
   // export pub
-  const pubTag = key.version === 'mainnet' ? 'xpub' : 'tpub'
-  addMenuItem(`导出 ${pubTag}`, async () => {
-    const pub = key.is_public_key() ? key : key.N()
-    const s = await pub.serialize()
-    download(buildFilename(node, 'pub') + '.txt', s)
+  addMenuItem(`导出 ${pubTag}`, () => {
+    download(buildFilename(node, 'pub') + '.txt', serializedPub)
   })
 
   // copy prv
   if (!key.is_public_key()) {
-    const tag = key.version === 'mainnet' ? 'xprv' : 'tprv'
-    addMenuItem(`复制 ${tag}`, async () => {
-      const s = await key.serialize()
-      await navigator.clipboard.writeText(s)
+    addMenuItem(`复制 ${prvTag}`, () => {
+      return copyText(serializedPrv)
     })
   }
 
   // copy pub
-  addMenuItem(`复制 ${pubTag}`, async () => {
-    const pub = key.is_public_key() ? key : key.N()
-    const s = await pub.serialize()
-    await navigator.clipboard.writeText(s)
+  addMenuItem(`复制 ${pubTag}`, () => {
+    return copyText(serializedPub)
   })
 
   if (ctxMenu.children.length === 0) { ctxMenuNode = null; return }
@@ -843,7 +894,19 @@ function addMenuItem(text, onClick) {
   const d = document.createElement('div')
   d.className = 'menu-item'
   d.textContent = text
-  d.addEventListener('click', e => { e.stopPropagation(); ctxMenu.style.display = 'none'; onClick() })
+  let activated = false
+  const activate = e => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (activated) return
+    activated = true
+    ctxMenu.style.display = 'none'
+    ctxMenuNode = null
+    ctxMenuBuildSeq++
+    Promise.resolve(onClick()).catch(err => console.error(err))
+  }
+  d.addEventListener('click', activate)
+  d.addEventListener('touchend', activate)
   ctxMenu.appendChild(d)
 }
 
