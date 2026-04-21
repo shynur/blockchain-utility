@@ -1,5 +1,5 @@
 import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './lib/constants.mjs'
-import { BIP44_IMPORT_ERRORS, canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
+import { BIP44_IMPORT_ERRORS, canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { fitTextareaToContent, moveCaretToEndIfFocused, setFieldValue, toggleSetMembership } from './lib/dom-utils.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AVAILABLE_OUTPUT_KINDS, createRequestedKindsState, PATH_CARD_GROUPS } from './lib/output-kinds.mjs'
@@ -412,6 +412,7 @@ function renderPathSummary() {
     const form = getFormState()
     const root = state.rootResult?.root
     const isXpub = root && state.rootResult.kind === 'xkey' && root.is_public_key()
+    const coin = COIN_TYPES.find(option => option.value === form.coinType)
 
     if (isXpub) {
         renderXpubPathNotation(el.pathSummary, root, form)
@@ -422,7 +423,6 @@ function renderPathSummary() {
         renderPathText(el.pathSummary, path)
     }
 
-    const coin = getCoinTypeOption(form.coinType)
     el.changeSwitch.setAttribute('aria-pressed', String(form.change === 1))
     el.changeSwitch.querySelector('.switch-number').textContent = String(form.change)
     el.changeNote.textContent = form.change === 0
@@ -672,8 +672,10 @@ function renderRootIndexDescription(rootInfo) {
         if (!rootInfo.isHardened)
             return ''
 
-        const coin = getCoinTypeOption(rootInfo.indexValue)
-        return renderInfoDescription([`${coin.name} (${coin.localName})`])
+        const coin = COIN_TYPES.find(option => option.value === rootInfo.indexValue)
+        return coin
+            ? renderInfoDescription([`${coin.name} (${coin.localName})`])
+            : ''
     }
 
     if (rootInfo.depth === 4) {

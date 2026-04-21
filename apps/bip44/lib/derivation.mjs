@@ -36,15 +36,6 @@ export const BIP44_IMPORT_ERRORS = {
  * }} DerivedNodeOutput
  */
 
-export function getCoinTypeOption(value) {
-    return COIN_TYPES.find(option => option.value === value) ?? {
-        value,
-        symbol: `#${value}`,
-        localName: '自定义币种',
-        name: 'Custom',
-    }
-}
-
 function isKnownCoinType(value) {
     return COIN_TYPES.some(option => option.value === value)
 }
@@ -148,7 +139,7 @@ function changeChainName(change) {
 }
 
 function describeOutputNoteParts(levelId, form, addressIndex = null) {
-    const coin = getCoinTypeOption(form.coinType)
+    const coin = COIN_TYPES.find(option => option.value === form.coinType)
 
     if (levelId === 'purpose')
         return [
@@ -240,14 +231,7 @@ export function validateBip44Import(root) {
     }
 
     if (depth === 2) {
-        if (!isHardened) {
-            return {
-                ok: false,
-                error: BIP44_IMPORT_ERRORS.unknownCoin,
-            }
-        }
-
-        return isKnownCoinType(indexValue)
+        return isHardened && isKnownCoinType(indexValue)
             ? { ok: true, error: '' }
             : { ok: false, error: BIP44_IMPORT_ERRORS.unknownCoin }
     }
