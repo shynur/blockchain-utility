@@ -112,9 +112,17 @@ export class RootInputModel {
     }
 
     /**
+     * Mnemonic and xprv are rendered through a masked/derived view, so they
+     * need append-only virtual editing. xpub is plain text and can use the
+     * browser's native caret/selection behavior.
+     */
+    usesVirtualInput() {
+        return this.mode === 'mnemonic' || this.raw.startsWith('xprv')
+    }
+
+    /**
      * Append filtered user input at the end of the logical value.
-     * The UI is intentionally append/backspace-only because the visible text is
-     * masked and therefore does not map cleanly to raw cursor positions.
+     * This is only used while the input is in virtual-editing mode.
      * @param {string} text
      */
     insertText(text) {
@@ -247,6 +255,10 @@ export class PassphraseModel {
      */
     setRaw(raw) {
         this.raw = filterPassphraseText(raw)
+    }
+
+    usesVirtualInput() {
+        return true
     }
 
     /**
