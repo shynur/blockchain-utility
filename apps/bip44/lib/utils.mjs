@@ -47,17 +47,6 @@ export function clampUint31Text(text) {
     return text.replace(/[^\d]/g, '')
 }
 
-export function parseUint31(text) {
-    if (!/^\d+$/.test(text))
-        return null
-
-    const value = Number(text)
-    if (!Number.isInteger(value) || value < 0 || value > MAX_UINT31)
-        return null
-
-    return value
-}
-
 export function dedupeSorted(values) {
     return Array.from(new Set(values)).sort((left, right) => left - right)
 }

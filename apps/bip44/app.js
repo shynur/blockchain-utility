@@ -2,7 +2,7 @@ import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, parseUint31, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -86,7 +86,7 @@ const addressAStateByCoinType = new Map(
 )
 const STATUS_ERROR_HIGHLIGHTS = new Map([
     ['未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app', ['未知协议类型']],
-    ['未知币种, 考虑更换钱包 app', ['未知币种']],
+    ['未知币种: 考虑更换钱包 app', ['未知币种']],
     ['密钥违反 BIP 44: 账户须使用硬化派生', ['违反 BIP 44']],
     ['未知的转账链类型: BIP 44 仅允许收款链和找零链', ['未知的转账链类型']],
     ['密钥违反 BIP 44: 地址索引必须使用 normal 派生', ['违反 BIP 44']],
@@ -200,10 +200,9 @@ function getGenerateAt() {
 }
 
 function getFormState() {
-    const account = parseUint31(el.accountInput.value)
     return {
         coinType: Number(el.coinType.value),
-        account: account ?? 0,
+        account: Number(el.accountInput.value),
         change: /** @type {0 | 1} */ (state.change),
         addressIndexes: [...addressState.values],
         requestedKinds: getGenerateAt(),
@@ -421,11 +420,10 @@ function renderAddressChips() {
 }
 
 function commitAddressDraft() {
-    const result = addressState.commitDraft()
-    if (result.ok)
+    if (addressState.commitDraft())
         addressState.updateDraft('0')
 
-    el.addressError.textContent = result.error
+    el.addressError.textContent = ''
     el.addressInput.value = addressState.draft
     state.lastValidAddressDraftText = addressState.draft
     renderAddressChips()
@@ -981,24 +979,6 @@ function showStatusError(message) {
     el.statusError.innerHTML = renderNoteParts(parts)
 }
 
-function validateLocalInputs() {
-    el.accountError.textContent = ''
-    el.addressError.textContent = ''
-
-    if (parseUint31(el.accountInput.value) == null) {
-        el.accountError.textContent = `account: 输入 0 到 ${MAX_UINT31_TEXT} 之间的整数`
-        return false
-    }
-
-    const draft = addressState.draft
-    if (draft && parseUint31(draft) == null) {
-        el.addressError.textContent = `address_index: 输入 0 到 ${MAX_UINT31_TEXT} 之间的整数`
-        return false
-    }
-
-    return true
-}
-
 async function runDerive() {
     syncMaskedInputs()
     syncAddressIndexEntryVisibility()
@@ -1008,9 +988,6 @@ async function runDerive() {
     const token = ++state.pendingToken
     el.rootError.textContent = ''
     showStatusError('')
-
-    if (!validateLocalInputs())
-        return
 
     try {
         if (rootModel.mode === 'mnemonic') {
