@@ -40,6 +40,7 @@ const PATH_CARD_GROUPS = Object.keys(DEFAULT_REQUESTED_KINDS)
 const PATH_CARD_DEPTHS = Object.fromEntries(BIP44_LEVELS.map(level => [level.id, level.depth]))
 
 const el = {
+    inputPanel: document.querySelector('.input-panel'),
     rootInput: document.querySelector('#root-input'),
     rootHelp: document.querySelector('#root-help'),
     rootError: document.querySelector('#root-error'),
@@ -267,6 +268,7 @@ function syncAddressDraftInput() {
 }
 
 function fitTextareaToContent(textarea) {
+    textarea.style.height = 'auto'
     const nextHeight = `${textarea.scrollHeight}px`
     if (textarea.style.height !== nextHeight)
         textarea.style.height = nextHeight
@@ -396,6 +398,7 @@ function syncMaskedInputs() {
     const rootChanged = setFieldValue(el.rootInput, rootModel.getDisplayValue())
     const passphraseChanged = setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
 
+    el.inputPanel.classList.toggle('xkey-entry', isImportMode)
     el.passphraseWrap.classList.toggle('hidden', isImportMode)
 
     if (rootChanged)
