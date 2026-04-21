@@ -1,5 +1,5 @@
 import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './lib/constants.mjs'
-import { BIP44_IMPORT_ERRORS, canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
+import { BIP44_IMPORT_ERROR_CODES, canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { fitTextareaToContent, moveCaretToEndIfFocused, setFieldValue, toggleSetMembership } from './lib/dom-utils.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AVAILABLE_OUTPUT_KINDS, createRequestedKindsState, PATH_CARD_GROUPS } from './lib/output-kinds.mjs'
@@ -71,13 +71,31 @@ const requestedKindsState = createRequestedKindsState()
 const addressAStateByCoinType = new Map(
     COIN_TYPES.filter(c => canDeriveBitcoinAddress(c.value)).map(c => [c.value, true]),
 )
-const STATUS_ERROR_HIGHLIGHTS = new Map([
-    [BIP44_IMPORT_ERRORS.unknownProtocol, ['未知协议类型']],
-    [BIP44_IMPORT_ERRORS.unknownCoin, ['未知币种']],
-    [BIP44_IMPORT_ERRORS.accountMustBeHardened, ['违反 BIP 44']],
-    [BIP44_IMPORT_ERRORS.unknownChangeChain, ['未知的转账链类型']],
-    [BIP44_IMPORT_ERRORS.addressMustBeNormal, ['违反 BIP 44']],
-    [BIP44_IMPORT_ERRORS.tooDeep, ['违反 BIP 44']],
+const STATUS_ERROR_CONTENT = new Map([
+    [BIP44_IMPORT_ERROR_CODES.unknownProtocol, {
+        message: '未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app',
+        highlights: ['未知协议类型'],
+    }],
+    [BIP44_IMPORT_ERROR_CODES.unknownCoin, {
+        message: '未知币种: 考虑更换钱包 app',
+        highlights: ['未知币种'],
+    }],
+    [BIP44_IMPORT_ERROR_CODES.accountMustBeHardened, {
+        message: '密钥违反 BIP 44: 账户须使用硬化派生',
+        highlights: ['违反 BIP 44'],
+    }],
+    [BIP44_IMPORT_ERROR_CODES.unknownChangeChain, {
+        message: '未知的转账链类型: BIP 44 仅允许收款链和找零链',
+        highlights: ['未知的转账链类型'],
+    }],
+    [BIP44_IMPORT_ERROR_CODES.addressMustBeNormal, {
+        message: '密钥违反 BIP 44: 地址索引必须使用 normal 派生',
+        highlights: ['违反 BIP 44'],
+    }],
+    [BIP44_IMPORT_ERROR_CODES.tooDeep, {
+        message: '密钥违反 BIP 44: 层级太深',
+        highlights: ['违反 BIP 44'],
+    }],
 ])
 
 function getSelectedCoinType() {
@@ -836,8 +854,11 @@ function setStatusLine(message) {
     el.statusLine.textContent = message
 }
 
-function showStatusError(message) {
-    const parts = splitHighlightedText(message, STATUS_ERROR_HIGHLIGHTS.get(message) ?? [])
+function showStatusError(errorOrMessage) {
+    const errorContent = STATUS_ERROR_CONTENT.get(errorOrMessage)
+    const message = errorContent?.message ?? errorOrMessage
+    const highlights = errorContent?.highlights ?? []
+    const parts = splitHighlightedText(message, highlights)
     el.statusError.hidden = !message
     el.statusError.innerHTML = renderNoteParts(parts)
 }
@@ -862,12 +883,12 @@ async function resolveCurrentRootSource() {
     })
 }
 
-function applyInvalidImportState(message) {
+function applyInvalidImportState(errorCode) {
     state.entryValidated = false
     state.preserveGatedPanelsWhilePending = false
     state.outputs = []
     setStatusLine('')
-    showStatusError(message)
+    showStatusError(errorCode)
     syncGatedPanels()
     syncKindAvailability()
     renderAll()
@@ -886,7 +907,7 @@ function validateImportedRoot() {
 
     const importValidation = validateBip44Import(state.rootResult.root)
     if (!importValidation.ok) {
-        applyInvalidImportState(importValidation.error)
+        applyInvalidImportState(importValidation.errorCode)
         return false
     }
 

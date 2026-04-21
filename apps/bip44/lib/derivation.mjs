@@ -11,13 +11,13 @@ const SELECTABLE_SEGMENT_BY_DEPTH = [
     form => formatAddressIndexesPreview(form.addressIndexes),
 ]
 
-export const BIP44_IMPORT_ERRORS = {
-    unknownProtocol: '未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app',
-    unknownCoin: '未知币种: 考虑更换钱包 app',
-    accountMustBeHardened: '密钥违反 BIP 44: 账户须使用硬化派生',
-    unknownChangeChain: '未知的转账链类型: BIP 44 仅允许收款链和找零链',
-    addressMustBeNormal: '密钥违反 BIP 44: 地址索引必须使用 normal 派生',
-    tooDeep: '密钥违反 BIP 44: 层级太深',
+export const BIP44_IMPORT_ERROR_CODES = {
+    unknownProtocol: 'unknownProtocol',
+    unknownCoin: 'unknownCoin',
+    accountMustBeHardened: 'accountMustBeHardened',
+    unknownChangeChain: 'unknownChangeChain',
+    addressMustBeNormal: 'addressMustBeNormal',
+    tooDeep: 'tooDeep',
 }
 
 /**
@@ -204,19 +204,19 @@ export async function resolveRootSource(source) {
 
 /**
  * @param {InstanceType<typeof libbip32.XKey>} root
- * @returns {{ ok: boolean, error: string }}
+ * @returns {{ ok: boolean, errorCode: string }}
  */
 export function validateBip44Import(root) {
     const depth = root.depth
     if (depth > 5) {
         return {
             ok: false,
-            error: BIP44_IMPORT_ERRORS.tooDeep,
+            errorCode: BIP44_IMPORT_ERROR_CODES.tooDeep,
         }
     }
 
     if (depth === 0)
-        return { ok: true, error: '' }
+        return { ok: true, errorCode: '' }
 
     const childNumber = root.i
     const isHardened = childNumber >= HARDENED_OFFSET
@@ -224,38 +224,38 @@ export function validateBip44Import(root) {
 
     if (depth === 1) {
         return isHardened && indexValue === 44
-            ? { ok: true, error: '' }
-            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownProtocol }
+            ? { ok: true, errorCode: '' }
+            : { ok: false, errorCode: BIP44_IMPORT_ERROR_CODES.unknownProtocol }
     }
 
     if (depth === 2) {
         return isHardened && isKnownCoinType(indexValue)
-            ? { ok: true, error: '' }
-            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownCoin }
+            ? { ok: true, errorCode: '' }
+            : { ok: false, errorCode: BIP44_IMPORT_ERROR_CODES.unknownCoin }
     }
 
     if (depth === 3) {
         return isHardened
-            ? { ok: true, error: '' }
-            : { ok: false, error: BIP44_IMPORT_ERRORS.accountMustBeHardened }
+            ? { ok: true, errorCode: '' }
+            : { ok: false, errorCode: BIP44_IMPORT_ERROR_CODES.accountMustBeHardened }
     }
 
     if (depth === 4) {
         if (isHardened) {
             return {
                 ok: false,
-                error: BIP44_IMPORT_ERRORS.unknownChangeChain,
+                errorCode: BIP44_IMPORT_ERROR_CODES.unknownChangeChain,
             }
         }
 
         return indexValue === 0 || indexValue === 1
-            ? { ok: true, error: '' }
-            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownChangeChain }
+            ? { ok: true, errorCode: '' }
+            : { ok: false, errorCode: BIP44_IMPORT_ERROR_CODES.unknownChangeChain }
     }
 
     return !isHardened
-        ? { ok: true, error: '' }
-        : { ok: false, error: BIP44_IMPORT_ERRORS.addressMustBeNormal }
+        ? { ok: true, errorCode: '' }
+        : { ok: false, errorCode: BIP44_IMPORT_ERROR_CODES.addressMustBeNormal }
 }
 
 /**
