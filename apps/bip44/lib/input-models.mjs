@@ -174,6 +174,12 @@ export class RootInputModel {
             return
 
         if (this.mode === 'xkey') {
+            if (this.raw.startsWith('xprv')) {
+                this.raw = ''
+                this.mode = 'mnemonic'
+                return
+            }
+
             this.raw = this.raw.slice(0, -1)
             if (!isXKeyPrefix(this.raw))
                 this.mode = 'mnemonic'
