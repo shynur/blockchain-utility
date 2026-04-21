@@ -241,7 +241,7 @@ small {
     min-height: 112px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 8px;
     padding: 12px 14px;
     border: 1px solid rgba(126, 102, 58, 0.22);
@@ -331,6 +331,7 @@ small {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin-top: auto;
 }
 
 .kind-picks[hidden] {
@@ -449,10 +450,6 @@ small {
     background: #143b35;
     color: #fff7e8;
     font-family: var(--mono);
-}
-
-.path-card .error {
-    min-height: 1.1em;
 }
 
 .chip button {

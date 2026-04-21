@@ -1,7 +1,6 @@
 import { BASE58_ALPHABET, HARDENED_OFFSET } from './constants.mjs'
 
 export const MAX_UINT31 = HARDENED_OFFSET - 1
-export const MAX_UINT31_TEXT = String(MAX_UINT31)
 
 export function isAsciiLetter(char) {
     return /^[A-Za-z]$/.test(char)

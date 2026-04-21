@@ -2,7 +2,7 @@ import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './
 import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, MAX_UINT31_TEXT, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -19,8 +19,6 @@ const state = {
     revealXprv: new Set(),
     revealPrivateKey: new Set(),
     selectedPathCards: new Set(),
-    lastValidAccountText: '0',
-    lastValidAddressDraftText: '0',
 }
 
 const DEFAULT_REQUESTED_KINDS = {
@@ -49,13 +47,11 @@ const el = {
     passphraseInput: document.querySelector('#passphrase-input'),
     coinType: document.querySelector('#coin-type'),
     accountInput: document.querySelector('#account-input'),
-    accountError: document.querySelector('#account-error'),
     changeSwitch: document.querySelector('#change-switch'),
     changeNote: document.querySelector('#change-note'),
     addressEntry: document.querySelector('#address-index-entry'),
     addressInput: document.querySelector('#address-index-input'),
     addressAdd: document.querySelector('#address-index-add'),
-    addressError: document.querySelector('#address-error'),
     addressList: document.querySelector('#address-index-list'),
     pathSummary: document.querySelector('#path-summary'),
     statusError: document.querySelector('#status-error'),
@@ -134,6 +130,7 @@ for (const group of PATH_CARD_GROUPS)
 
 const privateKindInputs = [...document.querySelectorAll('[data-output-kind="xprv"], [data-output-kind="k"]')]
 const addressKindInputs = [...document.querySelectorAll('[data-output-kind="A"]')]
+let lastValidAccountText = el.accountInput.value
 const hoverState = {
     activePathCard: null,
     lastPointerX: null,
@@ -223,9 +220,7 @@ function normalizeRequiredUint31Text(text) {
 }
 
 function isUint31TextTooLarge(text) {
-    const normalized = normalizeRequiredUint31Text(text)
-    return normalized.length > MAX_UINT31_TEXT.length
-        || (normalized.length === MAX_UINT31_TEXT.length && normalized > MAX_UINT31_TEXT)
+    return Number(normalizeRequiredUint31Text(text)) > MAX_UINT31
 }
 
 function getProjectedTextInputValue(input, insertedText) {
@@ -238,14 +233,10 @@ function syncAccountInputWidth() {
     el.accountInput.style.setProperty('--chars', String(Math.max(1, el.accountInput.value.length)))
 }
 
-function rejectOverflowing(errorEl, label) {
-    errorEl.textContent = `${label}: 最大值是 ${MAX_UINT31_TEXT}`
-}
-
-function syncRequiredUint31Input(input, lastValidText, onValueSynced, afterSync = () => {}) {
+function syncRequiredUint31Input(input, getLastValidText, onValueSynced, afterSync = () => {}) {
     const normalized = normalizeRequiredUint31Text(input.value)
     const accepted = !isUint31TextTooLarge(normalized)
-    const nextText = accepted ? normalized : lastValidText
+    const nextText = accepted ? normalized : getLastValidText()
 
     setFieldValue(input, nextText)
     onValueSynced(nextText)
@@ -257,18 +248,17 @@ function syncRequiredUint31Input(input, lastValidText, onValueSynced, afterSync 
 function syncAccountInput() {
     return syncRequiredUint31Input(
         el.accountInput,
-        state.lastValidAccountText,
+        () => lastValidAccountText,
         value => {
-            state.lastValidAccountText = value
+            lastValidAccountText = value
         },
         syncAccountInputWidth,
     )
 }
 
 function syncAddressDraftInput() {
-    return syncRequiredUint31Input(el.addressInput, state.lastValidAddressDraftText, value => {
+    return syncRequiredUint31Input(el.addressInput, () => addressState.draft || '0', value => {
         addressState.updateDraft(value)
-        state.lastValidAddressDraftText = addressState.draft
     })
 }
 
@@ -423,9 +413,7 @@ function commitAddressDraft() {
     if (addressState.commitDraft())
         addressState.updateDraft('0')
 
-    el.addressError.textContent = ''
     el.addressInput.value = addressState.draft
-    state.lastValidAddressDraftText = addressState.draft
     renderAddressChips()
     scheduleDerive()
 }
@@ -554,7 +542,6 @@ function renderPathSummary() {
 function syncAddressIndexEntryVisibility() {
     const hidden = isImportedAddressXkey()
     el.addressEntry.hidden = hidden
-    el.addressError.hidden = hidden
     pathCards.address.classList.toggle('compact', hidden)
 }
 
@@ -648,7 +635,7 @@ function handleMaskedBeforeInput(event, model) {
     }
 }
 
-function handleUint31BeforeInput(event, input, errorEl, label) {
+function handleUint31BeforeInput(event, input) {
     if (!event.inputType.startsWith('insert'))
         return
 
@@ -656,16 +643,11 @@ function handleUint31BeforeInput(event, input, errorEl, label) {
     if (!insertedText)
         return
 
-    if (isUint31TextTooLarge(getProjectedTextInputValue(input, insertedText))) {
+    if (isUint31TextTooLarge(getProjectedTextInputValue(input, insertedText)))
         event.preventDefault()
-        rejectOverflowing(errorEl, label)
-        return
-    }
-
-    errorEl.textContent = ''
 }
 
-function handleUint31Paste(event, input, errorEl, label) {
+function handleUint31Paste(event, input) {
     event.preventDefault()
 
     const pastedText = event.clipboardData.getData('text/plain')
@@ -694,9 +676,6 @@ function handleUint31Paste(event, input, errorEl, label) {
     input.value = normalized
     input.setSelectionRange(cursorPos, cursorPos)
     input.dispatchEvent(new Event('input', { bubbles: true }))
-
-    if (overflow)
-        rejectOverflowing(errorEl, label)
 }
 
 function renderRootInfo() {
@@ -1105,21 +1084,16 @@ function bindMaskedInput(input, model) {
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
 }
 
-function bindUint31Input({ input, errorEl, label, syncInput, onValidInput, onEnter }) {
+function bindUint31Input({ input, syncInput, onValidInput, onEnter }) {
     input.addEventListener('beforeinput', event => {
-        handleUint31BeforeInput(event, input, errorEl, label)
+        handleUint31BeforeInput(event, input)
     })
     input.addEventListener('paste', event => {
-        handleUint31Paste(event, input, errorEl, label)
+        handleUint31Paste(event, input)
     })
     input.addEventListener('input', () => {
-        if (!syncInput()) {
-            rejectOverflowing(errorEl, label)
-            return
-        }
-
-        errorEl.textContent = ''
-        onValidInput()
+        if (syncInput())
+            onValidInput()
     })
 
     if (!onEnter)
@@ -1142,8 +1116,6 @@ el.coinType.addEventListener('input', () => {
 })
 bindUint31Input({
     input: el.accountInput,
-    errorEl: el.accountError,
-    label: 'account',
     syncInput: syncAccountInput,
     onValidInput: scheduleDerive,
 })
@@ -1155,8 +1127,6 @@ el.changeSwitch.addEventListener('click', () => {
 
 bindUint31Input({
     input: el.addressInput,
-    errorEl: el.addressError,
-    label: 'address_index',
     syncInput: syncAddressDraftInput,
     onValidInput: scheduleDerive,
     onEnter: commitAddressDraft,
