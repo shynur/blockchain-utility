@@ -214,6 +214,16 @@ small {
     font-weight: 700;
 }
 
+.status-error-title {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.status-error-detail {
+    color: var(--muted);
+    font-weight: 400;
+}
+
 .xkey-entry #root-error:empty {
     display: none;
 }

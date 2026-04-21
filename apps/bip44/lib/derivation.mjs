@@ -11,6 +11,15 @@ const SELECTABLE_SEGMENT_BY_DEPTH = [
     form => formatAddressIndexesPreview(form.addressIndexes),
 ]
 
+export const BIP44_IMPORT_ERRORS = {
+    unknownProtocol: '未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app',
+    unknownCoin: '未知币种: 考虑更换钱包 app',
+    accountMustBeHardened: '密钥违反 BIP 44: 账户须使用硬化派生',
+    unknownChangeChain: '未知的转账链类型: BIP 44 仅允许收款链和找零链',
+    addressMustBeNormal: '密钥违反 BIP 44: 地址索引必须使用 normal 派生',
+    tooDeep: '密钥违反 BIP 44: 层级太深',
+}
+
 /**
  * @typedef {{
  *   id: string,
@@ -213,7 +222,7 @@ export function validateBip44Import(root) {
     if (depth > 5) {
         return {
             ok: false,
-            error: '密钥违反 BIP 44: 层级太深',
+            error: BIP44_IMPORT_ERRORS.tooDeep,
         }
     }
 
@@ -227,44 +236,44 @@ export function validateBip44Import(root) {
     if (depth === 1) {
         return isHardened && indexValue === 44
             ? { ok: true, error: '' }
-            : { ok: false, error: '未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app' }
+            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownProtocol }
     }
 
     if (depth === 2) {
         if (!isHardened) {
             return {
                 ok: false,
-                error: '未知币种, 考虑更换钱包 app',
+                error: BIP44_IMPORT_ERRORS.unknownCoin,
             }
         }
 
         return isKnownCoinType(indexValue)
             ? { ok: true, error: '' }
-            : { ok: false, error: '未知币种, 考虑更换钱包 app' }
+            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownCoin }
     }
 
     if (depth === 3) {
         return isHardened
             ? { ok: true, error: '' }
-            : { ok: false, error: '密钥违反 BIP 44: 账户须使用硬化派生' }
+            : { ok: false, error: BIP44_IMPORT_ERRORS.accountMustBeHardened }
     }
 
     if (depth === 4) {
         if (isHardened) {
             return {
                 ok: false,
-                error: '未知的转账链类型: BIP 44 仅允许收款链和找零链',
+                error: BIP44_IMPORT_ERRORS.unknownChangeChain,
             }
         }
 
         return indexValue === 0 || indexValue === 1
             ? { ok: true, error: '' }
-            : { ok: false, error: '未知的转账链类型: BIP 44 仅允许收款链和找零链' }
+            : { ok: false, error: BIP44_IMPORT_ERRORS.unknownChangeChain }
     }
 
     return !isHardened
         ? { ok: true, error: '' }
-        : { ok: false, error: '密钥违反 BIP 44: 地址索引必须使用 normal 派生' }
+        : { ok: false, error: BIP44_IMPORT_ERRORS.addressMustBeNormal }
 }
 
 /**

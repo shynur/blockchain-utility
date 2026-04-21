@@ -1,8 +1,12 @@
 import { BIP44_LEVELS, COIN_TYPES, VALID_MNEMONIC_COUNTS, XKEY_LENGTH } from './lib/constants.mjs'
-import { canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, getXpubPathSegments, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
+import { BIP44_IMPORT_ERRORS, canDeriveBitcoinAddress, deriveBip44, describeRootKey, formatAddressIndexesPreview, getCoinTypeOption, getPathPreview, resolveRootSource, validateBip44Import } from './lib/derivation.mjs'
+import { fitTextareaToContent, moveCaretToEndIfFocused, setFieldValue, toggleSetMembership } from './lib/dom-utils.mjs'
 import { RootInputModel, PassphraseModel } from './lib/input-models.mjs'
+import { AVAILABLE_OUTPUT_KINDS, createRequestedKindsState, PATH_CARD_GROUPS } from './lib/output-kinds.mjs'
 import { AddressIndexState } from './lib/path-state.mjs'
-import { clampUint31Text, escapeHtml, MAX_UINT31, pluralizeWords, stripUncertaintyMarkers, unhardenIndex } from './lib/utils.mjs'
+import { renderOutputAbsolutePath, renderPathText, renderXpubPathNotation } from './lib/path-rendering.mjs'
+import { renderNoteParts, splitHighlightedText } from './lib/rendering.mjs'
+import { clampUint31Text, escapeHtml, MAX_UINT31, pluralizeWords, unhardenIndex } from './lib/utils.mjs'
 
 const rootModel = new RootInputModel()
 const passphraseModel = new PassphraseModel()
@@ -22,21 +26,6 @@ const state = {
     selectedPathCards: new Set(),
 }
 
-const DEFAULT_REQUESTED_KINDS = {
-    purpose: { xprv: false, xpub: true, k: false, K: false, A: false },
-    coin: { xprv: false, xpub: true, k: false, K: false, A: false },
-    account: { xprv: false, xpub: true, k: false, K: false, A: false },
-    change: { xprv: false, xpub: true, k: false, K: false, A: false },
-    address: { xprv: false, xpub: false, k: false, K: false, A: false },
-}
-const AVAILABLE_OUTPUT_KINDS = {
-    purpose: ['xprv', 'xpub'],
-    coin: ['xprv', 'xpub'],
-    account: ['xprv', 'xpub'],
-    change: ['xprv', 'xpub'],
-    address: ['k', 'K', 'A'],
-}
-const PATH_CARD_GROUPS = Object.keys(DEFAULT_REQUESTED_KINDS)
 const PATH_CARD_DEPTHS = Object.fromEntries(BIP44_LEVELS.map(level => [level.id, level.depth]))
 
 const el = {
@@ -78,17 +67,17 @@ for (const option of COIN_TYPES) {
     el.coinType.append(node)
 }
 
-const requestedKindsState = structuredClone(DEFAULT_REQUESTED_KINDS)
+const requestedKindsState = createRequestedKindsState()
 const addressAStateByCoinType = new Map(
     COIN_TYPES.filter(c => canDeriveBitcoinAddress(c.value)).map(c => [c.value, true]),
 )
 const STATUS_ERROR_HIGHLIGHTS = new Map([
-    ['未知协议类型: 仅支持 BIP 44, 考虑更换钱包 app', ['未知协议类型']],
-    ['未知币种: 考虑更换钱包 app', ['未知币种']],
-    ['密钥违反 BIP 44: 账户须使用硬化派生', ['违反 BIP 44']],
-    ['未知的转账链类型: BIP 44 仅允许收款链和找零链', ['未知的转账链类型']],
-    ['密钥违反 BIP 44: 地址索引必须使用 normal 派生', ['违反 BIP 44']],
-    ['密钥违反 BIP 44: 层级太深', ['违反 BIP 44']],
+    [BIP44_IMPORT_ERRORS.unknownProtocol, ['未知协议类型']],
+    [BIP44_IMPORT_ERRORS.unknownCoin, ['未知币种']],
+    [BIP44_IMPORT_ERRORS.accountMustBeHardened, ['违反 BIP 44']],
+    [BIP44_IMPORT_ERRORS.unknownChangeChain, ['未知的转账链类型']],
+    [BIP44_IMPORT_ERRORS.addressMustBeNormal, ['违反 BIP 44']],
+    [BIP44_IMPORT_ERRORS.tooDeep, ['违反 BIP 44']],
 ])
 
 function getSelectedCoinType() {
@@ -208,14 +197,6 @@ function getFormState() {
     }
 }
 
-function setFieldValue(input, value) {
-    if (input.value === value)
-        return false
-
-    input.value = value
-    return true
-}
-
 function normalizeRequiredUint31Text(text) {
     const digits = clampUint31Text(text)
     if (!digits)
@@ -265,24 +246,6 @@ function syncAddressDraftInput() {
     return syncRequiredUint31Input(el.addressInput, () => addressState.draft || '0', value => {
         addressState.updateDraft(value)
     })
-}
-
-function fitTextareaToContent(textarea) {
-    textarea.style.height = 'auto'
-    const nextHeight = `${textarea.scrollHeight}px`
-    if (textarea.style.height !== nextHeight)
-        textarea.style.height = nextHeight
-}
-
-function moveCaretToEndIfFocused(input) {
-    if (document.activeElement !== input)
-        return
-
-    const end = input.value.length
-    if (input.selectionStart === end && input.selectionEnd === end)
-        return
-
-    input.selectionStart = input.selectionEnd = end
 }
 
 function isTextInputEditing() {
@@ -445,101 +408,6 @@ function commitAddressDraft() {
     scheduleDerive()
 }
 
-function appendSpan(container, text, className = '') {
-    const node = document.createElement('span')
-    if (className)
-        node.className = className
-    if (text)
-        node.textContent = text
-    container.append(node)
-    return node
-}
-
-function renderPathSegment(container, segment) {
-    const uncertainMatch = segment.match(/^~(.+)~$/)
-    if (uncertainMatch) {
-        const text = uncertainMatch[1]
-        const hardenedMatch = text.match(/^(.+)'$/)
-        if (hardenedMatch) {
-            appendSpan(container, hardenedMatch[1], 'path-segment path-uncertain')
-            appendSpan(container, "'", 'path-segment')
-        } else {
-            appendSpan(container, text, 'path-segment path-uncertain')
-        }
-        return
-    }
-
-    const match = segment.match(/^\{(\d+(?:,\d+)*)\}$/)
-    if (!match) {
-        appendSpan(container, segment, 'path-segment')
-        return
-    }
-
-    appendSpan(container, '{', 'path-address-token')
-    container.append(document.createElement('wbr'))
-
-    const values = match[1].split(',')
-    for (const [index, value] of values.entries()) {
-        appendSpan(container, value, 'path-address-token')
-        if (index >= values.length - 1)
-            continue
-
-        appendSpan(container, ',', 'path-address-token')
-        container.append(document.createElement('wbr'))
-    }
-
-    container.append(document.createElement('wbr'))
-    appendSpan(container, '}', 'path-address-token')
-}
-
-function appendSeparatedSegments(container, segments) {
-    for (const segment of segments) {
-        appendSeparator(container)
-        renderPathSegment(container, segment)
-    }
-}
-
-function renderPathText(container, path) {
-    container.replaceChildren()
-    container.setAttribute('aria-label', path)
-
-    const [first, ...rest] = path.split('/')
-    renderPathSegment(container, first)
-    appendSeparatedSegments(container, rest)
-}
-
-function renderXpubPathNotation(container, root, form) {
-    container.replaceChildren()
-
-    const result = getXpubPathSegments(root, form)
-    if (!result) {
-        container.setAttribute('aria-label', 'M')
-        appendSpan(container, 'M', 'path-segment')
-        return
-    }
-
-    const nParts = ['m', ...result.insideN.map(stripUncertaintyMarkers)]
-    const outerParts = result.outsideN.map(stripUncertaintyMarkers)
-    let ariaLabel = `N(${nParts.join(' / ')})`
-    if (outerParts.length > 0)
-        ariaLabel += ' / ' + outerParts.join(' / ')
-    container.setAttribute('aria-label', ariaLabel)
-
-    appendSpan(container, 'N(', 'path-notation')
-    renderPathSegment(container, 'm')
-    appendSeparatedSegments(container, result.insideN)
-    appendSpan(container, ')', 'path-notation')
-    appendSeparatedSegments(container, result.outsideN)
-}
-
-function appendSeparator(container) {
-    const sep = document.createElement('span')
-    sep.className = 'path-separator'
-    sep.textContent = '/'
-    sep.setAttribute('aria-hidden', 'true')
-    container.append(sep)
-}
-
 function renderPathSummary() {
     const form = getFormState()
     const root = state.rootResult?.root
@@ -601,13 +469,6 @@ function syncKindAvailability() {
 
 function shouldTogglePathCardFromClick(event) {
     return !event.target.closest('label, input, select, button, textarea, a, .chip')
-}
-
-function toggleSetMembership(set, value) {
-    if (set.has(value))
-        set.delete(value)
-    else
-        set.add(value)
 }
 
 function togglePathCardSelection(group) {
@@ -890,65 +751,6 @@ function attachSecretToggle(kind, output, card) {
     })
 }
 
-function renderNoteParts(parts) {
-    return parts.map(part => {
-        const className = part.highlight ? ' class="output-note-highlight"' : ''
-        return `<span${className}>${escapeHtml(part.text)}</span>`
-    }).join('')
-}
-
-function splitHighlightedText(text, highlights) {
-    if (!text || highlights.length === 0)
-        return [{ text, highlight: false }]
-
-    const matchedHighlights = highlights
-        .map(value => ({ value, index: text.indexOf(value) }))
-        .filter(match => match.index >= 0)
-        .sort((left, right) => left.index - right.index || right.value.length - left.value.length)
-
-    if (matchedHighlights.length === 0)
-        return [{ text, highlight: false }]
-
-    const parts = []
-    let cursor = 0
-    for (const match of matchedHighlights) {
-        const start = match.index
-        const end = start + match.value.length
-        if (start < cursor)
-            continue
-
-        if (start > cursor)
-            parts.push({ text: text.slice(cursor, start), highlight: false })
-        parts.push({ text: match.value, highlight: true })
-        cursor = end
-    }
-
-    if (cursor < text.length)
-        parts.push({ text: text.slice(cursor), highlight: false })
-
-    return parts
-}
-
-function renderOutputAbsolutePath(container, output) {
-    const root = state.rootResult?.root
-    if (!root) {
-        renderPathText(container, `m${output.pathSuffix}`)
-        return
-    }
-
-    const form = getFormState()
-    const importedPath = getPathPreview(root, form).split('/')
-    const baseSegments = importedPath.slice(1, root.depth + 1)
-    const suffixSegments = output.pathSuffix
-        ? output.pathSuffix.slice(1).split('/')
-        : []
-    const plainSegments = [...baseSegments, ...suffixSegments].map(stripUncertaintyMarkers)
-    container.setAttribute('aria-label', ['m', ...plainSegments].join(' / '))
-
-    renderPathSegment(container, 'm')
-    appendSeparatedSegments(container, plainSegments)
-}
-
 function renderOutputsImmediate() {
     state.revealXprv.clear()
     state.revealPrivateKey.clear()
@@ -984,7 +786,7 @@ function renderOutputsImmediate() {
                 ${rows}
             </div>
         `
-        renderOutputAbsolutePath(card.querySelector('.output-meta p'), output)
+        renderOutputAbsolutePath(card.querySelector('.output-meta p'), state.rootResult?.root ?? null, getFormState(), output)
         attachSecretToggle('xprv', output, card)
         attachSecretToggle('k', output, card)
         el.outputs.append(card)
@@ -1039,6 +841,67 @@ function showStatusError(message) {
     el.statusError.innerHTML = renderNoteParts(parts)
 }
 
+function isDeriveResultStale(token) {
+    return token !== state.pendingToken
+}
+
+async function resolveCurrentRootSource() {
+    if (rootModel.mode === 'mnemonic') {
+        const wordState = rootModel.getWordState()
+        return resolveRootSource({
+            importMode: 'mnemonic',
+            mnemonicSentence: wordState.normalizedSentence,
+            passphrase: passphraseModel.getRawValue(),
+        })
+    }
+
+    return resolveRootSource({
+        importMode: 'xkey',
+        xkeyText: rootModel.getRawValue(),
+    })
+}
+
+function applyInvalidImportState(message) {
+    state.entryValidated = false
+    state.preserveGatedPanelsWhilePending = false
+    state.outputs = []
+    setStatusLine('')
+    showStatusError(message)
+    syncGatedPanels()
+    syncKindAvailability()
+    renderAll()
+}
+
+function applyValidImportState() {
+    state.entryValidated = true
+    state.preserveGatedPanelsWhilePending = false
+    syncGatedPanels()
+    syncKindAvailability()
+}
+
+function validateImportedRoot() {
+    if (state.rootResult?.kind !== 'xkey')
+        return true
+
+    const importValidation = validateBip44Import(state.rootResult.root)
+    if (!importValidation.ok) {
+        applyInvalidImportState(importValidation.error)
+        return false
+    }
+
+    syncXkeyLockedValues(state.rootResult.root)
+    return true
+}
+
+function showInvalidRootSourceError() {
+    const title = rootModel.mode === 'xkey' ? '密钥无效' : '助记词无效'
+    const detail = rootModel.mode === 'xkey'
+        ? ': xpub / xprv 不合法'
+        : ': 请检查单词和顺序'
+    el.statusError.hidden = false
+    el.statusError.innerHTML = `<span class="status-error-title">${escapeHtml(title)}</span><span class="status-error-detail">${escapeHtml(detail)}</span>`
+}
+
 async function runDerive() {
     syncMaskedInputs()
     syncAddressIndexEntryVisibility()
@@ -1056,58 +919,31 @@ async function runDerive() {
         }
 
         setStatusLine('')
-        if (rootModel.mode === 'mnemonic') {
-            const wordState = rootModel.getWordState()
-            state.rootResult = await resolveRootSource({
-                importMode: 'mnemonic',
-                mnemonicSentence: wordState.normalizedSentence,
-                passphrase: passphraseModel.getRawValue(),
-            })
-        } else {
-            state.rootResult = await resolveRootSource({ importMode: 'xkey', xkeyText: rootModel.getRawValue() })
-        }
+        state.rootResult = await resolveCurrentRootSource()
 
-        if (token !== state.pendingToken)
+        if (isDeriveResultStale(token))
             return
 
         state.rootInfo = await describeRootKey(state.rootResult.root)
-        if (token !== state.pendingToken)
+        if (isDeriveResultStale(token))
             return
 
-        if (state.rootResult.kind === 'xkey') {
-            const importValidation = validateBip44Import(state.rootResult.root)
-            if (!importValidation.ok) {
-                state.entryValidated = false
-                state.preserveGatedPanelsWhilePending = false
-                state.outputs = []
-                setStatusLine('')
-                showStatusError(importValidation.error)
-                syncGatedPanels()
-                syncKindAvailability()
-                renderAll()
-                return
-            }
-            syncXkeyLockedValues(state.rootResult.root)
-        }
-        state.entryValidated = true
-        state.preserveGatedPanelsWhilePending = false
-        syncGatedPanels()
-        syncKindAvailability()
+        if (!validateImportedRoot())
+            return
+
+        applyValidImportState()
         const derived = await deriveBip44(state.rootResult.root, getFormState())
-        if (token !== state.pendingToken)
+        if (isDeriveResultStale(token))
             return
 
         state.outputs = derived
         setStatusLine('')
         renderAll()
     } catch (error) {
-        if (token !== state.pendingToken)
+        if (isDeriveResultStale(token))
             return
         clearResults('')
-        el.statusError.hidden = false
-        el.statusError.innerHTML = rootModel.mode === 'xkey'
-            ? '<span style="color: var(--danger); font-weight: 700;">密钥无效</span><span style="color: var(--muted); font-weight: 400;">: xpub / xprv 不合法</span>'
-            : '<span style="color: var(--danger); font-weight: 700;">助记词无效</span><span style="color: var(--muted); font-weight: 400;">: 请检查单词和顺序</span>'
+        showInvalidRootSourceError()
     }
 }
 
