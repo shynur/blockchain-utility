@@ -77,11 +77,6 @@ button {
     margin-bottom: 0;
 }
 
-.top-panels > .input-panel.xkey-entry {
-    align-self: start;
-    height: auto;
-}
-
 .status-panel {
     --status-columns: 2;
     display: flex;
