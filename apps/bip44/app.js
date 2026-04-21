@@ -891,7 +891,7 @@ function renderOutputsImmediate() {
     el.outputs.replaceChildren()
     el.outputs.classList.toggle('empty', state.outputs.length === 0)
     if (!state.outputs.length) {
-        el.outputs.textContent = state.rootResult ? '当前没有选择要生成的节点。' : '有效输入出现后会在这里显示。'
+        el.outputs.textContent = '当前没有选择要生成的节点。'
         return
     }
 
