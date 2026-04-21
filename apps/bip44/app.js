@@ -13,6 +13,7 @@ const state = {
     rootResult: null,
     rootInfo: null,
     entryValidated: false,
+    preserveGatedPanelsWhilePending: false,
     outputs: [],
     pendingToken: 0,
     change: 0,
@@ -207,8 +208,11 @@ function getFormState() {
 }
 
 function setFieldValue(input, value) {
-    if (input.value !== value)
-        input.value = value
+    if (input.value === value)
+        return false
+
+    input.value = value
+    return true
 }
 
 function normalizeRequiredUint31Text(text) {
@@ -263,8 +267,24 @@ function syncAddressDraftInput() {
 }
 
 function fitTextareaToContent(textarea) {
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight}px`
+    const nextHeight = `${textarea.scrollHeight}px`
+    if (textarea.style.height !== nextHeight)
+        textarea.style.height = nextHeight
+}
+
+function moveCaretToEndIfFocused(input) {
+    if (document.activeElement !== input)
+        return
+
+    const end = input.value.length
+    if (input.selectionStart === end && input.selectionEnd === end)
+        return
+
+    input.selectionStart = input.selectionEnd = end
+}
+
+function isMaskedInputEditing() {
+    return document.activeElement === el.rootInput || document.activeElement === el.passphraseInput
 }
 
 function syncPathCardSelection() {
@@ -370,14 +390,15 @@ function syncMaskedInputs() {
     const isImportMode = rootModel.mode === 'xkey'
     const rootRawValue = rootModel.getRawValue()
 
-    setFieldValue(el.rootInput, rootModel.getDisplayValue())
-    setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
-    el.rootInput.selectionStart = el.rootInput.selectionEnd = el.rootInput.value.length
-    el.passphraseInput.selectionStart = el.passphraseInput.selectionEnd = el.passphraseInput.value.length
+    const rootChanged = setFieldValue(el.rootInput, rootModel.getDisplayValue())
+    const passphraseChanged = setFieldValue(el.passphraseInput, passphraseModel.getDisplayValue())
 
     el.passphraseWrap.classList.toggle('hidden', isImportMode)
-    fitTextareaToContent(el.rootInput)
-    fitTextareaToContent(el.passphraseInput)
+
+    if (rootChanged)
+        fitTextareaToContent(el.rootInput)
+    if (passphraseChanged)
+        fitTextareaToContent(el.passphraseInput)
 
     if (isImportMode) {
         el.rootHelp.textContent = `已输入 ${rootRawValue.length}/${XKEY_LENGTH}`
@@ -594,8 +615,17 @@ function togglePathCardSelection(group) {
     scheduleDerive()
 }
 
-function invalidateEntryValidation() {
+function shouldPreserveGatedPanelsWhilePending() {
+    return rootModel.mode === 'mnemonic'
+        && isRootEntryComplete()
+        && (state.entryValidated || state.preserveGatedPanelsWhilePending)
+}
+
+function invalidateEntryValidation({ preserveGatedPanels = false } = {}) {
     state.pendingToken += 1
+
+    if (preserveGatedPanels && shouldPreserveGatedPanelsWhilePending())
+        state.preserveGatedPanelsWhilePending = true
 
     if (!state.entryValidated)
         return
@@ -606,7 +636,7 @@ function invalidateEntryValidation() {
 
 function commitMaskedModelChange(model, change) {
     change()
-    invalidateEntryValidation()
+    invalidateEntryValidation({ preserveGatedPanels: model === passphraseModel })
     syncMaskedInputs()
     if (model === rootModel && !isRootEntryComplete())
         clearResults(WAITING_INPUT_STATUS)
@@ -907,6 +937,7 @@ function renderOutputsImmediate() {
 function renderOutputs() {
     const canAnimate = typeof document.startViewTransition === 'function'
         && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        && !isMaskedInputEditing()
     if (canAnimate) {
         const transition = document.startViewTransition(renderOutputsImmediate)
         transition.finished.finally(() => {
@@ -919,9 +950,10 @@ function renderOutputs() {
 }
 
 function syncGatedPanels() {
+    const showGatedPanels = state.entryValidated || state.preserveGatedPanelsWhilePending
     for (const panel of el.gatedPanels)
-        panel.hidden = !state.entryValidated
-    if (state.entryValidated && isImportedMasterXpub())
+        panel.hidden = !showGatedPanels
+    if (showGatedPanels && isImportedMasterXpub())
         el.outputPanel.hidden = true
 }
 
@@ -929,6 +961,7 @@ function clearResults(message) {
     state.rootResult = null
     state.rootInfo = null
     state.entryValidated = false
+    state.preserveGatedPanelsWhilePending = false
     state.outputs = []
     resetXkeyLockedValues()
     showStatusError('')
@@ -1006,6 +1039,7 @@ async function runDerive() {
             const importValidation = validateBip44Import(state.rootResult.root)
             if (!importValidation.ok) {
                 state.entryValidated = false
+                state.preserveGatedPanelsWhilePending = false
                 syncGatedPanels()
                 syncKindAvailability()
                 renderRootInfo()
@@ -1016,6 +1050,7 @@ async function runDerive() {
             syncXkeyLockedValues(state.rootResult.root)
         }
         state.entryValidated = true
+        state.preserveGatedPanelsWhilePending = false
         syncGatedPanels()
         syncKindAvailability()
         const derived = await deriveBip44(state.rootResult.root, getFormState())
@@ -1073,6 +1108,12 @@ function handleMaskedKeydown(event, model) {
 }
 
 function bindMaskedInput(input, model) {
+    const syncCaret = () => {
+        window.requestAnimationFrame(() => {
+            moveCaretToEndIfFocused(input)
+        })
+    }
+
     input.addEventListener('keydown', event => handleMaskedKeydown(event, model))
     input.addEventListener('paste', event => {
         event.preventDefault()
@@ -1082,6 +1123,8 @@ function bindMaskedInput(input, model) {
     })
     input.addEventListener('drop', event => event.preventDefault())
     input.addEventListener('beforeinput', event => handleMaskedBeforeInput(event, model))
+    input.addEventListener('focus', syncCaret)
+    input.addEventListener('pointerup', syncCaret)
 }
 
 function bindUint31Input({ input, syncInput, onValidInput, onEnter }) {
