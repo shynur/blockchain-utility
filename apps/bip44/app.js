@@ -1176,7 +1176,6 @@ bindUint31Input({
 })
 el.addressAdd.addEventListener('click', () => {
     commitAddressDraft()
-    el.addressInput.focus()
 })
 
 document.addEventListener('pointermove', handlePathCardPointerEvent)
