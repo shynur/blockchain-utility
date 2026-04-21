@@ -395,10 +395,16 @@ export function getXpubPathSegments(root, form) {
     const LAST_HARDENED_DEPTH = 3
     const nDepth = Math.min(root.depth, LAST_HARDENED_DEPTH)
     const segments = buildFixedSegments(root, form)
+    const start = Math.min(root.depth, SELECTABLE_SEGMENT_BY_DEPTH.length)
+    const derivableSegments = root.depth >= LAST_HARDENED_DEPTH
+        ? SELECTABLE_SEGMENT_BY_DEPTH
+            .slice(start)
+            .map((_, offset) => resolveSegment(start + offset, form))
+        : []
 
     return {
         insideN: segments.slice(0, nDepth),
-        outsideN: segments.slice(nDepth),
+        outsideN: [...segments.slice(nDepth), ...derivableSegments],
     }
 }
 
