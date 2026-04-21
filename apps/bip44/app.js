@@ -51,6 +51,7 @@ const el = {
     accountError: document.querySelector('#account-error'),
     changeSwitch: document.querySelector('#change-switch'),
     changeNote: document.querySelector('#change-note'),
+    addressEntry: document.querySelector('#address-index-entry'),
     addressInput: document.querySelector('#address-index-input'),
     addressAdd: document.querySelector('#address-index-add'),
     addressError: document.querySelector('#address-error'),
@@ -319,6 +320,10 @@ function getImportedPathDepth() {
     return state.rootResult?.kind === 'xkey' ? state.rootResult.root.depth : 0
 }
 
+function isImportedAddressXkey() {
+    return getImportedPathDepth() === 5
+}
+
 function isImportedMasterXpub() {
     const root = state.rootResult?.root
     return root && state.rootResult.kind === 'xkey' && root.is_public_key() && root.depth === 0
@@ -369,18 +374,17 @@ function syncXkeyLockedValues(root) {
         addressState.updateDraft(String(indexValue))
         addressState.commitDraft()
         addressState.updateDraft('0')
-        el.addressInput.disabled = true
-        el.addressAdd.disabled = true
         renderAddressChips()
     }
+
+    syncAddressIndexEntryVisibility()
 }
 
 function resetXkeyLockedValues() {
     el.coinType.disabled = false
     el.accountInput.disabled = false
     el.changeSwitch.disabled = false
-    el.addressInput.disabled = false
-    el.addressAdd.disabled = false
+    syncAddressIndexEntryVisibility()
 }
 
 function syncMaskedInputs() {
@@ -418,7 +422,7 @@ function syncMaskedInputs() {
 }
 
 function renderAddressChips() {
-    const locked = getImportedPathDepth() >= 5
+    const locked = isImportedAddressXkey()
     el.addressList.replaceChildren()
     for (const value of addressState.values) {
         const chip = document.createElement('span')
@@ -568,6 +572,13 @@ function renderPathSummary() {
         ? '外部地址（收款）'
         : '内部地址（找零）'
     el.coinType.title = `${coin.value}': ${coin.name}`
+}
+
+function syncAddressIndexEntryVisibility() {
+    const hidden = isImportedAddressXkey()
+    el.addressEntry.hidden = hidden
+    el.addressError.hidden = hidden
+    pathCards.address.classList.toggle('compact', hidden)
 }
 
 function syncKindAvailability() {
@@ -1003,6 +1014,7 @@ function validateLocalInputs() {
 
 async function runDerive() {
     syncMaskedInputs()
+    syncAddressIndexEntryVisibility()
     renderAddressChips()
     renderPathSummary()
 
@@ -1252,6 +1264,7 @@ syncKindAvailability()
 syncPathCardSelection()
 syncAccountInput()
 syncAddressDraftInput()
+syncAddressIndexEntryVisibility()
 renderAddressChips()
 renderPathSummary()
 renderOutputs()
