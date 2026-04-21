@@ -275,7 +275,8 @@ export class PassphraseModel {
     }
 
     backspace() {
-        this.raw = this.raw.slice(0, -1)
+        // Passphrase is always fully masked, so a single delete clears it all.
+        this.raw = ''
     }
 
     /**
