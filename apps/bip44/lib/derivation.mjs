@@ -65,9 +65,9 @@ export function canDeriveBitcoinAddress(coinType) {
 }
 
 function describeBip44Level(depth) {
+    console.assert(depth <= 5)
     if (depth === 0)
         return 'master'
-
     if (depth === 1)
         return 'purpose'
     if (depth === 2)
@@ -78,8 +78,6 @@ function describeBip44Level(depth) {
         return '转账链'
     if (depth === 5)
         return '地址索引'
-
-    return `超出 BIP44 范围（第 ${depth} 层）`
 }
 
 /**
