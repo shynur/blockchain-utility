@@ -426,8 +426,8 @@ function renderPathSummary() {
     el.changeSwitch.setAttribute('aria-pressed', String(form.change === 1))
     el.changeSwitch.querySelector('.switch-number').textContent = String(form.change)
     el.changeNote.textContent = form.change === 0
-        ? '外部地址（收款）'
-        : '内部地址（找零）'
+        ? '外部地址 (收款)'
+        : '内部地址 (找零)'
     el.coinType.title = `${coin.value}': ${coin.name}`
 }
 
