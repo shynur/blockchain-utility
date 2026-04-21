@@ -115,6 +115,9 @@ function resolveAbsolutePath(root, fallbackAbsolutePath, labels) {
     const normalized = labels.referencePath.trim()
     if (!normalized)
         return fallbackAbsolutePath
+    if (fallbackAbsolutePath === 'm(?)')
+        return normalized
+
     const suffix = fallbackAbsolutePath.startsWith('m') ? fallbackAbsolutePath.slice(1) : fallbackAbsolutePath
     if (!suffix)
         return normalized
@@ -301,7 +304,7 @@ export async function deriveBip44(root, form) {
         const selfLevel = BIP44_LEVELS[originalDepth - 1]
         const requestedKinds = getRequestedKinds(form, selfLevel.id)
         if (hasRequestedKinds(requestedKinds)) {
-            const selfPath = form.labels.referencePath.trim()
+            const selfPath = resolveAbsolutePath(root, 'm(?)', form.labels)
             outputs.push({
                 id: selfLevel.id === 'address' ? `address-${root.i}` : selfLevel.id,
                 label: selfLevel.label,
