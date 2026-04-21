@@ -719,13 +719,13 @@ small {
     }
 
     .address-entry {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        align-items: center;
     }
 
     .address-add-button {
         display: block;
-        width: 100%;
+        width: auto;
     }
 
 }
