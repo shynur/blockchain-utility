@@ -191,7 +191,7 @@ export async function resolveRootSource(source) {
         const passphrase = source.passphrase ?? ''
         const isValid = await libbip39.validateMnemonicSentence(mnemonicSentence, 'en')
         if (!isValid)
-            throw new Error('助记词校验失败: 请检查单词拼写、词数和 checksum')
+            throw new Error
         const seed = await libbip39.mnemonicSentenceToSeed(mnemonicSentence, passphrase)
         const root = await libbip32.XPrv.from(seed)
         return { kind: 'mnemonic', root }
