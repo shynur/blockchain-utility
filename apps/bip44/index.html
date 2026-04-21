@@ -17,14 +17,14 @@
                 </div>
 
                 <label class="field">
-                    <span>助记词 / xpub / xprv</span>
+                    <span class="field-label">助记词 / xpub / xprv</span>
                     <textarea id="root-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="abandon ability ... 或 xpub/xprv"></textarea>
                     <small id="root-help">输入空白会隐藏刚完成的 word; 追加一个空格可隐藏最后一个 word。</small>
                     <small id="root-error" class="error" role="alert"></small>
                 </label>
 
                 <label id="passphrase-wrap" class="field compact-field">
-                    <span>passphrase</span>
+                    <span class="field-label">passphrase</span>
                     <textarea id="passphrase-input" rows="1" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="允许空格, 禁止其它空白字符"></textarea>
                 </label>
             </section>
@@ -60,7 +60,7 @@
 
                 <div class="path-card" data-path-card="coin">
                     <div class="field inline-field">
-                        <span id="coin-type-label">coin_type'</span>
+                        <span id="coin-type-label" class="field-label">coin_type'</span>
                         <select id="coin-type" aria-labelledby="coin-type-label"></select>
                     </div>
                     <div class="kind-picks" data-kind-group="coin"></div>
@@ -68,7 +68,7 @@
 
                 <div class="path-card" data-path-card="account">
                     <div class="field inline-field account-field">
-                        <span id="account-input-label">account'</span>
+                        <span id="account-input-label" class="field-label">account'</span>
                         <span class="suffix-input">
                             <input id="account-input" type="text" inputmode="numeric" value="0" size="1" aria-labelledby="account-input-label">
                             <b>H</b>
@@ -91,7 +91,7 @@
 
                 <div class="path-card address-card" data-path-card="address">
                     <div class="field inline-field">
-                        <span id="address-index-label">address_index</span>
+                        <span id="address-index-label" class="field-label">address_index</span>
                         <div id="address-index-entry" class="address-entry">
                             <input id="address-index-input" type="text" inputmode="numeric" enterkeyhint="done" value="0" aria-labelledby="address-index-label">
                             <button id="address-index-add" class="ghost-button address-add-button" type="button">添加</button>

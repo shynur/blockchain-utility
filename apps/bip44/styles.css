@@ -147,7 +147,7 @@ h2 {
     gap: 8px;
 }
 
-.field > span,
+.field-label,
 .path-label {
     color: var(--accent);
     font-family: var(--mono);
