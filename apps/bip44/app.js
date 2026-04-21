@@ -455,20 +455,17 @@ function appendSpan(container, text, className = '') {
     return node
 }
 
-function renderUncertainSegment(container, text) {
-    const hardenedMatch = text.match(/^(.+)'$/)
-    if (hardenedMatch) {
-        appendSpan(container, hardenedMatch[1], 'path-segment path-uncertain')
-        appendSpan(container, "'", 'path-segment')
-    } else {
-        appendSpan(container, text, 'path-segment path-uncertain')
-    }
-}
-
 function renderPathSegment(container, segment) {
     const uncertainMatch = segment.match(/^~(.+)~$/)
     if (uncertainMatch) {
-        renderUncertainSegment(container, uncertainMatch[1])
+        const text = uncertainMatch[1]
+        const hardenedMatch = text.match(/^(.+)'$/)
+        if (hardenedMatch) {
+            appendSpan(container, hardenedMatch[1], 'path-segment path-uncertain')
+            appendSpan(container, "'", 'path-segment')
+        } else {
+            appendSpan(container, text, 'path-segment path-uncertain')
+        }
         return
     }
 
@@ -649,15 +646,6 @@ function commitMaskedModelChange(model, change) {
     scheduleDerive()
 }
 
-function commitRootModelRawInput(rawValue) {
-    rootModel.setRaw(rawValue)
-    invalidateEntryValidation()
-    syncMaskedInputs()
-    if (!isRootEntryComplete())
-        clearResults(WAITING_INPUT_STATUS)
-    scheduleDerive()
-}
-
 function handleVirtualBeforeInput(event, model, inputState) {
     if (event.isComposing || inputState.isComposing)
         return
@@ -728,31 +716,6 @@ function handleVirtualInput(input, model, inputState) {
     syncMaskedInputs()
 }
 
-function handleRootInputBeforeInput(event, inputState) {
-    if (rootModel.usesVirtualInput()) {
-        handleVirtualBeforeInput(event, rootModel, inputState)
-        return
-    }
-
-    if (event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph')
-        event.preventDefault()
-}
-
-function handleRootInputEvent(input, inputState) {
-    if (rootModel.usesVirtualInput()) {
-        handleVirtualInput(input, rootModel, inputState)
-        return
-    }
-
-    if (inputState.isComposing) {
-        fitTextareaToContent(input)
-        return
-    }
-
-    inputState.pendingCompositionText = ''
-    commitRootModelRawInput(input.value)
-}
-
 function handleUint31BeforeInput(event, input) {
     if (!event.inputType.startsWith('insert'))
         return
@@ -794,6 +757,12 @@ function handleUint31Paste(event, input) {
     input.value = normalized
     input.setSelectionRange(cursorPos, cursorPos)
     input.dispatchEvent(new Event('input', { bubbles: true }))
+}
+
+function renderAll() {
+    renderRootInfo()
+    renderOutputs()
+    renderPathSummary()
 }
 
 function renderRootInfo() {
@@ -1056,16 +1025,7 @@ function clearResults(message) {
     setStatusLine(message)
     syncGatedPanels()
     syncKindAvailability()
-    renderRootInfo()
-    renderOutputs()
-    renderPathSummary()
-}
-
-function clearOutputs(message) {
-    state.outputs = []
-    setStatusLine(message)
-    renderOutputs()
-    renderPathSummary()
+    renderAll()
 }
 
 function setStatusLine(message) {
@@ -1090,30 +1050,21 @@ async function runDerive() {
     showStatusError('')
 
     try {
+        if (!isRootEntryComplete()) {
+            clearResults(WAITING_INPUT_STATUS)
+            return
+        }
+
+        setStatusLine('')
         if (rootModel.mode === 'mnemonic') {
             const wordState = rootModel.getWordState()
-            if (!wordState.normalizedSentence) {
-                clearResults(WAITING_INPUT_STATUS)
-                return
-            }
-            if (!wordState.hasValidCount) {
-                clearResults(WAITING_INPUT_STATUS)
-                return
-            }
-            setStatusLine('')
             state.rootResult = await resolveRootSource({
                 importMode: 'mnemonic',
                 mnemonicSentence: wordState.normalizedSentence,
                 passphrase: passphraseModel.getRawValue(),
             })
         } else {
-            const xkey = rootModel.getRawValue()
-            if (xkey.length !== XKEY_LENGTH) {
-                clearResults(WAITING_INPUT_STATUS)
-                return
-            }
-            setStatusLine('')
-            state.rootResult = await resolveRootSource({ importMode: 'xkey', xkeyText: xkey })
+            state.rootResult = await resolveRootSource({ importMode: 'xkey', xkeyText: rootModel.getRawValue() })
         }
 
         if (token !== state.pendingToken)
@@ -1128,11 +1079,12 @@ async function runDerive() {
             if (!importValidation.ok) {
                 state.entryValidated = false
                 state.preserveGatedPanelsWhilePending = false
+                state.outputs = []
+                setStatusLine('')
+                showStatusError(importValidation.error)
                 syncGatedPanels()
                 syncKindAvailability()
-                renderRootInfo()
-                clearOutputs('')
-                showStatusError(importValidation.error)
+                renderAll()
                 return
             }
             syncXkeyLockedValues(state.rootResult.root)
@@ -1147,9 +1099,7 @@ async function runDerive() {
 
         state.outputs = derived
         setStatusLine('')
-        renderRootInfo()
-        renderOutputs()
-        renderPathSummary()
+        renderAll()
     } catch (error) {
         if (token !== state.pendingToken)
             return
@@ -1198,14 +1148,15 @@ function handleMaskedKeydown(event, model, maskedState) {
     }
 }
 
-function bindRootInput(input) {
+function bindMaskedInput(input, model) {
     const inputState = {
         isComposing: false,
         pendingCompositionText: '',
         supportsBeforeInput: 'onbeforeinput' in input,
     }
+    const isVirtual = () => model.usesVirtualInput()
     const syncCaret = () => {
-        if (!rootModel.usesVirtualInput())
+        if (!isVirtual())
             return
         window.requestAnimationFrame(() => {
             moveCaretToEndIfFocused(input)
@@ -1213,78 +1164,42 @@ function bindRootInput(input) {
     }
 
     input.addEventListener('keydown', event => {
-        if (!rootModel.usesVirtualInput())
+        if (!isVirtual())
             return
-        handleMaskedKeydown(event, rootModel, inputState)
+        handleMaskedKeydown(event, model, inputState)
     })
     input.addEventListener('paste', event => {
-        if (rootModel.usesVirtualInput()) {
-            event.preventDefault()
-            inputState.pendingCompositionText = ''
-            commitMaskedModelChange(rootModel, () => {
-                rootModel.applyPaste(event.clipboardData.getData('text/plain'))
-            })
-        }
-    })
-    input.addEventListener('drop', event => {
-        if (rootModel.usesVirtualInput())
-            event.preventDefault()
-    })
-    input.addEventListener('beforeinput', event => handleRootInputBeforeInput(event, inputState))
-    input.addEventListener('input', () => {
-        handleRootInputEvent(input, inputState)
-    })
-    input.addEventListener('compositionstart', () => {
-        inputState.isComposing = true
-        inputState.pendingCompositionText = ''
-    })
-    input.addEventListener('compositionend', event => {
-        inputState.isComposing = false
-        inputState.pendingCompositionText = rootModel.usesVirtualInput()
-            ? (event.data ?? '')
-            : ''
-        if (rootModel.usesVirtualInput()) {
-            window.requestAnimationFrame(() => {
-                if (!inputState.pendingCompositionText)
-                    return
-
-                const text = inputState.pendingCompositionText
-                inputState.pendingCompositionText = ''
-                commitMaskedModelChange(rootModel, () => {
-                    rootModel.insertText(text)
-                })
-            })
-        }
-        syncCaret()
-    })
-    input.addEventListener('focus', syncCaret)
-    input.addEventListener('pointerup', syncCaret)
-}
-
-function bindMaskedInput(input, model) {
-    const inputState = {
-        isComposing: false,
-        pendingCompositionText: '',
-        supportsBeforeInput: 'onbeforeinput' in input,
-    }
-    const syncCaret = () => {
-        window.requestAnimationFrame(() => {
-            moveCaretToEndIfFocused(input)
-        })
-    }
-
-    input.addEventListener('keydown', event => handleMaskedKeydown(event, model, inputState))
-    input.addEventListener('paste', event => {
+        if (!isVirtual())
+            return
         event.preventDefault()
         inputState.pendingCompositionText = ''
         commitMaskedModelChange(model, () => {
             model.applyPaste(event.clipboardData.getData('text/plain'))
         })
     })
-    input.addEventListener('drop', event => event.preventDefault())
-    input.addEventListener('beforeinput', event => handleVirtualBeforeInput(event, model, inputState))
+    input.addEventListener('drop', event => {
+        if (isVirtual())
+            event.preventDefault()
+    })
+    input.addEventListener('beforeinput', event => {
+        if (isVirtual()) {
+            handleVirtualBeforeInput(event, model, inputState)
+            return
+        }
+        if (event.inputType === 'insertLineBreak' || event.inputType === 'insertParagraph')
+            event.preventDefault()
+    })
     input.addEventListener('input', () => {
-        handleVirtualInput(input, model, inputState)
+        if (isVirtual()) {
+            handleVirtualInput(input, model, inputState)
+            return
+        }
+        if (inputState.isComposing) {
+            fitTextareaToContent(input)
+            return
+        }
+        inputState.pendingCompositionText = ''
+        commitMaskedModelChange(rootModel, () => rootModel.setRaw(input.value))
     })
     input.addEventListener('compositionstart', () => {
         inputState.isComposing = true
@@ -1292,17 +1207,19 @@ function bindMaskedInput(input, model) {
     })
     input.addEventListener('compositionend', event => {
         inputState.isComposing = false
-        inputState.pendingCompositionText = event.data ?? ''
-        window.requestAnimationFrame(() => {
-            if (!inputState.pendingCompositionText)
-                return
+        inputState.pendingCompositionText = isVirtual() ? (event.data ?? '') : ''
+        if (isVirtual()) {
+            window.requestAnimationFrame(() => {
+                if (!inputState.pendingCompositionText)
+                    return
 
-            const text = inputState.pendingCompositionText
-            inputState.pendingCompositionText = ''
-            commitMaskedModelChange(model, () => {
-                model.insertText(text)
+                const text = inputState.pendingCompositionText
+                inputState.pendingCompositionText = ''
+                commitMaskedModelChange(model, () => {
+                    model.insertText(text)
+                })
             })
-        })
+        }
         syncCaret()
     })
     input.addEventListener('focus', syncCaret)
@@ -1332,7 +1249,7 @@ function bindUint31Input({ input, syncInput, onValidInput, onEnter }) {
     })
 }
 
-bindRootInput(el.rootInput)
+bindMaskedInput(el.rootInput, rootModel)
 bindMaskedInput(el.passphraseInput, passphraseModel)
 
 el.coinType.addEventListener('input', () => {
