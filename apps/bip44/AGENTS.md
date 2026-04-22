@@ -26,6 +26,7 @@ The app (i.e., this entire directory) will ultimately be deployed to the server 
 
 - BIP 32: 由 `deps.mjs` 导出的 `libbip32` 提供.
 - BIP 39: 由 `deps.mjs` 导出的 `libbip39` 提供.
+- SLIP 44: 由 `deps.mjs` 导出的 `libslip44` 提供.
 
 ## Git
 
