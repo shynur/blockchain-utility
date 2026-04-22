@@ -31,7 +31,7 @@ export const COIN_TYPES = function() {
         931: '雷神链',
 
     }
-    return index.filter(
+    return libslip44.index.filter(
         coin => (coin[0] - 2**31) in supported
     ).map(coin => ({
         value: coin[0] - 2**31,
