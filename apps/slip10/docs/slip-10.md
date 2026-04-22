@@ -26,11 +26,11 @@ To use different private keys for different curves we use different keys for the
 For the NIST P-256 curve the only other difference is the curve domain parameters.
 In the algorithm below we denote the group order of the elliptic curve by $n$.
 $point(k)$ is the scalar multiplication of the curve generator by the scalar $k$.
-The operation $+$ of two elements on the curve is the group point addition.
+The operation ($+$) of two elements on the curve is the group point addition.
 For ed25519 and curve25519 the private keys are no longer multipliers for the group generator; instead the hash of the private key is the multiplier.
 For this reason, our scheme for ed25519 and curve25519 doesn’t support public key derivation and uses the produced hashes directly as private keys.
 
-For ed25519 public keys we define ser<sub>P</sub>(P): serializes the elliptic curve point P = (x,y) on a twisted Edwards curve as a byte sequence:
+For ed25519 public keys we define $ser_P(P)$: serializes the elliptic curve point P = (x,y) on a twisted Edwards curve as a byte sequence:
 0x00 || ENC(x, y), where ENC is defined in [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032).
 
 For curve25519 public keys we define ser<sub>P</sub>(P): serializes the elliptic curve point P = (u,v) on a Montgomery curve as a byte sequence:
