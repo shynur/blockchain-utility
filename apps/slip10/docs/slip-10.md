@@ -25,37 +25,37 @@ We adapt the master key generation from BIP-32.
 To use different private keys for different curves we use different keys for the HMAC hash that generates the master key.
 For the NIST P-256 curve the only other difference is the curve domain parameters.
 In the algorithm below we denote the group order of the elliptic curve by $n$.
-$point(k)$ is the scalar multiplication of the curve generator by the scalar $k$.
-The operation ($+$) of two elements on the curve is the group point addition.
+$`\mathrm{point}(k)`$ is the scalar multiplication of the curve generator by the scalar $k$.
+The operation $+$ of two elements on the curve is the group point addition.
 For ed25519 and curve25519 the private keys are no longer multipliers for the group generator; instead the hash of the private key is the multiplier.
 For this reason, our scheme for ed25519 and curve25519 doesn’t support public key derivation and uses the produced hashes directly as private keys.
 
-For ed25519 public keys we define $ser_P(P)$: serializes the elliptic curve point P = (x,y) on a twisted Edwards curve as a byte sequence:
-0x00 || ENC(x, y), where ENC is defined in [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032).
+For ed25519 public keys we define $`\mathrm{ser}_P(P)`$: serializes the elliptic curve point $P = (x, y)$ on a twisted Edwards curve as a byte sequence:
+$`\texttt{0x00} \parallel \mathrm{ENC}(x, y)`$, where $`\mathrm{ENC}`$ is defined in [RFC 8032](https://datatracker.ietf.org/doc/html/rfc8032).
 
-For curve25519 public keys we define ser<sub>P</sub>(P): serializes the elliptic curve point P = (u,v) on a Montgomery curve as a byte sequence:
-0x00 || encodeUCoordinate(u, 255), where encodeUCoordinate is defined in [RFC 7748](https://datatracker.ietf.org/doc/html/rfc7748).
+For curve25519 public keys we define $`\mathrm{ser}_P(P)`$: serializes the elliptic curve point $P = (u, v)$ on a Montgomery curve as a byte sequence:
+$`\texttt{0x00} \parallel \mathrm{encodeUCoordinate}(u, 255)`$, where $`\mathrm{encodeUCoordinate}`$ is defined in [RFC 7748](https://datatracker.ietf.org/doc/html/rfc7748).
 
-For ed25519 and curve25519 private keys we define ser<sub>256</sub>(p) = p and parse<sub>256</sub>(p) = p, since private keys for these two curves aren’t integers but byte sequences.
+For ed25519 and curve25519 private keys we define $`\mathrm{ser}_{256}(p) = p`$ and $`\mathrm{parse}_{256}(p) = p`$, since private keys for these two curves aren’t integers but byte sequences.
 
 To avoid invalid master keys, the algorithm is retried with the intermediate hash as new seed if the key is invalid.
 
-Let S be a seed byte sequence of 128 to 512 bits in length.
+Let $S$ be a seed byte sequence of 128 to 512 bits in length.
 This is the same as the seed byte sequence used in BIP-32.
-The value of S should be the binary seed obtained from a BIP-39 mnemonic and optional passphrase or it should be the master secret obtained from a set of SLIP-39 mnemonics and optional passphrase.
+The value of $S$ should be the binary seed obtained from a BIP-39 mnemonic and optional passphrase or it should be the master secret obtained from a set of SLIP-39 mnemonics and optional passphrase.
 
-1. Calculate I = HMAC-SHA512(Key = Curve, Data = S)
-2. Split I into two 32-byte sequences, I<sub>L</sub> and I<sub>R</sub>.
-3. Use parse<sub>256</sub>(I<sub>L</sub>) as master secret key, and I<sub>R</sub> as master chain code.
-4. If curve isn’t ed25519 or curve25519 and I<sub>L</sub> is 0 or ≥ n (invalid key):
-    - Set S := I and restart at step 1.
+1. Calculate $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = \mathrm{Curve}, \mathrm{Data} = S)`$.
+2. Split $I$ into two 32-byte sequences, $I_L$ and $I_R$.
+3. Use $`\mathrm{parse}_{256}(I_L)`$ as master secret key, and $I_R$ as master chain code.
+4. If curve isn’t ed25519 or curve25519 and $I_L$ is $0$ or $\ge n$ (invalid key):
+   - Set $S := I$ and restart at step 1.
 
 The supported curves are
 
-- Curve = "Bitcoin seed" for the secp256k1 curve (this is compatible with BIP-32).
-- Curve = "Nist256p1 seed" for the NIST P-256 curve.
-- Curve = "ed25519 seed" for the ed25519 curve.
-- Curve = "curve25519 seed" for curve25519.
+- Curve = `"Bitcoin seed"` for the secp256k1 curve (this is compatible with BIP-32).
+- Curve = `"Nist256p1 seed"` for the NIST P-256 curve.
+- Curve = `"ed25519 seed"` for the ed25519 curve.
+- Curve = `"curve25519 seed"` for curve25519.
 
 For ed25519 and curve25519, the last step always succeeds since every 32-byte sequence (even all zero) is a valid private key.
 
@@ -65,27 +65,27 @@ Private and public key derivation for NIST P-256 is identical to the generation 
 We change BIP-32 to not fail if the resulting key isn’t valid but retry hashing until a valid key is found.
 For ed25519 and curve25519 only hardened key generation from private parent key to private child key is supported.
 
-Given a parent extended key and an index i, it’s possible to compute the corresponding child extended key.
-The algorithm to do so depends on whether the child is a hardened key or not (or, equivalently, whether i ≥ 2<sup>31</sup>), and whether we’re talking about private or public keys.
+Given a parent extended key and an index $i$, it’s possible to compute the corresponding child extended key.
+The algorithm to do so depends on whether the child is a hardened key or not (or, equivalently, whether $i \ge 2^{31}$), and whether we’re talking about private or public keys.
 
 #### Private parent key → private child key
 
-Let n denote the order of the curve.
+Let $n$ denote the order of the curve.
 
-The function CKDpriv((k<sub>par</sub>, c<sub>par</sub>), i) → (k<sub>i</sub>, c<sub>i</sub>) computes a child extended private key from the parent extended private key:
+The function $`\mathrm{CKDpriv}((k_{\mathrm{par}}, c_{\mathrm{par}}), i) \to (k_i, c_i)`$ computes a child extended private key from the parent extended private key:
 
-1. Check whether i ≥ 2<sup>31</sup> (whether the child is a hardened key).
-    - If so (hardened child): let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = 0x00 || ser<sub>256</sub>(k<sub>par</sub>) || ser<sub>32</sub>(i)).
-      (Note: The 0x00 pads the private key to make it 33 bytes long.)
-    - If not (normal child):
-        - If curve is ed25519 or curve25519: return failure.
-        - let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = ser<sub>P</sub>(point(k<sub>par</sub>)) || ser<sub>32</sub>(i)).
-2. Split I into two 32-byte sequences, I<sub>L</sub> and I<sub>R</sub>.
-3. The returned chain code c<sub>i</sub> is I<sub>R</sub>.
-4. If curve is ed25519 or curve25519: The returned child key k<sub>i</sub> is I<sub>L</sub>.
-5. If parse<sub>256</sub>(I<sub>L</sub>) ≥ n or parse<sub>256</sub>(I<sub>L</sub>) + k<sub>par</sub> (mod n) = 0 (resulting key is invalid):
-    - let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = 0x01 || I<sub>R</sub> || ser<sub>32</sub>(i) and restart at step 2.
-6. Otherwise: The returned child key k<sub>i</sub> is parse<sub>256</sub>(I<sub>L</sub>) + k<sub>par</sub> (mod n).
+1. Check whether $i \ge 2^{31}$ (whether the child is a hardened key).
+   - If so (hardened child): let $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = c_{\mathrm{par}}, \mathrm{Data} = \texttt{0x00} \parallel \mathrm{ser}_{256}(k_{\mathrm{par}}) \parallel \mathrm{ser}_{32}(i))`$.
+     (Note: The $`\texttt{0x00}`$ pads the private key to make it 33 bytes long.)
+   - If not (normal child):
+     - If curve is ed25519 or curve25519: return failure.
+     - let $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = c_{\mathrm{par}}, \mathrm{Data} = \mathrm{ser}_P(\mathrm{point}(k_{\mathrm{par}})) \parallel \mathrm{ser}_{32}(i))`$.
+2. Split $I$ into two 32-byte sequences, $I_L$ and $I_R$.
+3. The returned chain code $c_i$ is $I_R$.
+4. If curve is ed25519 or curve25519: The returned child key $k_i$ is $I_L$.
+5. If $`\mathrm{parse}_{256}(I_L) \ge n`$ or $`\left(\mathrm{parse}_{256}(I_L) + k_{\mathrm{par}}\right) \bmod n = 0`$ (resulting key is invalid):
+   - let $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = c_{\mathrm{par}}, \mathrm{Data} = \texttt{0x01} \parallel I_R \parallel \mathrm{ser}_{32}(i))`$ and restart at step 2.
+6. Otherwise: The returned child key $k_i$ is $`\left(\mathrm{parse}_{256}(I_L) + k_{\mathrm{par}}\right) \bmod n`$.
 
 The HMAC-SHA512 function is specified in [RFC 4231](https://datatracker.ietf.org/doc/html/rfc4231).
 
@@ -93,29 +93,29 @@ The HMAC-SHA512 function is specified in [RFC 4231](https://datatracker.ietf.org
 
 This function always fails for ed25519 and curve25519 since normal derivation isn’t supported.
 
-The function CKDpub((K<sub>par</sub>, c<sub>par</sub>), i) → (K<sub>i</sub>, c<sub>i</sub>) computes a child extended public key from the parent extended public key.
+The function $`\mathrm{CKDpub}((K_{\mathrm{par}}, c_{\mathrm{par}}), i) \to (K_i, c_i)`$ computes a child extended public key from the parent extended public key.
 It’s only defined for non-hardened child keys.
 
-1. Check whether i ≥ 2<sup>31</sup> (whether the child is a hardened key).
-    - If so (hardened child): return failure
-    - If not (normal child): let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = ser<sub>P</sub>(K<sub>par</sub>) || ser<sub>32</sub>(i)).
-2. Split I into two 32-byte sequences, I<sub>L</sub> and I<sub>R</sub>.
-3. The returned child key K<sub>i</sub> is point(parse<sub>256</sub>(I<sub>L</sub>)) + K<sub>par</sub>.
-4. The returned chain code c<sub>i</sub> is I<sub>R</sub>.
-5. If parse<sub>256</sub>(I<sub>L</sub>) ≥ n or K<sub>i</sub> is the point at infinity (the resulting key is invalid):
-    - let I = HMAC-SHA512(Key = c<sub>par</sub>, Data = 0x01 || I<sub>R</sub> || ser<sub>32</sub>(i)) and restart at step 2.
+1. Check whether $i \ge 2^{31}$ (whether the child is a hardened key).
+   - If so (hardened child): return failure
+   - If not (normal child): let $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = c_{\mathrm{par}}, \mathrm{Data} = \mathrm{ser}_P(K_{\mathrm{par}}) \parallel \mathrm{ser}_{32}(i))`$.
+2. Split $I$ into two 32-byte sequences, $I_L$ and $I_R$.
+3. The returned child key $K_i$ is $`\mathrm{point}(\mathrm{parse}_{256}(I_L)) + K_{\mathrm{par}}`$.
+4. The returned chain code $c_i$ is $I_R$.
+5. If $`\mathrm{parse}_{256}(I_L) \ge n`$ or $K_i$ is the point at infinity (the resulting key is invalid):
+   - let $`I = \mathrm{HMAC-SHA512}(\mathrm{Key} = c_{\mathrm{par}}, \mathrm{Data} = \texttt{0x01} \parallel I_R \parallel \mathrm{ser}_{32}(i))`$ and restart at step 2.
 
 ## Compatibility with BIP-32
 
 Master key generation in BIP-32 may result in an invalid key, in which case the wallet keys are undefined.
 Similarly child key derivation may result in an invalid key, in which case the child key for the given index is undefined and one should proceed with the next index value.
-For the secp256k1 curve the probability of this happening is lower than 2<sup>&minus;127</sup>, i.e. practically impossible.
-For the NIST P-256 curve, on the other hand, the probability is 2<sup>&minus;32</sup>, i.e. unlikely but possible.
+For the secp256k1 curve the probability of this happening is lower than $2^{-127}$, i.e. practically impossible.
+For the NIST P-256 curve, on the other hand, the probability is $2^{-32}$, i.e. unlikely but possible.
 The present specification extends the BIP-32 definition of child key derivation so that the keys for all indices are well defined.
 The reason for extending the definition is to avoid problems when dealing with the NIST P-256 curve.
 However, the extended definition also applies to the secp256k1 curve.
 
-For the secp256k1 curve the SLIP-10 derivation scheme is identical to BIP-32 with near certainty (probability greater than 1&minus;2<sup>&minus;127</sup> per derivation operation).
+For the secp256k1 curve the SLIP-10 derivation scheme is identical to BIP-32 with near certainty (probability greater than $1 - 2^{-127}$ per derivation operation).
 Theoretically, if a seed is used in a SLIP-10 wallet to receive assets and the seed is ported to a BIP-32 wallet, then there is an infinitesimal chance that some assets won’t be discovered by the BIP-32 wallet.
 Conversely, if a seed is used in a BIP-32 wallet to receive assets and the seed is ported to a SLIP-10 wallet, then all assets will be discovered by the SLIP-10 wallet.
 
