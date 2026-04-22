@@ -1,4 +1,4 @@
-import libslip44 from '../deps.mjs'
+import { libslip44 } from '../deps.mjs'
 
 export const VALID_MNEMONIC_COUNTS = [12, 15, 18, 21, 24]
 
